@@ -114,6 +114,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+
+  // ── Theme toggle ──────────────────────────────────────
+  const root = document.documentElement;
+  const toggleBtns = document.querySelectorAll('.theme-toggle');
+
+  // Persist preference
+  const savedTheme = localStorage.getItem('kguide-theme') || 'dark';
+  root.setAttribute('data-theme', savedTheme);
+
+  toggleBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const current = root.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('kguide-theme', next);
+    });
+  });
+
   // ── Page fade in ──
   document.body.style.opacity = '0';
   document.body.style.transition = 'opacity 0.4s ease';
