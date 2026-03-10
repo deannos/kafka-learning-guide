@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kafka Security — Kafka Developer Guide</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="sidebar-toggle">☰</button>
+<div class="site-wrapper">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">⚡</div>
+      <div class="sidebar-logo-text"><span class="name">KafkaGuide</span><span class="version">v3.x • Developer Portal</span></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Getting Started</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a>
+      <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Learning Roadmap</a>
+      <div class="nav-section-label">Core Knowledge</div>
+      <a href="architecture.html" class="nav-item"><span class="nav-icon">🏗️</span> Architecture</a>
+      <a href="advanced.html" class="nav-item"><span class="nav-icon">⚡</span> Advanced Concepts</a>
+      <a href="security.html" class="nav-item active"><span class="nav-icon">🔒</span> Security</a>
+      <div class="nav-section-label">Applied Kafka</div>
+      <a href="usecases.html" class="nav-item"><span class="nav-icon">🚀</span> Use Cases</a>
+      <a href="performance.html" class="nav-item"><span class="nav-icon">📊</span> Performance Tuning</a>
+      <a href="comparison.html" class="nav-item"><span class="nav-icon">⚖️</span> Kafka vs Others</a>
+      <a href="operations.html" class="nav-item"><span class="nav-icon">🔧</span> Operations<span class="nav-badge">NEW</span></a>
+      <div class="nav-section-label">Reference</div>
+      <a href="cheatsheet.html" class="nav-item"><span class="nav-icon">📋</span> Cheatsheet</a>
+      <a href="interview.html" class="nav-item"><span class="nav-icon">🎯</span> Interview Prep<span class="nav-badge">NEW</span></a>
+    </nav>
+    <div class="sidebar-footer"><div class="sidebar-footer-text">Apache Kafka® is a trademark of<br>the Apache Software Foundation.</div></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="header">
+      <div class="header-breadcrumb">
+        <span>kafka-guide</span><span style="color:var(--text-muted)">/</span><span class="current">security</span>
+      </div>
+      <div class="header-right"><span class="header-tag">Production Security</span></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-block">
+        <div class="page-tag">// SECURITY</div>
+        <h1 class="page-h1">Kafka <span>Security</span></h1>
+        <p class="page-subtitle">Encryption, authentication, and authorization — everything needed to run Kafka securely in production. Never expose Kafka without these layers.</p>
+      </div>
+
+      <!-- SECURITY LAYERS -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// OVERVIEW</div>
+        <h2>The Three Security Layers</h2>
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-accent-top"></div>
+            <div class="card-icon cyan">🔐</div>
+            <div class="card-title">Encryption (TLS)</div>
+            <div class="card-desc">Encrypt all data in transit between clients and brokers, and between brokers. Prevents eavesdropping and man-in-the-middle attacks. Mandatory for any production deployment.</div>
+            <div class="card-tags"><span class="tag cyan">TLS 1.2/1.3</span><span class="tag green">mTLS</span></div>
+          </div>
+          <div class="card">
+            <div class="card-accent-top"></div>
+            <div class="card-icon orange">🪪</div>
+            <div class="card-title">Authentication (SASL)</div>
+            <div class="card-desc">Verify the identity of producers, consumers, and brokers. Supports PLAIN, SCRAM-SHA-256/512, Kerberos (GSSAPI), and OAuth 2.0 (OAUTHBEARER).</div>
+            <div class="card-tags"><span class="tag orange">SASL</span><span class="tag purple">Kerberos</span><span class="tag yellow">OAuth</span></div>
+          </div>
+          <div class="card">
+            <div class="card-accent-top"></div>
+            <div class="card-icon purple">🛡️</div>
+            <div class="card-title">Authorization (ACLs)</div>
+            <div class="card-desc">Control what authenticated principals can do — read, write, create, delete. Fine-grained control at the topic, consumer group, and cluster level.</div>
+            <div class="card-tags"><span class="tag purple">ACLs</span><span class="tag cyan">RBAC</span></div>
+          </div>
+        </div>
+
+        <div class="info-box orange fade-in">
+          <div class="info-label">⚠ Default Kafka is Completely Open</div>
+          <div class="info-text">Out of the box, Kafka has <strong>no authentication, no encryption, and no authorization</strong>. Any client that can reach the network port can read and write any topic. Never deploy to a production network without all three security layers enabled.</div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- TLS -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// ENCRYPTION</div>
+        <h2>TLS Configuration</h2>
+        <p>TLS (formerly SSL) encrypts the Kafka protocol in transit. You need to generate certificates for each broker and configure clients to trust them.</p>
+
+        <div class="steps fade-in">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Generate CA and Broker Certificates</div>
+              <div class="step-desc">Create a Certificate Authority (CA), then generate and sign certificates for each broker. In production, use your organization's PKI or a tool like cert-manager on Kubernetes.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Configure Broker Keystores & Truststores</div>
+              <div class="step-desc">Import broker certs into Java keystores. Import CA cert into truststores. Both broker and client need these configured correctly.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Enable SSL Listener on Broker</div>
+              <div class="step-desc">Add an SSL listener alongside PLAINTEXT (for internal traffic). Configure clients to use the SSL listener.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Configure Clients</div>
+              <div class="step-desc">Point clients to the SSL bootstrap server and provide truststore (and keystore for mTLS). Test connectivity.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">bash — Generate certificates with keytool</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre><span class="cm"># 1. Create CA key + certificate</span>
+openssl req -new -x509 -keyout ca-key -out ca-cert \
+  -days 365 -subj "/CN=kafka-ca"
+
+<span class="cm"># 2. Create broker keystore</span>
+keytool -genkey -keystore kafka.broker1.keystore.jks \
+  -alias broker1 -validity 365 \
+  -keyalg RSA -keysize 2048 \
+  -dname "CN=broker1.kafka.internal,OU=Kafka,O=Company"
+
+<span class="cm"># 3. Create CSR (Certificate Signing Request)</span>
+keytool -keystore kafka.broker1.keystore.jks \
+  -alias broker1 -certreq -file cert-file
+
+<span class="cm"># 4. Sign CSR with CA</span>
+openssl x509 -req -CA ca-cert -CAkey ca-key \
+  -in cert-file -out cert-signed \
+  -days 365 -CAcreateserial
+
+<span class="cm"># 5. Import CA + signed cert into keystore</span>
+keytool -keystore kafka.broker1.keystore.jks -alias CARoot -import -file ca-cert
+keytool -keystore kafka.broker1.keystore.jks -alias broker1 -import -file cert-signed
+
+<span class="cm"># 6. Create client truststore (trust the CA)</span>
+keytool -keystore kafka.client.truststore.jks \
+  -alias CARoot -import -file ca-cert</pre>
+        </div>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">server.properties — Broker TLS config</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre><span class="cm"># Listeners: keep PLAINTEXT for inter-broker, add SSL for clients</span>
+listeners=PLAINTEXT://0.0.0.0:9092,SSL://0.0.0.0:9093
+advertised.listeners=PLAINTEXT://broker1:9092,SSL://broker1.kafka.internal:9093
+inter.broker.listener.name=PLAINTEXT
+
+<span class="cm"># SSL settings</span>
+ssl.keystore.location=/etc/kafka/certs/kafka.broker1.keystore.jks
+ssl.keystore.password=changeit
+ssl.key.password=changeit
+ssl.truststore.location=/etc/kafka/certs/kafka.broker1.truststore.jks
+ssl.truststore.password=changeit
+
+<span class="cm"># TLS protocol versions</span>
+ssl.protocol=TLSv1.3
+ssl.enabled.protocols=TLSv1.3,TLSv1.2
+ssl.cipher.suites=TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256
+
+<span class="cm"># Require client certificates (mTLS) - optional</span>
+ssl.client.auth=required</pre>
+        </div>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">Python — Client TLS configuration</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaProducer
+
+producer = <span class="fn">KafkaProducer</span>(
+    <span class="cm"># Use the SSL listener port</span>
+    bootstrap_servers=<span class="str">'broker1.kafka.internal:9093'</span>,
+    
+    <span class="cm"># TLS configuration</span>
+    security_protocol=<span class="str">'SSL'</span>,
+    ssl_cafile=<span class="str">'/etc/kafka/certs/ca-cert.pem'</span>,
+    
+    <span class="cm"># Only needed for mTLS (client certificates)</span>
+    ssl_certfile=<span class="str">'/etc/kafka/certs/client-cert.pem'</span>,
+    ssl_keyfile=<span class="str">'/etc/kafka/certs/client-key.pem'</span>,
+    
+    <span class="cm"># Verify broker hostname in cert (always True in prod)</span>
+    ssl_check_hostname=<span class="kw">True</span>,
+)</pre>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- SASL -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// AUTHENTICATION</div>
+        <h2>SASL Authentication</h2>
+
+        <div class="table-wrap fade-in">
+          <table>
+            <thead><tr><th>Mechanism</th><th>Security</th><th>Complexity</th><th>Best For</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>SASL/PLAIN</strong></td>
+                <td><span class="security-level sec-medium">MEDIUM</span></td>
+                <td>Low</td>
+                <td>Dev/test. Use ONLY over TLS. Credentials in config.</td>
+              </tr>
+              <tr>
+                <td><strong>SASL/SCRAM-SHA-256</strong></td>
+                <td><span class="security-level sec-high">HIGH</span></td>
+                <td>Low-Medium</td>
+                <td>Production default. Salted challenge-response, no plaintext password.</td>
+              </tr>
+              <tr>
+                <td><strong>SASL/SCRAM-SHA-512</strong></td>
+                <td><span class="security-level sec-high">HIGH</span></td>
+                <td>Low-Medium</td>
+                <td>Higher security than SHA-256. Recommended for sensitive data.</td>
+              </tr>
+              <tr>
+                <td><strong>SASL/GSSAPI (Kerberos)</strong></td>
+                <td><span class="security-level sec-critical">HIGHEST</span></td>
+                <td>High</td>
+                <td>Enterprise with existing Kerberos infrastructure.</td>
+              </tr>
+              <tr>
+                <td><strong>SASL/OAUTHBEARER</strong></td>
+                <td><span class="security-level sec-high">HIGH</span></td>
+                <td>Medium</td>
+                <td>Modern cloud-native. Integrates with Okta, Keycloak, Azure AD.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">bash — SCRAM-SHA-512: create users on broker</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre><span class="cm"># Create user credentials (stored in ZK/KRaft)</span>
+kafka-configs.sh --bootstrap-server localhost:9092 \
+  --alter --add-config \
+  'SCRAM-SHA-512=[password=supersecret123]' \
+  --entity-type users \
+  --entity-name payments-service
+
+<span class="cm"># Verify user exists</span>
+kafka-configs.sh --bootstrap-server localhost:9092 \
+  --describe --entity-type users \
+  --entity-name payments-service</pre>
+        </div>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">server.properties — SASL_SSL broker config</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre><span class="cm"># Use SASL_SSL (both auth + encryption)</span>
+listeners=SASL_SSL://0.0.0.0:9093
+advertised.listeners=SASL_SSL://broker1:9093
+security.inter.broker.protocol=SASL_SSL
+
+sasl.mechanism.inter.broker.protocol=SCRAM-SHA-512
+sasl.enabled.mechanisms=SCRAM-SHA-512
+
+<span class="cm"># Broker's own credentials for inter-broker auth</span>
+listener.name.sasl_ssl.scram-sha-512.sasl.jaas.config=\
+  org.apache.kafka.common.security.scram.ScramLoginModule required \
+  username="kafka-broker" \
+  password="broker-password";
+
+<span class="cm"># SSL settings (same as above)</span>
+ssl.keystore.location=/certs/kafka.broker.keystore.jks
+ssl.keystore.password=changeit</pre>
+        </div>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">Python — SASL_SSL client config</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaProducer
+
+producer = <span class="fn">KafkaProducer</span>(
+    bootstrap_servers=<span class="str">'broker1:9093'</span>,
+    security_protocol=<span class="str">'SASL_SSL'</span>,
+    sasl_mechanism=<span class="str">'SCRAM-SHA-512'</span>,
+    sasl_plain_username=<span class="str">'payments-service'</span>,
+    sasl_plain_password=<span class="str">'supersecret123'</span>,
+    ssl_cafile=<span class="str">'/certs/ca-cert.pem'</span>,
+    ssl_check_hostname=<span class="kw">True</span>,
+)</pre>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- ACLs -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// AUTHORIZATION</div>
+        <h2>Access Control Lists (ACLs)</h2>
+        <p>ACLs define what authenticated principals can do. Enable with <code>authorizer.class.name=org.apache.kafka.metadata.authorizer.StandardAuthorizer</code> (KRaft) or <code>kafka.security.authorizer.AclAuthorizer</code> (ZooKeeper).</p>
+
+        <div class="info-box cyan fade-in">
+          <div class="info-label">💡 Principle of Least Privilege</div>
+          <div class="info-text">Grant each service only the minimum permissions it needs. A payments consumer should have <code>Read</code> on the payments topic and its consumer group — nothing else. Never grant wildcard <code>*</code> permissions in production.</div>
+        </div>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">bash — Complete ACL setup for a microservice</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre><span class="cm">## ── Order Service (producer to orders topic) ────────</span>
+kafka-acls.sh --bootstrap-server localhost:9093 \
+  --command-config /etc/kafka/admin.properties \
+  --add \
+  --allow-principal User:order-service \
+  --operation Write \
+  --operation Describe \
+  --topic orders
+
+<span class="cm">## ── Payments Service (consumer from orders, producer to payments) ─</span>
+<span class="cm"># Read from orders topic</span>
+kafka-acls.sh --bootstrap-server localhost:9093 \
+  --command-config /etc/kafka/admin.properties \
+  --add \
+  --allow-principal User:payments-service \
+  --operation Read --operation Describe \
+  --topic orders
+
+<span class="cm"># Access to consumer group</span>
+kafka-acls.sh --bootstrap-server localhost:9093 \
+  --command-config /etc/kafka/admin.properties \
+  --add \
+  --allow-principal User:payments-service \
+  --operation Read \
+  --group payments-cg
+
+<span class="cm"># Write to payments topic</span>
+kafka-acls.sh --bootstrap-server localhost:9093 \
+  --command-config /etc/kafka/admin.properties \
+  --add \
+  --allow-principal User:payments-service \
+  --operation Write --operation Describe \
+  --topic payments
+
+<span class="cm">## ── Admin user: full cluster access ──────────────</span>
+kafka-acls.sh --bootstrap-server localhost:9093 \
+  --command-config /etc/kafka/admin.properties \
+  --add \
+  --allow-principal User:kafka-admin \
+  --operation All \
+  --cluster
+
+<span class="cm">## ── List all ACLs ──────────────────────────────</span>
+kafka-acls.sh --bootstrap-server localhost:9093 \
+  --command-config /etc/kafka/admin.properties \
+  --list</pre>
+        </div>
+
+        <div class="table-wrap fade-in">
+          <table>
+            <thead><tr><th>Operation</th><th>Resource</th><th>Who Needs It</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Write</strong></td><td>Topic</td><td>Producers</td></tr>
+              <tr><td><strong>Read</strong></td><td>Topic + ConsumerGroup</td><td>Consumers (both needed)</td></tr>
+              <tr><td><strong>Create</strong></td><td>Cluster or Topic</td><td>Admin / DevOps</td></tr>
+              <tr><td><strong>Delete</strong></td><td>Topic</td><td>Admin only</td></tr>
+              <tr><td><strong>Describe</strong></td><td>Topic</td><td>Any client connecting</td></tr>
+              <tr><td><strong>DescribeConfigs</strong></td><td>Topic / Broker</td><td>Monitoring tools</td></tr>
+              <tr><td><strong>AlterConfigs</strong></td><td>Topic / Broker</td><td>Admin only</td></tr>
+              <tr><td><strong>All</strong></td><td>Cluster</td><td>Super users only</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- SECURITY CHECKLIST -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// CHECKLIST</div>
+        <h2>Production Security Checklist</h2>
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-icon cyan">🔐</div>
+            <div class="card-title">Encryption</div>
+            <div class="card-desc">
+              <ul style="padding-left:16px;margin:0">
+                <li>TLS enabled on all listeners</li>
+                <li>TLS 1.2 minimum (1.3 preferred)</li>
+                <li>Certificates from trusted CA</li>
+                <li>Cert rotation process documented</li>
+                <li>Inter-broker traffic encrypted</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-icon orange">🪪</div>
+            <div class="card-title">Authentication</div>
+            <div class="card-desc">
+              <ul style="padding-left:16px;margin:0">
+                <li>SASL_SSL on external listeners</li>
+                <li>SCRAM-SHA-512 or Kerberos</li>
+                <li>Unique credentials per service</li>
+                <li>No shared service accounts</li>
+                <li>Credential rotation process</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-icon purple">🛡️</div>
+            <div class="card-title">Authorization</div>
+            <div class="card-desc">
+              <ul style="padding-left:16px;margin:0">
+                <li>ACL authorizer enabled</li>
+                <li>Principle of least privilege</li>
+                <li>No wildcard (*) ACLs in prod</li>
+                <li>ACLs in version control (IaC)</li>
+                <li>Regular ACL audit</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-icon green">📋</div>
+            <div class="card-title">Network & Audit</div>
+            <div class="card-desc">
+              <ul style="padding-left:16px;margin:0">
+                <li>Brokers in private subnet</li>
+                <li>Firewall rules restrict 9092/9093</li>
+                <li>Audit logging enabled</li>
+                <li>No public internet exposure</li>
+                <li>VPN or mTLS for remote access</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <span class="footer-text">// kafka-developer-guide • Security</span>
+      <div class="footer-links">
+        <a href="advanced.html" class="footer-link">← Advanced</a>
+        <a href="operations.html" class="footer-link">Operations →</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script src="js/app.js"></script>
+</body>
+</html>
