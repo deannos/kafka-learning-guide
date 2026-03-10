@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kafka Use Cases — Kafka Developer Guide</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="sidebar-toggle">☰</button>
+<div class="site-wrapper">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">⚡</div>
+      <div class="sidebar-logo-text"><span class="name">KafkaGuide</span><span class="version">v3.x • Developer Portal</span></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Getting Started</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a>
+      <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Learning Roadmap</a>
+      <div class="nav-section-label">Core Knowledge</div>
+      <a href="architecture.html" class="nav-item"><span class="nav-icon">🏗️</span> Architecture</a>
+      <a href="advanced.html" class="nav-item"><span class="nav-icon">⚡</span> Advanced Concepts</a>
+      <a href="security.html" class="nav-item"><span class="nav-icon">🔒</span> Security</a>
+      <div class="nav-section-label">Applied Kafka</div>
+      <a href="usecases.html" class="nav-item"><span class="nav-icon">🚀</span> Use Cases</a>
+      <a href="performance.html" class="nav-item"><span class="nav-icon">📊</span> Performance Tuning</a>
+      <a href="comparison.html" class="nav-item"><span class="nav-icon">⚖️</span> Kafka vs Others</a>
+      <a href="operations.html" class="nav-item"><span class="nav-icon">🔧</span> Operations<span class="nav-badge">NEW</span></a>
+      <div class="nav-section-label">Reference</div>
+      <a href="cheatsheet.html" class="nav-item"><span class="nav-icon">📋</span> Cheatsheet</a>
+      <a href="interview.html" class="nav-item"><span class="nav-icon">🎯</span> Interview Prep<span class="nav-badge">NEW</span></a>
+    </nav>
+    <div class="sidebar-footer"><div class="sidebar-footer-text">Apache Kafka® is a trademark of<br>the Apache Software Foundation.</div></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="header">
+      <div class="header-breadcrumb">
+        <span>kafka-guide</span><span style="color:var(--text-muted)">/</span><span class="current">use-cases</span>
+      </div>
+      <div class="header-right"><span class="header-tag">Real World</span></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-block">
+        <div class="page-tag">// USE CASES</div>
+        <h1 class="page-h1">Where <span>Kafka Shines</span></h1>
+        <p class="page-subtitle">From startups to Fortune 500 companies — learn how the world's most demanding systems are built on Kafka across every industry.</p>
+      </div>
+
+      <!-- USE CASE CARDS -->
+      <div class="content-section">
+        <div class="section-eyebrow">// ARCHITECTURE PATTERNS</div>
+        <h2>Event-Driven Architecture</h2>
+        <p>The most impactful use of Kafka is as the backbone of event-driven microservices — replacing brittle synchronous REST calls with asynchronous, decoupled event streams.</p>
+
+        <div class="info-box cyan fade-in">
+          <div class="info-label">💡 Core Pattern</div>
+          <div class="info-text">Services emit events to Kafka topics describing what happened. Other services subscribe to relevant topics and react. <strong>No service knows about other services</strong> — only about events. This enables independent deployment, scaling, and failure isolation.</div>
+        </div>
+
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-accent-top"></div>
+            <div class="card-icon cyan">🔗</div>
+            <div class="card-title">Microservices Decoupling</div>
+            <div class="card-desc">Services communicate via events instead of direct API calls. An order service emits "OrderPlaced" — inventory, payment, notification, and analytics services each react independently, without the order service knowing they exist.</div>
+            <div class="card-tags"><span class="tag cyan">Async</span><span class="tag green">Decoupled</span><span class="tag orange">Scalable</span></div>
+          </div>
+          <div class="card">
+            <div class="card-accent-top"></div>
+            <div class="card-icon green">📸</div>
+            <div class="card-title">Event Sourcing</div>
+            <div class="card-desc">Store state changes as an immutable event log instead of mutable records. Current state = replay of all events. Enables time-travel debugging, audit trails, and building multiple read models from one event stream.</div>
+            <div class="card-tags"><span class="tag green">Immutable</span><span class="tag purple">Auditable</span></div>
+          </div>
+          <div class="card">
+            <div class="card-accent-top"></div>
+            <div class="card-icon purple">🔀</div>
+            <div class="card-title">CQRS Pattern</div>
+            <div class="card-desc">Commands write to the event log. Multiple specialized read models are built by consumers. Query throughput is completely decoupled from write throughput — read models can be optimized independently.</div>
+            <div class="card-tags"><span class="tag purple">CQRS</span><span class="tag cyan">Read Scaling</span></div>
+          </div>
+          <div class="card">
+            <div class="card-accent-top"></div>
+            <div class="card-icon orange">📮</div>
+            <div class="card-title">Outbox Pattern</div>
+            <div class="card-desc">Solve the dual-write problem atomically: write to DB + outbox table in one transaction, then Debezium captures the outbox table and publishes to Kafka. Guarantees no events are lost even if Kafka is temporarily unavailable.</div>
+            <div class="card-tags"><span class="tag orange">Reliable</span><span class="tag green">Atomic</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- INDUSTRY USE CASES -->
+      <div class="content-section">
+        <div class="section-eyebrow">// BY INDUSTRY</div>
+        <h2>Industry Applications</h2>
+
+        <!-- Banking & Finance -->
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">💳</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">Banking & Financial Services</div>
+              <div class="concept-subtitle">Goldman Sachs, JPMorgan, Capital One, Stripe</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p><strong>Real-time fraud detection</strong> is one of Kafka's most critical use cases. Every transaction event flows through Kafka, where stream processing enriches it with account history, applies ML models, and triggers alerts — all within milliseconds of the transaction occurring.</p>
+            <ul>
+              <li><strong>Payments processing:</strong> Transaction events flow through authorization, fraud scoring, ledger update, and notification services atomically using Kafka transactions</li>
+              <li><strong>Risk management:</strong> Real-time position and risk calculation as market prices change — feeds hundreds of downstream risk systems from a single stream</li>
+              <li><strong>Regulatory reporting:</strong> Immutable event log provides a complete audit trail for compliance (SOX, PCI DSS, GDPR)</li>
+              <li><strong>Market data distribution:</strong> Distribute real-time market data feeds to hundreds of internal consumers at sub-millisecond latency</li>
+            </ul>
+          </div>
+          <div class="code-wrap" style="margin-top:16px">
+            <div class="code-header">
+              <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+              <span class="code-title">Python — Real-time fraud scoring pipeline</span>
+              <button class="copy-btn">COPY</button>
+            </div>
+            <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaConsumer, KafkaProducer
+<span class="kw">import</span> json, ml_model
+
+<span class="cm"># Consume payment events</span>
+consumer = <span class="fn">KafkaConsumer</span>(
+    <span class="str">'payment-events'</span>,
+    bootstrap_servers=<span class="str">'kafka:9092'</span>,
+    group_id=<span class="str">'fraud-detector'</span>,
+    value_deserializer=<span class="kw">lambda</span> m: json.loads(m.decode()),
+)
+
+alert_producer = <span class="fn">KafkaProducer</span>(bootstrap_servers=<span class="str">'kafka:9092'</span>)
+
+<span class="kw">for</span> msg <span class="kw">in</span> consumer:
+    txn = msg.value
+    
+    <span class="cm"># Score transaction using ML model</span>
+    features = <span class="fn">extract_features</span>(txn)
+    fraud_score = ml_model.<span class="fn">predict</span>(features)
+    
+    <span class="kw">if</span> fraud_score > <span class="num">0.85</span>:
+        <span class="cm"># Emit fraud alert — < 50ms end-to-end</span>
+        alert_producer.<span class="fn">send</span>(<span class="str">'fraud-alerts'</span>, 
+            key=txn[<span class="str">'account_id'</span>].encode(),
+            value=json.dumps({
+                <span class="str">'txn_id'</span>: txn[<span class="str">'id'</span>],
+                <span class="str">'score'</span>: fraud_score,
+                <span class="str">'action'</span>: <span class="str">'BLOCK'</span>,
+                <span class="str">'reason'</span>: <span class="str">'ML_ANOMALY'</span>,
+            }).encode()
+        )</pre>
+          </div>
+        </div>
+
+        <!-- E-Commerce -->
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">🛒</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">E-Commerce & Retail</div>
+              <div class="concept-subtitle">Amazon, Alibaba, Shopify, eBay</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p>E-commerce platforms use Kafka to handle massive spikes (Black Friday, flash sales) and coordinate dozens of downstream services that react to every order event.</p>
+            <ul>
+              <li><strong>Order lifecycle management:</strong> OrderPlaced → InventoryReserved → PaymentAuthorized → OrderConfirmed → ShipmentCreated → Delivered</li>
+              <li><strong>Real-time recommendations:</strong> User browsing and purchase events feed ML models that update recommendations within seconds</li>
+              <li><strong>Inventory synchronization:</strong> Stock level changes propagate instantly across warehouses, storefronts, and partner systems</li>
+              <li><strong>Search index updates:</strong> Product changes (price, availability) reflected in search results within seconds using Elasticsearch Sink connector</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- IoT -->
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">📡</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">IoT & Telemetry</div>
+              <div class="concept-subtitle">Tesla, GE, Siemens, Smart Cities</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p>IoT generates staggering volumes of time-series data from millions of devices. Kafka ingests, buffers, and routes this data to analytics, storage, and alerting systems.</p>
+            <ul>
+              <li><strong>Vehicle telemetry:</strong> Tesla streams sensor data (GPS, battery, motor, climate) from 4M+ vehicles. Kafka handles ingestion before routing to time-series DBs and ML pipelines</li>
+              <li><strong>Industrial monitoring:</strong> Factory equipment sensors stream temperature, vibration, and pressure data. Kafka Streams applies anomaly detection for predictive maintenance</li>
+              <li><strong>Smart grid:</strong> Electricity meters send consumption events; Kafka enables real-time demand forecasting and dynamic pricing</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Real-time Analytics -->
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">📊</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">Real-Time Analytics & CDC</div>
+              <div class="concept-subtitle">Airbnb, Lyft, Twitter/X, LinkedIn</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p><strong>Change Data Capture (CDC)</strong> via Debezium + Kafka is the modern standard for keeping databases and downstream systems in sync in real-time without expensive polling or ETL jobs.</p>
+            <ul>
+              <li><strong>Data warehouse sync:</strong> Database changes flow to Snowflake/BigQuery in real-time (minutes instead of nightly batch jobs)</li>
+              <li><strong>Operational dashboards:</strong> Business metrics computed from event streams power live dashboards with sub-second freshness</li>
+              <li><strong>Log aggregation:</strong> Application logs from thousands of microservices unified into a single queryable stream (replacing file-based log shipping)</li>
+              <li><strong>A/B testing:</strong> Experiment events flow through Kafka to real-time assignment and metrics computation systems</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Additional cards grid -->
+        <div class="cards-grid fade-in" style="margin-top:32px">
+          <div class="card">
+            <div class="card-accent-top"></div>
+            <div class="card-icon yellow">📈</div>
+            <div class="card-title">Algorithmic Trading</div>
+            <div class="card-desc">Market data feeds, order management, risk checks, and execution all flow through Kafka. Ultra-low latency message delivery enables sub-millisecond trading decisions.</div>
+            <div class="card-tags"><span class="tag yellow">Low Latency</span><span class="tag cyan">High Freq</span></div>
+          </div>
+          <div class="card">
+            <div class="card-accent-top"></div>
+            <div class="card-icon red">🏥</div>
+            <div class="card-title">Healthcare</div>
+            <div class="card-desc">Patient monitoring streams from ICU devices, EHR change events for clinical decision support, and FHIR event pipelines for interoperability between healthcare systems.</div>
+            <div class="card-tags"><span class="tag red">Real-time</span><span class="tag purple">Critical</span></div>
+          </div>
+          <div class="card">
+            <div class="card-accent-top"></div>
+            <div class="card-icon green">🎮</div>
+            <div class="card-title">Gaming & Media</div>
+            <div class="card-desc">Player activity events, matchmaking queues, real-time leaderboards, content recommendation, and in-game purchase events processed at scale with Kafka Streams.</div>
+            <div class="card-tags"><span class="tag green">Scale</span><span class="tag orange">Engagement</span></div>
+          </div>
+          <div class="card">
+            <div class="card-accent-top"></div>
+            <div class="card-icon cyan">🌐</div>
+            <div class="card-title">AdTech</div>
+            <div class="card-desc">Impression and click events at billions per day, real-time bidding auction pipelines, campaign performance metrics, and attribution streams — Kafka is the backbone of programmatic advertising.</div>
+            <div class="card-tags"><span class="tag cyan">High Volume</span><span class="tag yellow">Real-time</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <span class="footer-text">// kafka-developer-guide • Use Cases</span>
+      <div class="footer-links">
+        <a href="advanced.html" class="footer-link">← Advanced</a>
+        <a href="performance.html" class="footer-link">Performance →</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Kafka — Kafka Developer Guide</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+<button class="sidebar-toggle">☰</button>
+<div class="site-wrapper">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">⚡</div>
+      <div class="sidebar-logo-text"><span class="name">KafkaGuide</span><span class="version">v3.x • Developer Portal</span></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Getting Started</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a>
+      <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Learning Roadmap</a>
+      <div class="nav-section-label">Core Knowledge</div>
+      <a href="architecture.html" class="nav-item"><span class="nav-icon">🏗️</span> Architecture</a>
+      <a href="advanced.html" class="nav-item"><span class="nav-icon">⚡</span> Advanced Concepts</a>
+      <a href="security.html" class="nav-item"><span class="nav-icon">🔒</span> Security</a>
+      <div class="nav-section-label">Applied Kafka</div>
+      <a href="usecases.html" class="nav-item"><span class="nav-icon">🚀</span> Use Cases</a>
+      <a href="performance.html" class="nav-item"><span class="nav-icon">📊</span> Performance Tuning</a>
+      <a href="comparison.html" class="nav-item"><span class="nav-icon">⚖️</span> Kafka vs Others</a>
+      <a href="operations.html" class="nav-item"><span class="nav-icon">🔧</span> Operations<span class="nav-badge">NEW</span></a>
+      <div class="nav-section-label">Reference</div>
+      <a href="cheatsheet.html" class="nav-item"><span class="nav-icon">📋</span> Cheatsheet</a>
+      <a href="interview.html" class="nav-item"><span class="nav-icon">🎯</span> Interview Prep<span class="nav-badge">NEW</span></a>
+    </nav>
+    <div class="sidebar-footer"><div class="sidebar-footer-text">Apache Kafka® is a trademark of<br>the Apache Software Foundation.</div></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="header">
+      <div class="header-breadcrumb">
+        <span>kafka-guide</span><span style="color:var(--text-muted)">/</span><span class="current">advanced</span>
+      </div>
+      <div class="header-right"><span class="header-tag">Advanced</span></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-block">
+        <div class="page-tag">// ADVANCED CONCEPTS</div>
+        <h1 class="page-h1"><span>Advanced</span> Kafka</h1>
+        <p class="page-subtitle">Exactly-once semantics, transactions, Kafka Streams, Schema Registry, Kafka Connect — the tools that power production-grade data systems.</p>
+      </div>
+
+      <!-- DELIVERY SEMANTICS -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// GUARANTEES</div>
+        <h2>Delivery Semantics</h2>
+        <div class="table-wrap fade-in">
+          <table>
+            <thead><tr><th>Semantic</th><th>How Achieved</th><th>Risk</th><th>Performance</th><th>Use Case</th></tr></thead>
+            <tbody>
+              <tr><td><strong>At-Most-Once</strong></td><td>Commit before processing</td><td class="no">Data loss possible</td><td class="yes">Highest</td><td>Metrics, logs</td></tr>
+              <tr><td><strong>At-Least-Once</strong></td><td>Commit after processing</td><td class="partial">Duplicates possible</td><td class="yes">High</td><td>Most applications</td></tr>
+              <tr><td><strong>Exactly-Once</strong></td><td>Idempotent + Transactions</td><td class="yes">No loss, no dups</td><td class="partial">Lower</td><td>Payments, ledgers</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">EOS</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">Exactly-Once Semantics (EOS)</div>
+              <div class="concept-subtitle">Idempotent Producer + Transactions</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p>Exactly-once delivery requires two things: an <strong>idempotent producer</strong> (prevents duplicate messages on retry) and <strong>transactions</strong> (atomically write to multiple partitions/topics at once).</p>
+            <p>The idempotent producer assigns each message a <strong>sequence number</strong>. The broker deduplicates by rejecting any message with a sequence number it has already seen for that producer session.</p>
+          </div>
+          <div class="code-wrap" style="margin-top:16px">
+            <div class="code-header">
+              <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+              <span class="code-title">Java — Transactional producer (exactly-once)</span>
+              <button class="copy-btn">COPY</button>
+            </div>
+            <pre>Properties props = <span class="kw">new</span> <span class="fn">Properties</span>();
+props.<span class="fn">put</span>(<span class="str">"bootstrap.servers"</span>, <span class="str">"localhost:9092"</span>);
+props.<span class="fn">put</span>(<span class="str">"enable.idempotence"</span>, <span class="str">"true"</span>);     <span class="cm">// No duplicate messages</span>
+props.<span class="fn">put</span>(<span class="str">"transactional.id"</span>, <span class="str">"payment-tx-1"</span>); <span class="cm">// Unique per producer</span>
+props.<span class="fn">put</span>(<span class="str">"acks"</span>, <span class="str">"all"</span>);
+props.<span class="fn">put</span>(<span class="str">"retries"</span>, Integer.MAX_VALUE);
+
+KafkaProducer&lt;String, String&gt; producer = <span class="kw">new</span> <span class="fn">KafkaProducer</span>&lt;&gt;(props);
+producer.<span class="fn">initTransactions</span>();
+
+<span class="kw">try</span> {
+    producer.<span class="fn">beginTransaction</span>();
+    
+    <span class="cm">// Both writes are atomic — either both commit or both abort</span>
+    producer.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">ProducerRecord</span>&lt;&gt;(<span class="str">"payments"</span>, txId, paymentJson));
+    producer.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">ProducerRecord</span>&lt;&gt;(<span class="str">"ledger-entries"</span>, txId, ledgerJson));
+    producer.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">ProducerRecord</span>&lt;&gt;(<span class="str">"notifications"</span>, userId, notifyJson));
+    
+    producer.<span class="fn">commitTransaction</span>();  <span class="cm">// All or nothing</span>
+} <span class="kw">catch</span> (Exception e) {
+    producer.<span class="fn">abortTransaction</span>();   <span class="cm">// Rollback all three</span>
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- LOG COMPACTION -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// STORAGE</div>
+        <h2>Log Compaction & Retention</h2>
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-icon cyan">🗑️</div>
+            <div class="card-title">Time-Based Retention</div>
+            <div class="card-desc">Default mode. Segments older than <code>log.retention.hours</code> (default 168h = 7 days) are deleted. Good for event logs, activity streams, and any data with a natural expiry.</div>
+            <div class="card-tags"><span class="tag cyan">cleanup.policy=delete</span></div>
+          </div>
+          <div class="card">
+            <div class="card-icon green">🗜️</div>
+            <div class="card-title">Log Compaction</div>
+            <div class="card-desc">For each key, only the most recent record is retained. Older records with the same key are removed. Use for CDC, event sourcing, and database-like topics where you need the latest value per entity.</div>
+            <div class="card-tags"><span class="tag green">cleanup.policy=compact</span></div>
+          </div>
+          <div class="card">
+            <div class="card-icon purple">🔀</div>
+            <div class="card-title">Compact + Delete</div>
+            <div class="card-desc">Both policies active. Keys are compacted but records older than the retention period are also deleted. Useful for CDC topics that don't need infinite history but do need latest-per-key semantics.</div>
+            <div class="card-tags"><span class="tag purple">compact,delete</span></div>
+          </div>
+        </div>
+        <div class="info-box green fade-in">
+          <div class="info-label">💡 Compaction Use Case: Debezium CDC</div>
+          <div class="info-text">A user updates their email address 50 times. With time-based retention, you'd store all 50 events. With compaction, only the latest <strong>user-123 → {email: "<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cea0abb98eabb6afa3bea2abe0ada1a3">[email&#160;protected]</a>"}</strong> record is kept. New consumers bootstrapping can read just the latest state of every entity without replaying all history.</div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- KAFKA STREAMS -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// STREAM PROCESSING</div>
+        <h2>Kafka Streams</h2>
+        <p>Kafka Streams is a <strong>client library</strong> (not a separate cluster) for building real-time stream processing applications. It runs inside your application JVM process — no additional infrastructure needed.</p>
+
+        <div class="diagram-block fade-in">
+          <div class="diagram-label">// Kafka Streams Topology</div>
+          <div class="mermaid">
+graph LR
+    SRC["Source Topic\nraw-orders"] --> |KStream| FILTER["filter()\nstatus == 'paid'"]
+    FILTER --> MAP["mapValues()\nEnrich with tax"]
+    MAP --> JOIN["leftJoin()\nKTable: customers"]
+    JOIN --> AGG["groupByKey()\n.count()"]
+    AGG --> SINK["Sink Topic\norder-counts"]
+    USERTABLE["Topic: users\n(KTable)"] -.->|changelog| JOIN
+          </div>
+        </div>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">Java — Kafka Streams: Real-time fraud detection</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre>StreamsBuilder builder = <span class="kw">new</span> <span class="fn">StreamsBuilder</span>();
+
+<span class="cm">// Stream of payment events</span>
+KStream&lt;String, Payment&gt; payments = builder.<span class="fn">stream</span>(<span class="str">"payments"</span>);
+
+<span class="cm">// KTable of customer risk profiles (from compacted topic)</span>
+KTable&lt;String, RiskProfile&gt; riskProfiles = builder.<span class="fn">table</span>(<span class="str">"risk-profiles"</span>);
+
+<span class="cm">// Fraud detection: join payments with risk profiles,</span>
+<span class="cm">// count transactions per user in 5-min tumbling window</span>
+KTable&lt;Windowed&lt;String&gt;, Long&gt; txCounts = payments
+    .<span class="fn">leftJoin</span>(riskProfiles, 
+        (payment, risk) -> <span class="kw">new</span> <span class="fn">EnrichedPayment</span>(payment, risk))
+    .<span class="fn">filter</span>((key, ep) -> ep.amount > <span class="num">10000</span>)
+    .<span class="fn">groupByKey</span>()
+    .<span class="fn">windowedBy</span>(<span class="fn">TimeWindows</span>.<span class="fn">ofSizeWithNoGrace</span>(Duration.<span class="fn">ofMinutes</span>(<span class="num">5</span>)))
+    .<span class="fn">count</span>(<span class="fn">Materialized</span>.<span class="fn">as</span>(<span class="str">"fraud-window-store"</span>));
+
+<span class="cm">// Alert if > 3 large transactions in 5 minutes</span>
+txCounts
+    .<span class="fn">toStream</span>()
+    .<span class="fn">filter</span>((windowedKey, count) -> count > <span class="num">3</span>)
+    .<span class="fn">map</span>((windowedKey, count) -> 
+        KeyValue.<span class="fn">pair</span>(windowedKey.key(), <span class="fn">buildAlert</span>(count)))
+    .<span class="fn">to</span>(<span class="str">"fraud-alerts"</span>);
+
+KafkaStreams streams = <span class="kw">new</span> <span class="fn">KafkaStreams</span>(builder.<span class="fn">build</span>(), props);
+streams.<span class="fn">start</span>();</pre>
+        </div>
+
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-icon cyan">🌊</div>
+            <div class="card-title">KStream</div>
+            <div class="card-desc">Unbounded stream of independent records. Each record is a separate event. <strong>Append-only</strong>. Think: clickstream, transactions, sensor readings. Every event matters equally.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon green">📋</div>
+            <div class="card-title">KTable</div>
+            <div class="card-desc">Changelog stream where each record <strong>updates</strong> the value for a key. Represents current state. Think: user profiles, account balances, inventory. Only the latest value per key matters.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon purple">🌐</div>
+            <div class="card-title">GlobalKTable</div>
+            <div class="card-desc">Like KTable but replicated to <strong>all stream processor instances</strong>. Enables joining against small reference data (country codes, product catalog) without re-partitioning the stream.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon orange">⏱️</div>
+            <div class="card-title">Windowing</div>
+            <div class="card-desc"><strong>Tumbling</strong> (non-overlapping), <strong>Hopping</strong> (overlapping), <strong>Session</strong> (activity-based gaps), <strong>Sliding</strong> (event-triggered). Handle late arrivals with grace periods.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- SCHEMA REGISTRY -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// DATA CONTRACTS</div>
+        <h2>Schema Registry</h2>
+        <p>Schema Registry is a centralized service for managing schemas (Avro, Protobuf, JSON Schema) for Kafka topics. It enforces <strong>schema compatibility</strong> — preventing producers from breaking downstream consumers with schema changes.</p>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">Python — Avro producer with Schema Registry</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre><span class="kw">from</span> confluent_kafka <span class="kw">import</span> SerializingProducer
+<span class="kw">from</span> confluent_kafka.schema_registry <span class="kw">import</span> SchemaRegistryClient
+<span class="kw">from</span> confluent_kafka.schema_registry.avro <span class="kw">import</span> AvroSerializer
+
+<span class="cm"># Avro schema — versioned and validated centrally</span>
+order_schema = <span class="str">"""
+{
+  "type": "record",
+  "name": "Order",
+  "namespace": "com.example.events",
+  "fields": [
+    {"name": "order_id",   "type": "string"},
+    {"name": "user_id",    "type": "string"},
+    {"name": "amount",     "type": "double"},
+    {"name": "currency",   "type": "string", "default": "USD"},
+    {"name": "created_at", "type": "long", "logicalType": "timestamp-millis"}
+  ]
+}
+"""</span>
+
+schema_registry = <span class="fn">SchemaRegistryClient</span>({
+    <span class="str">'url'</span>: <span class="str">'http://schema-registry:8081'</span>
+})
+
+<span class="cm"># Serializer automatically registers schema & checks compatibility</span>
+avro_serializer = <span class="fn">AvroSerializer</span>(
+    schema_registry_client=schema_registry,
+    schema_str=order_schema,
+)
+
+producer = <span class="fn">SerializingProducer</span>({
+    <span class="str">'bootstrap.servers'</span>: <span class="str">'kafka:9092'</span>,
+    <span class="str">'value.serializer'</span>: avro_serializer,
+})
+
+<span class="cm"># On the wire: 5-byte magic header (schema ID) + Avro binary</span>
+producer.<span class="fn">produce</span>(
+    topic=<span class="str">'orders'</span>,
+    key=<span class="str">'ord-001'</span>,
+    value={
+        <span class="str">'order_id'</span>: <span class="str">'ord-001'</span>,
+        <span class="str">'user_id'</span>: <span class="str">'usr-999'</span>,
+        <span class="str">'amount'</span>: <span class="num">299.99</span>,
+        <span class="str">'currency'</span>: <span class="str">'USD'</span>,
+        <span class="str">'created_at'</span>: <span class="num">1709000000000</span>,
+    }
+)</pre>
+        </div>
+
+        <div class="table-wrap fade-in">
+          <table>
+            <thead><tr><th>Compatibility Mode</th><th>Add Field w/ Default</th><th>Remove Field</th><th>Use When</th></tr></thead>
+            <tbody>
+              <tr><td><strong>BACKWARD</strong> (default)</td><td class="yes">✅</td><td class="no">❌</td><td>New consumers must read old data</td></tr>
+              <tr><td><strong>FORWARD</strong></td><td class="no">❌</td><td class="yes">✅ (with default)</td><td>Old consumers must read new data</td></tr>
+              <tr><td><strong>FULL</strong></td><td class="yes">✅ (with default)</td><td class="yes">✅ (with default)</td><td>Both directions safe</td></tr>
+              <tr><td><strong>NONE</strong></td><td class="yes">✅</td><td class="yes">✅</td><td>Development/prototyping only</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- KAFKA CONNECT -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// DATA INTEGRATION</div>
+        <h2>Kafka Connect</h2>
+        <p>Kafka Connect is a framework for building scalable, fault-tolerant connectors between Kafka and external systems — databases, cloud storage, search engines, and more. <strong>No custom code needed</strong> for standard integrations.</p>
+
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-icon cyan">📥</div>
+            <div class="card-title">Source Connectors</div>
+            <div class="card-desc">Pull data from external systems into Kafka topics. Examples: Debezium (CDC from PostgreSQL/MySQL), JDBC Source (poll tables), S3 Source (read files), Twitter/REST APIs.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon green">📤</div>
+            <div class="card-title">Sink Connectors</div>
+            <div class="card-desc">Push data from Kafka topics to external systems. Examples: Elasticsearch Sink, S3 Sink, JDBC Sink (write to DB), BigQuery Sink, Snowflake Sink.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon orange">🔧</div>
+            <div class="card-title">Single Message Transforms</div>
+            <div class="card-desc">Transform messages in-flight without writing code. Built-in SMTs: ReplaceField, MaskField, ExtractTopic, TimestampConverter, Flatten, Cast, and more.</div>
+          </div>
+        </div>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">JSON — Debezium PostgreSQL CDC Connector config</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre>{
+  <span class="prop">"name"</span>: <span class="str">"postgres-cdc-source"</span>,
+  <span class="prop">"config"</span>: {
+    <span class="prop">"connector.class"</span>: <span class="str">"io.debezium.connector.postgresql.PostgresConnector"</span>,
+    <span class="prop">"database.hostname"</span>: <span class="str">"postgres"</span>,
+    <span class="prop">"database.port"</span>: <span class="str">"5432"</span>,
+    <span class="prop">"database.user"</span>: <span class="str">"replicator"</span>,
+    <span class="prop">"database.password"</span>: <span class="str">"${file:/opt/secrets.properties:db.password}"</span>,
+    <span class="prop">"database.dbname"</span>: <span class="str">"ecommerce"</span>,
+    <span class="prop">"table.include.list"</span>: <span class="str">"public.orders,public.products,public.users"</span>,
+    <span class="prop">"topic.prefix"</span>: <span class="str">"ecommerce"</span>,
+    <span class="prop">"plugin.name"</span>: <span class="str">"pgoutput"</span>,
+    <span class="prop">"publication.name"</span>: <span class="str">"kafka_cdc"</span>,
+    <span class="prop">"slot.name"</span>: <span class="str">"debezium_slot"</span>,
+    <span class="prop">"key.converter"</span>: <span class="str">"io.confluent.kafka.serializers.KafkaAvroSerializer"</span>,
+    <span class="prop">"value.converter"</span>: <span class="str">"io.confluent.kafka.serializers.KafkaAvroSerializer"</span>,
+    <span class="prop">"schema.registry.url"</span>: <span class="str">"http://schema-registry:8081"</span>,
+    <span class="cm">// SMT: route each table to its own topic</span>
+    <span class="prop">"transforms"</span>: <span class="str">"route"</span>,
+    <span class="prop">"transforms.route.type"</span>: <span class="str">"org.apache.kafka.connect.transforms.RegexRouter"</span>,
+    <span class="prop">"transforms.route.regex"</span>: <span class="str">"([^.]+)\\.([^.]+)\\.([^.]+)"</span>,
+    <span class="prop">"transforms.route.replacement"</span>: <span class="str">"$1-$3-events"</span>
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- PARTITION STRATEGIES -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// DESIGN PATTERNS</div>
+        <h2>Partition Strategy & Ordering</h2>
+
+        <div class="info-box orange fade-in">
+          <div class="info-label">⚠ Critical: Ordering in Kafka</div>
+          <div class="info-text">Kafka guarantees <strong>ordering within a partition</strong>, not across partitions. To maintain order for related events (e.g., all events for the same order, user, or account), use the same key — Kafka routes records with the same key to the same partition.</div>
+        </div>
+
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-icon cyan">🔑</div>
+            <div class="card-title">Key-Based (Default)</div>
+            <div class="card-desc"><code>hash(key) % numPartitions</code>. Same key → same partition → ordering guaranteed per key. Use for: order events, user activity, financial transactions per account.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon green">🔄</div>
+            <div class="card-title">Round-Robin</div>
+            <div class="card-desc">No key provided. Records distributed evenly across partitions. Maximum throughput but no ordering. Use for: independent events where ordering doesn't matter.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon purple">🎯</div>
+            <div class="card-title">Custom Partitioner</div>
+            <div class="card-desc">Implement <code>Partitioner</code> interface for business logic. Examples: route VIP customers to dedicated partitions, geographic routing, or size-based load balancing.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon orange">🏷️</div>
+            <div class="card-title">Sticky Partitioner</div>
+            <div class="card-desc">Default since Kafka 2.4 when no key. Fills one partition's batch completely before switching. Improves batching efficiency (lower latency, higher throughput vs pure round-robin).</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <span class="footer-text">// kafka-developer-guide • Advanced Concepts</span>
+      <div class="footer-links">
+        <a href="architecture.html" class="footer-link">← Architecture</a>
+        <a href="usecases.html" class="footer

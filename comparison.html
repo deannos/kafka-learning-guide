@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kafka vs Others — Kafka Developer Guide</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="sidebar-toggle">☰</button>
+<div class="site-wrapper">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">⚡</div>
+      <div class="sidebar-logo-text"><span class="name">KafkaGuide</span><span class="version">v3.x • Developer Portal</span></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Getting Started</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a>
+      <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Learning Roadmap</a>
+      <div class="nav-section-label">Core Knowledge</div>
+      <a href="architecture.html" class="nav-item"><span class="nav-icon">🏗️</span> Architecture</a>
+      <a href="advanced.html" class="nav-item"><span class="nav-icon">⚡</span> Advanced Concepts</a>
+      <a href="security.html" class="nav-item"><span class="nav-icon">🔒</span> Security</a>
+      <div class="nav-section-label">Applied Kafka</div>
+      <a href="usecases.html" class="nav-item"><span class="nav-icon">🚀</span> Use Cases</a>
+      <a href="performance.html" class="nav-item"><span class="nav-icon">📊</span> Performance Tuning</a>
+      <a href="comparison.html" class="nav-item"><span class="nav-icon">⚖️</span> Kafka vs Others</a>
+      <a href="operations.html" class="nav-item"><span class="nav-icon">🔧</span> Operations<span class="nav-badge">NEW</span></a>
+      <div class="nav-section-label">Reference</div>
+      <a href="cheatsheet.html" class="nav-item"><span class="nav-icon">📋</span> Cheatsheet</a>
+      <a href="interview.html" class="nav-item"><span class="nav-icon">🎯</span> Interview Prep<span class="nav-badge">NEW</span></a>
+    </nav>
+    <div class="sidebar-footer"><div class="sidebar-footer-text">Apache Kafka® is a trademark of<br>the Apache Software Foundation.</div></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="header">
+      <div class="header-breadcrumb">
+        <span>kafka-guide</span><span style="color:var(--text-muted)">/</span><span class="current">comparison</span>
+      </div>
+      <div class="header-right"><span class="header-tag">Decision Guide</span></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-block">
+        <div class="page-tag">// COMPARISON</div>
+        <h1 class="page-h1">Kafka <span>vs The World</span></h1>
+        <p class="page-subtitle">Honest, detailed comparisons to help you choose the right tool. Kafka isn't always the answer — but when it is, nothing else compares.</p>
+      </div>
+
+      <!-- KAFKA VS RABBITMQ -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// VS RABBITMQ</div>
+        <h2>Kafka vs RabbitMQ</h2>
+        <p>Both are message brokers, but they're designed for fundamentally different purposes. <strong>RabbitMQ</strong> is a traditional message queue (AMQP) optimized for task distribution and routing. <strong>Kafka</strong> is an event streaming platform optimized for high-throughput, durable event logs.</p>
+
+        <div class="table-wrap fade-in">
+          <table>
+            <thead><tr><th>Feature</th><th>Apache Kafka</th><th>RabbitMQ</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Primary Model</strong></td><td class="yes">Event streaming / Log</td><td>Task queue / AMQP</td></tr>
+              <tr><td><strong>Message Retention</strong></td><td class="yes">Configurable (days/weeks)</td><td class="no">Deleted after ACK</td></tr>
+              <tr><td><strong>Replay Messages</strong></td><td class="yes">✅ Yes — any consumer</td><td class="no">❌ No</td></tr>
+              <tr><td><strong>Throughput</strong></td><td class="yes">Millions/sec</td><td class="partial">~50K/sec</td></tr>
+              <tr><td><strong>Consumer Groups</strong></td><td class="yes">Native, built-in</td><td class="partial">Competing consumers only</td></tr>
+              <tr><td><strong>Message Ordering</strong></td><td class="yes">Guaranteed per partition</td><td class="partial">Per queue only</td></tr>
+              <tr><td><strong>Push vs Pull</strong></td><td class="yes">Pull (consumer controls pace)</td><td class="partial">Push (broker pushes)</td></tr>
+              <tr><td><strong>Complex Routing</strong></td><td class="no">Limited (topic-based)</td><td class="yes">Rich (exchanges, bindings)</td></tr>
+              <tr><td><strong>Message Priority</strong></td><td class="no">❌ Not native</td><td class="yes">✅ Yes</td></tr>
+              <tr><td><strong>Protocol</strong></td><td>Custom binary</td><td class="yes">AMQP 0-9-1 (standard)</td></tr>
+              <tr><td><strong>Best For</strong></td><td class="yes">Event streaming, high volume</td><td>Task queues, job distribution</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="cards-grid fade-in" style="margin-top:24px">
+          <div class="card">
+            <div class="card-icon cyan">✅</div>
+            <div class="card-title">Choose Kafka When</div>
+            <div class="card-desc">
+              <ul style="padding-left:16px;margin:0">
+                <li>High-throughput event streams (&gt;50K/sec)</li>
+                <li>Multiple consumers need same data</li>
+                <li>You need to replay historical events</li>
+                <li>Event sourcing or audit log patterns</li>
+                <li>Long-term message retention needed</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-icon orange">✅</div>
+            <div class="card-title">Choose RabbitMQ When</div>
+            <div class="card-desc">
+              <ul style="padding-left:16px;margin:0">
+                <li>Task queue / work distribution patterns</li>
+                <li>Complex routing logic (topic exchanges)</li>
+                <li>Message priority is important</li>
+                <li>AMQP protocol required</li>
+                <li>Small scale (&lt;50K msg/sec)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- KAFKA VS REST -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// VS REST API</div>
+        <h2>Kafka vs REST/HTTP APIs</h2>
+
+        <div class="info-box orange fade-in">
+          <div class="info-label">⚠ Common Mistake</div>
+          <div class="info-text">Many teams default to REST for microservice communication, then struggle with cascading failures, timeout handling, retry storms, and tight coupling. Kafka-based async messaging eliminates these problems at the cost of eventual consistency.</div>
+        </div>
+
+        <div class="table-wrap fade-in">
+          <table>
+            <thead><tr><th>Aspect</th><th>Kafka (Async Events)</th><th>REST/HTTP (Sync)</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Coupling</strong></td><td class="yes">Loose (producer unaware of consumers)</td><td class="no">Tight (must know endpoint)</td></tr>
+              <tr><td><strong>Availability</strong></td><td class="yes">Producer works even if consumer down</td><td class="no">Consumer must be up</td></tr>
+              <tr><td><strong>Throughput</strong></td><td class="yes">Millions/sec</td><td class="no">Thousands/sec</td></tr>
+              <tr><td><strong>Backpressure</strong></td><td class="yes">Natural (consumer reads at own pace)</td><td class="no">Must implement manually</td></tr>
+              <tr><td><strong>Failure Handling</strong></td><td class="yes">Retry from offset</td><td class="no">Complex retry logic needed</td></tr>
+              <tr><td><strong>Consistency</strong></td><td class="partial">Eventual</td><td class="yes">Immediate</td></tr>
+              <tr><td><strong>Debugging</strong></td><td class="partial">More complex</td><td class="yes">Simple request/response</td></tr>
+              <tr><td><strong>Broadcast</strong></td><td class="yes">✅ Native fan-out</td><td class="no">❌ Must call each service</td></tr>
+              <tr><td><strong>Response Required</strong></td><td class="partial">Request-reply pattern needed</td><td class="yes">Native</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- KAFKA VS REDIS -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// VS REDIS</div>
+        <h2>Kafka vs Redis Pub/Sub & Streams</h2>
+
+        <div class="table-wrap fade-in">
+          <table>
+            <thead><tr><th>Feature</th><th>Kafka</th><th>Redis Pub/Sub</th><th>Redis Streams</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Persistence</strong></td><td class="yes">Disk-based, durable</td><td class="no">In-memory, fire-and-forget</td><td class="partial">In-memory (AOF opt-in)</td></tr>
+              <tr><td><strong>Message History</strong></td><td class="yes">Full retention</td><td class="no">❌ Lost if no subscriber</td><td class="partial">Limited by memory</td></tr>
+              <tr><td><strong>Scale</strong></td><td class="yes">Petabytes, millions/sec</td><td class="partial">Memory-limited</td><td class="partial">Memory-limited</td></tr>
+              <tr><td><strong>Consumer Groups</strong></td><td class="yes">First-class feature</td><td class="no">❌ All subscribers get all</td><td class="yes">✅ Supported</td></tr>
+              <tr><td><strong>Replay</strong></td><td class="yes">✅ By offset</td><td class="no">❌ Not possible</td><td class="partial">Limited window</td></tr>
+              <tr><td><strong>Latency</strong></td><td class="partial">~1-5ms</td><td class="yes">Sub-millisecond</td><td class="yes">Sub-millisecond</td></tr>
+              <tr><td><strong>Ideal Use</strong></td><td>Event streaming, CDC</td><td>Real-time notifications</td><td>Lightweight streaming</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- KAFKA VS PULSAR -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// VS APACHE PULSAR</div>
+        <h2>Kafka vs Apache Pulsar</h2>
+        <p>Apache Pulsar is the most serious competitor to Kafka, built at Yahoo with a different architectural approach — separating compute (brokers) from storage (BookKeeper).</p>
+
+        <div class="table-wrap fade-in">
+          <table>
+            <thead><tr><th>Feature</th><th>Apache Kafka</th><th>Apache Pulsar</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Architecture</strong></td><td>Monolithic (broker=storage)</td><td class="yes">Separated compute + storage</td></tr>
+              <tr><td><strong>Multi-tenancy</strong></td><td class="partial">Manual namespace setup</td><td class="yes">Native built-in</td></tr>
+              <tr><td><strong>Geo-Replication</strong></td><td class="partial">MirrorMaker (complex)</td><td class="yes">Native, built-in</td></tr>
+              <tr><td><strong>Scaling</strong></td><td class="partial">Partition reassignment needed</td><td class="yes">Automatic, seamless</td></tr>
+              <tr><td><strong>Consumer Models</strong></td><td class="partial">Pull-based groups</td><td class="yes">Multiple: Exclusive, Shared, Failover, Key_Shared</td></tr>
+              <tr><td><strong>Maturity / Ecosystem</strong></td><td class="yes">Dominant, massive ecosystem</td><td class="partial">Growing, less mature</td></tr>
+              <tr><td><strong>Operational Complexity</strong></td><td class="yes">Simpler (KRaft)</td><td class="no">ZK + BookKeeper + Brokers</td></tr>
+              <tr><td><strong>Community</strong></td><td class="yes">Largest in streaming</td><td class="partial">Smaller but growing</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- KAFKA VS DATABASE -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// VS DATABASE</div>
+        <h2>Kafka vs Database for Messaging</h2>
+
+        <div class="info-box cyan fade-in">
+          <div class="info-label">💡 Common Anti-Pattern</div>
+          <div class="info-text">Teams often use a database table as a message queue (polling for new rows). This creates significant load on the DB, doesn't scale, and is operationally fragile. Kafka was literally designed to solve this problem.</div>
+        </div>
+
+        <div class="table-wrap fade-in">
+          <table>
+            <thead><tr><th>Aspect</th><th>Kafka</th><th>DB as Queue (Polling)</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Throughput</strong></td><td class="yes">Millions/sec</td><td class="no">Thousands/sec (creates load)</td></tr>
+              <tr><td><strong>Multiple Consumers</strong></td><td class="yes">Native consumer groups</td><td class="no">Requires complex locking</td></tr>
+              <tr><td><strong>DB Load</strong></td><td class="yes">None</td><td class="no">Continuous polling burden</td></tr>
+              <tr><td><strong>Backpressure</strong></td><td class="yes">Natural</td><td class="no">Manual implementation</td></tr>
+              <tr><td><strong>Operations</strong></td><td class="partial">Learn Kafka</td><td class="yes">Reuse existing DB skills</td></tr>
+              <tr><td><strong>Transactional Outbox</strong></td><td class="yes">Debezium captures outbox</td><td class="partial">DB is the outbox</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DECISION TREE -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// DECISION GUIDE</div>
+        <h2>When to Use What</h2>
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-icon cyan">⚡</div>
+            <div class="card-title">Use Kafka</div>
+            <div class="card-desc">
+              <ul style="padding-left:16px;margin:0">
+                <li>High-volume event streaming</li>
+                <li>Multiple independent consumers</li>
+                <li>Event sourcing / audit log</li>
+                <li>CDC from databases</li>
+                <li>Stream processing pipelines</li>
+                <li>Microservice event backbone</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-icon orange">🐇</div>
+            <div class="card-title">Use RabbitMQ</div>
+            <div class="card-desc">
+              <ul style="padding-left:16px;margin:0">
+                <li>Task queue / job distribution</li>
+                <li>Complex routing patterns</li>
+                <li>Message TTL and priority</li>
+                <li>Low volume, low latency</li>
+                <li>AMQP protocol required</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-icon red">⚡</div>
+            <div class="card-title">Use Redis Pub/Sub</div>
+            <div class="card-desc">
+              <ul style="padding-left:16px;margin:0">
+                <li>Real-time notifications (sub-ms)</li>
+                <li>Cache invalidation broadcasts</li>
+                <li>Simple fan-out with no history</li>
+                <li>Already using Redis for caching</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-icon green">🌐</div>
+            <div class="card-title">Use REST</div>
+            <div class="card-desc">
+              <ul style="padding-left:16px;margin:0">
+                <li>Synchronous request-response needed</li>
+                <li>Immediate consistency required</li>
+                <li>Simple CRUD operations</li>
+                <li>External-facing public APIs</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <span class="footer-text">// kafka-developer-guide • Comparison</span>
+      <div class="footer-links">
+        <a href="performance.html" class="footer-link">← Performance</a>
+        <a href="roadmap.html" class="footer-link">Roadmap →</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script src="js/app.js"></script>
+</body>
+</html>

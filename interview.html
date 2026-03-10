@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interview Prep — Kafka Developer Guide</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="sidebar-toggle">☰</button>
+<div class="site-wrapper">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">⚡</div>
+      <div class="sidebar-logo-text"><span class="name">KafkaGuide</span><span class="version">v3.x • Developer Portal</span></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Getting Started</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a>
+      <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Learning Roadmap</a>
+      <div class="nav-section-label">Core Knowledge</div>
+      <a href="architecture.html" class="nav-item"><span class="nav-icon">🏗️</span> Architecture</a>
+      <a href="advanced.html" class="nav-item"><span class="nav-icon">⚡</span> Advanced Concepts</a>
+      <a href="security.html" class="nav-item"><span class="nav-icon">🔒</span> Security</a>
+      <div class="nav-section-label">Applied Kafka</div>
+      <a href="usecases.html" class="nav-item"><span class="nav-icon">🚀</span> Use Cases</a>
+      <a href="performance.html" class="nav-item"><span class="nav-icon">📊</span> Performance Tuning</a>
+      <a href="comparison.html" class="nav-item"><span class="nav-icon">⚖️</span> Kafka vs Others</a>
+      <a href="operations.html" class="nav-item"><span class="nav-icon">🔧</span> Operations</a>
+      <div class="nav-section-label">Reference</div>
+      <a href="cheatsheet.html" class="nav-item"><span class="nav-icon">📋</span> Cheatsheet</a>
+      <a href="interview.html" class="nav-item active"><span class="nav-icon">🎯</span> Interview Prep<span class="nav-badge">NEW</span></a>
+    </nav>
+    <div class="sidebar-footer"><div class="sidebar-footer-text">Apache Kafka® is a trademark of<br>the Apache Software Foundation.</div></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="header">
+      <div class="header-breadcrumb">
+        <span>kafka-guide</span><span style="color:var(--text-muted)">/</span><span class="current">interview</span>
+      </div>
+      <div class="header-right"><span class="header-tag">Interview Ready</span></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-block">
+        <div class="page-tag">// INTERVIEW PREP</div>
+        <h1 class="page-h1"><span>Interview</span> Questions</h1>
+        <p class="page-subtitle">The 30 most common Kafka interview questions — from junior to senior architect level. Click each question to reveal the model answer.</p>
+      </div>
+
+      <!-- QUIZ SECTION -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// KNOWLEDGE TEST</div>
+        <h2>Quick Knowledge Quiz</h2>
+        <p>Test yourself before the interview. Try answering before clicking.</p>
+
+        <div class="quiz-section-wrap">
+          <div class="quiz-block fade-in">
+            <div class="quiz-heading">Q1 — Core Concepts</div>
+            <div class="quiz-q-text">What is the maximum number of consumers in a consumer group that can actively consume from a topic with 6 partitions?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" data-correct="false">3</button>
+              <button class="quiz-opt" data-correct="true">6</button>
+              <button class="quiz-opt" data-correct="false">12</button>
+              <button class="quiz-opt" data-correct="false">Unlimited</button>
+            </div>
+            <div class="quiz-result"></div>
+          </div>
+
+          <div class="quiz-block fade-in">
+            <div class="quiz-heading">Q2 — Delivery Semantics</div>
+            <div class="quiz-q-text">A consumer commits its offset BEFORE processing a message. If the consumer crashes mid-processing and restarts, what delivery semantic does this produce?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" data-correct="false">Exactly-once</button>
+              <button class="quiz-opt" data-correct="false">At-least-once</button>
+              <button class="quiz-opt" data-correct="true">At-most-once</button>
+              <button class="quiz-opt" data-correct="false">Best-effort</button>
+            </div>
+            <div class="quiz-result"></div>
+          </div>
+
+          <div class="quiz-block fade-in">
+            <div class="quiz-heading">Q3 — Configuration</div>
+            <div class="quiz-q-text">With replication.factor=3 and min.insync.replicas=2 and acks=all, what is the maximum number of broker failures you can tolerate and still successfully produce messages?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" data-correct="false">0</button>
+              <button class="quiz-opt" data-correct="true">1</button>
+              <button class="quiz-opt" data-correct="false">2</button>
+              <button class="quiz-opt" data-correct="false">3</button>
+            </div>
+            <div class="quiz-result"></div>
+          </div>
+
+          <div class="quiz-block fade-in">
+            <div class="quiz-heading">Q4 — Performance</div>
+            <div class="quiz-q-text">Which producer configuration should you increase to maximize throughput at the cost of slightly higher latency?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" data-correct="false">acks=0</button>
+              <button class="quiz-opt" data-correct="false">retries=0</button>
+              <button class="quiz-opt" data-correct="true">linger.ms=50</button>
+              <button class="quiz-opt" data-correct="false">max.block.ms=0</button>
+            </div>
+            <div class="quiz-result"></div>
+          </div>
+
+          <div class="quiz-block fade-in">
+            <div class="quiz-heading">Q5 — Ordering</div>
+            <div class="quiz-q-text">You need to guarantee that all events for a specific order_id are processed in order. What is the correct approach?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" data-correct="false">Use a single partition topic</button>
+              <button class="quiz-opt" data-correct="true">Use order_id as the message key</button>
+              <button class="quiz-opt" data-correct="false">Set replication.factor=1</button>
+              <button class="quiz-opt" data-correct="false">Use a consumer group with one member</button>
+            </div>
+            <div class="quiz-result"></div>
+          </div>
+
+          <div class="quiz-block fade-in">
+            <div class="quiz-heading">Q6 — Internals</div>
+            <div class="quiz-q-text">Kafka uses a Linux OS feature to transfer data from disk to network without copying through user space. What is this called?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" data-correct="false">DMA transfer</button>
+              <button class="quiz-opt" data-correct="false">Page cache bypass</button>
+              <button class="quiz-opt" data-correct="true">Zero-copy (sendfile syscall)</button>
+              <button class="quiz-opt" data-correct="false">Memory-mapped I/O</button>
+            </div>
+            <div class="quiz-result"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- BEGINNER QUESTIONS -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// LEVEL 1</div>
+        <h2>Beginner Questions</h2>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">1. What is Apache Kafka and what problem does it solve?</span>
+            <div class="interview-q-meta">
+              <span class="security-level sec-low">BEGINNER</span>
+              <span class="interview-toggle">›</span>
+            </div>
+          </div>
+          <div class="interview-a">
+            <p>Apache Kafka is a <strong>distributed event streaming platform</strong> designed for high-throughput, fault-tolerant, real-time data pipelines. It solves the <strong>integration complexity problem</strong> in distributed systems.</p>
+            <p>Before Kafka, services communicated via point-to-point integrations. With N services, you need up to N×(N-1)/2 connections — each with custom schemas and failure modes. Kafka introduces a central event log that any service can write to or read from, reducing this to N connections total.</p>
+            <p>Key capabilities: <strong>publish-subscribe</strong> messaging, <strong>durable storage</strong> of events, <strong>stream processing</strong> via Kafka Streams, and <strong>high throughput</strong> (millions of messages/sec). Unlike traditional queues, messages aren't deleted after consumption — multiple consumers can read the same data independently.</p>
+          </div>
+        </div>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">2. Explain topics, partitions, and offsets.</span>
+            <div class="interview-q-meta"><span class="security-level sec-low">BEGINNER</span><span class="interview-toggle">›</span></div>
+          </div>
+          <div class="interview-a">
+            <p>A <strong>topic</strong> is a named feed of events — analogous to a database table or a folder. Producers write to topics; consumers read from them.</p>
+            <p>A <strong>partition</strong> is a subdivision of a topic. Each partition is an ordered, append-only log stored on disk. Partitions are the unit of parallelism — more partitions allow more producers and consumers to work simultaneously. A topic with 6 partitions can be consumed by up to 6 consumer instances in parallel.</p>
+            <p>An <strong>offset</strong> is a unique sequential identifier for each record within a partition, starting at 0. Consumers use offsets to track their position — "I've processed up to offset 4,221 in partition 0." This enables consumers to replay data, start from the beginning, or pick up exactly where they left off after a crash.</p>
+          </div>
+        </div>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">3. What is a consumer group and why is it important?</span>
+            <div class="interview-q-meta"><span class="security-level sec-low">BEGINNER</span><span class="interview-toggle">›</span></div>
+          </div>
+          <div class="interview-a">
+            <p>A <strong>consumer group</strong> is a set of consumer instances that cooperate to consume a topic. Kafka ensures each partition is assigned to exactly <strong>one consumer</strong> within the group at any time — this guarantees ordered processing within a partition while distributing load across the group.</p>
+            <p>Consumer groups enable two key patterns: <strong>load balancing</strong> (multiple consumers share work; adding consumers increases throughput up to partition count) and <strong>broadcast</strong> (multiple groups can all consume the same topic independently — each gets its own complete copy of all events).</p>
+            <p>The critical rule: <strong>max parallelism = number of partitions</strong>. If a group has more consumers than partitions, some consumers will be idle.</p>
+          </div>
+        </div>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">4. What is the difference between Kafka and RabbitMQ?</span>
+            <div class="interview-q-meta"><span class="security-level sec-low">BEGINNER</span><span class="interview-toggle">›</span></div>
+          </div>
+          <div class="interview-a">
+            <p>The fundamental difference is their <strong>model</strong>: RabbitMQ is a traditional message <strong>queue</strong> (work distribution), while Kafka is an event <strong>streaming log</strong>.</p>
+            <p>Key differences: RabbitMQ <strong>deletes messages after consumption</strong>; Kafka <strong>retains them</strong> for days/weeks and allows replay. RabbitMQ pushes messages to consumers; Kafka consumers pull at their own pace. Kafka supports <strong>millions of messages/sec</strong>; RabbitMQ tops out around 50K/sec. Kafka has native <strong>consumer groups</strong> with parallel consumption; RabbitMQ uses competing consumers with more limited semantics.</p>
+            <p>Choose RabbitMQ for task queues, complex routing, or RPC patterns. Choose Kafka for high-volume event streaming, event sourcing, CDC, or when multiple independent services need to consume the same data.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- INTERMEDIATE -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// LEVEL 2</div>
+        <h2>Intermediate Questions</h2>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">5. Explain Kafka's replication mechanism and what ISR means.</span>
+            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle">›</span></div>
+          </div>
+          <div class="interview-a">
+            <p>For each partition, Kafka designates one broker as the <strong>leader</strong> and others as <strong>followers</strong>. All client reads and writes go to the leader. Followers continuously replicate data from the leader.</p>
+            <p><strong>ISR (In-Sync Replicas)</strong> is the set of replicas that are fully caught up with the leader, within the window defined by <code>replica.lag.time.max.ms</code>. When a follower falls too far behind, it's removed from ISR. When it catches up, it's re-added.</p>
+            <p>A message is considered <strong>committed</strong> only when all ISR replicas have written it. With <code>acks=all</code> and <code>min.insync.replicas=2</code>, a write is acknowledged only after 2 ISR replicas confirm it — guaranteeing durability even if a broker fails immediately after the ack.</p>
+            <p>If the leader fails, Kafka elects a new leader from ISR — ensuring no committed data is lost. <code>unclean.leader.election.enable=false</code> prevents electing out-of-sync replicas as leaders, which could cause data loss.</p>
+          </div>
+        </div>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">6. What are the three delivery semantics? How do you achieve exactly-once?</span>
+            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle">›</span></div>
+          </div>
+          <div class="interview-a">
+            <p><strong>At-most-once:</strong> Commit offset before processing. Messages may be lost on crash (consumer committed but didn't finish processing), but never duplicated. Used for non-critical metrics.</p>
+            <p><strong>At-least-once:</strong> Commit offset after processing. Messages are never lost, but may be reprocessed on crash (consumer processed but didn't commit before crashing). Your processing must be idempotent. Most common choice.</p>
+            <p><strong>Exactly-once:</strong> Requires two components: (1) <strong>Idempotent producer</strong> (<code>enable.idempotence=true</code>) — broker assigns each message a sequence number and deduplicates on retry. (2) <strong>Transactions</strong> — <code>producer.initTransactions()</code> + <code>beginTransaction()</code> + <code>commitTransaction()</code> — writes to multiple partitions/topics are atomic. Consumer must use <code>isolation.level=read_committed</code> to only read committed transactional messages.</p>
+          </div>
+        </div>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">7. Why does Kafka perform so well? What makes it faster than a database?</span>
+            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle">›</span></div>
+          </div>
+          <div class="interview-a">
+            <p>Kafka's performance comes from four key design decisions:</p>
+            <p><strong>1. Sequential disk I/O:</strong> Kafka only appends to the end of log files. Sequential writes on SSDs can exceed 600MB/s — faster than random reads because the OS can aggressively prefetch sequential data. Traditional databases do random I/O for every operation.</p>
+            <p><strong>2. OS Page Cache:</strong> Kafka doesn't maintain its own cache. It writes to the page cache (OS-managed RAM buffer) and lets the OS handle disk persistence. Data written recently is automatically in RAM, making recent reads essentially free.</p>
+            <p><strong>3. Zero-copy transfers:</strong> When sending data to consumers, Kafka uses the <code>sendfile()</code> Linux syscall, which transfers data directly from the OS page cache to the network socket without copying through application memory. This saves 2 data copies and 2 context switches per message batch.</p>
+            <p><strong>4. Batching and compression:</strong> Messages are batched before sending (multiple records in one network request) and compressed end-to-end. A batch of 1000 JSON messages compressed with LZ4 can be 5–10× smaller than individual messages.</p>
+          </div>
+        </div>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">8. What is log compaction? When would you use it?</span>
+            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle">›</span></div>
+          </div>
+          <div class="interview-a">
+            <p><strong>Log compaction</strong> (<code>cleanup.policy=compact</code>) is a retention mode where instead of deleting old messages by time, Kafka retains <strong>the latest record for each key</strong> and removes older records with the same key.</p>
+            <p>This allows a Kafka topic to act as a <strong>durable key-value store</strong>. A consumer starting from the beginning of a compacted topic will see the latest value for every key — equivalent to a database snapshot.</p>
+            <p><strong>Primary use cases:</strong> Change Data Capture (CDC) topics — if user #123 updates their email 50 times, compaction keeps only the latest. Database replication topics where downstream systems need current state. KTable state restoration in Kafka Streams. Any scenario where current state matters but full history doesn't.</p>
+            <p>Note: A record with a <code>null</code> value (tombstone) causes the key to be deleted from the compacted log eventually.</p>
+          </div>
+        </div>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">9. What causes consumer group rebalancing, and why is it a problem?</span>
+            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle">›</span></div>
+          </div>
+          <div class="interview-a">
+            <p>A rebalance is triggered when: a consumer joins the group, a consumer leaves (crash, graceful close), a consumer is considered dead (heartbeat timeout or <code>max.poll.interval.ms</code> exceeded), or partition count changes.</p>
+            <p>The <strong>problem with eager rebalancing</strong> (default pre-2.4): all partitions are revoked from all consumers simultaneously, then reassigned. During this "stop the world" pause, no consumption happens. For high-lag topics or slow consumers, this can cause visible processing delays.</p>
+            <p><strong>Solutions:</strong> (1) Use <code>CooperativeStickyAssignor</code> (Kafka 2.4+) — only partitions being moved are revoked, others continue processing. (2) Tune <code>max.poll.interval.ms</code> to allow enough processing time. (3) Reduce <code>max.poll.records</code> so each batch processes faster. (4) Use <code>session.timeout.ms</code> tuned to your GC pause profile.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- ADVANCED -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// LEVEL 3</div>
+        <h2>Advanced & Architect-Level Questions</h2>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">10. How would you design a Kafka-based order processing system that guarantees no order is lost and no order is processed twice?</span>
+            <div class="interview-q-meta"><span class="security-level sec-high">ADVANCED</span><span class="interview-toggle">›</span></div>
+          </div>
+          <div class="interview-a">
+            <p><strong>Producer side:</strong> Enable <code>enable.idempotence=true</code> and use transactions (<code>transactional.id=order-service-1</code>). Use the <strong>Outbox Pattern</strong> — write the order to the database and an outbox table in a single DB transaction. Debezium captures the outbox table and publishes to Kafka. This guarantees the event is always published exactly once, even if the service crashes between writing to DB and publishing to Kafka.</p>
+            <p><strong>Kafka configuration:</strong> <code>acks=all</code>, <code>replication.factor=3</code>, <code>min.insync.replicas=2</code>, <code>unclean.leader.election.enable=false</code>. This ensures committed messages survive broker failures.</p>
+            <p><strong>Consumer side:</strong> Use <code>isolation.level=read_committed</code> to avoid reading uncommitted transactional messages. Implement idempotent processing — check if the order was already processed before acting (deduplicate by order_id in the processing DB). Commit offsets only after the order is durably persisted in the target system, and wrap the processing + offset commit in a single DB transaction where possible.</p>
+            <p><strong>End result:</strong> The combination of the transactional outbox (no event loss at publish) + idempotent consumer processing (no duplicate effects) gives you effectively exactly-once semantics across the full pipeline.</p>
+          </div>
+        </div>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">11. How do you choose the right number of partitions for a topic?</span>
+            <div class="interview-q-meta"><span class="security-level sec-high">ADVANCED</span><span class="interview-toggle">›</span></div>
+          </div>
+          <div class="interview-a">
+            <p>Partition count is the most important tuning decision and is hard to change later. Consider these factors:</p>
+            <p><strong>Throughput:</strong> Estimate target throughput ÷ throughput per partition. A single partition can handle ~10–100MB/s depending on hardware. If you need 1GB/s producer throughput and a partition handles ~100MB/s, you need at least 10 partitions.</p>
+            <p><strong>Consumer parallelism:</strong> Number of partitions = max consumer instances in a group. If you'll ever need 20 parallel consumers, you need at least 20 partitions.</p>
+            <p><strong>End-to-end latency:</strong> More partitions = slightly higher latency (more coordination overhead). For low-latency use cases, don't over-partition.</p>
+            <p><strong>Ordering requirements:</strong> If you need all events for entity X in order, ensure your key hash distributes well across partitions. Hotspots (many events to one key) concentrate load on one partition.</p>
+            <p><strong>Rule of thumb:</strong> Start with max(target_throughput / partition_throughput, target_consumer_count). Multiply by 2-3 for growth headroom. For most topics: 6–24 partitions. Never go below 3 for production, don't go above 100 without a strong reason (each partition costs memory and file handles on the broker).</p>
+          </div>
+        </div>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">12. Explain KRaft and why it replaces ZooKeeper.</span>
+            <div class="interview-q-meta"><span class="security-level sec-high">ADVANCED</span><span class="interview-toggle">›</span></div>
+          </div>
+          <div class="interview-a">
+            <p>Kafka historically used <strong>Apache ZooKeeper</strong> as an external coordination service for: storing cluster metadata (topic configs, partition assignments), controller election (one broker acts as cluster controller), and authentication/ACL data.</p>
+            <p><strong>Problems with ZooKeeper:</strong> Two systems to operate and monitor. Metadata propagation took seconds (ZK → Controller → Brokers). Cluster could only support ~200K partitions. Controller failover took 30–60 seconds. ZooKeeper had its own scaling limits.</p>
+            <p><strong>KRaft (Kafka Raft)</strong> replaces ZooKeeper with a Raft consensus algorithm built into Kafka itself. A set of brokers are designated as "controllers" and form a Raft quorum. Metadata is stored in an internal Kafka topic (<code>@metadata</code>) replicated via Raft.</p>
+            <p><strong>Benefits:</strong> Single system to operate. Metadata changes propagate in milliseconds. Support for millions of partitions. Controller failover in milliseconds. Simpler deployment (no ZK cluster to manage). KRaft has been production-ready since Kafka 3.3 and ZooKeeper support is deprecated.</p>
+          </div>
+        </div>
+
+        <div class="interview-block fade-in">
+          <div class="interview-q">
+            <span class="interview-q-text">13. How does Kafka Streams handle state and fault tolerance?</span>
+            <div class="interview-q-meta"><span class="security-level sec-high">ADVANCED</span><span class="interview-toggle">›</span></div>
+          </div>
+          <div class="interview-a">
+            <p>Kafka Streams maintains local state in <strong>RocksDB</strong> (an embedded key-value store) on each stream processor instance. This enables O(1) lookups for joins and aggregations without network round-trips to external databases.</p>
+            <p><strong>Fault tolerance:</strong> Every state store is backed by a <strong>changelog topic</strong> in Kafka. Every write to the state store also writes to the changelog. If a stream processor instance crashes, a new instance reads the changelog topic to restore the state — essentially replaying the state changes rather than the raw events. This makes recovery much faster than reprocessing all events.</p>
+            <p><strong>Standby replicas:</strong> Configure <code>num.standby.replicas=1</code> to have hot standby state on another instance. When the primary fails, the standby only needs to catch up on delta changes since its last sync — recovery in seconds instead of minutes.</p>
+            <p><strong>Exactly-once in Streams:</strong> Use <code>processing.guarantee=exactly_once_v2</code> to wrap each poll-process-produce cycle in a transaction, ensuring no event is processed twice even on failures.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <span class="footer-text">// kafka-developer-guide • Interview Prep</span>
+      <div class="footer-links">
+        <a href="cheatsheet.html" class="footer-link">← Cheatsheet</a>
+        <a href="index.html" class="footer-link">Back to Home</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script src="js/app.js"></script>
+</body>
+</html>

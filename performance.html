@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Performance Tuning — Kafka Developer Guide</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="sidebar-toggle">☰</button>
+<div class="site-wrapper">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">⚡</div>
+      <div class="sidebar-logo-text"><span class="name">KafkaGuide</span><span class="version">v3.x • Developer Portal</span></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Getting Started</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a>
+      <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Learning Roadmap</a>
+      <div class="nav-section-label">Core Knowledge</div>
+      <a href="architecture.html" class="nav-item"><span class="nav-icon">🏗️</span> Architecture</a>
+      <a href="advanced.html" class="nav-item"><span class="nav-icon">⚡</span> Advanced Concepts</a>
+      <a href="security.html" class="nav-item"><span class="nav-icon">🔒</span> Security</a>
+      <div class="nav-section-label">Applied Kafka</div>
+      <a href="usecases.html" class="nav-item"><span class="nav-icon">🚀</span> Use Cases</a>
+      <a href="performance.html" class="nav-item"><span class="nav-icon">📊</span> Performance Tuning</a>
+      <a href="comparison.html" class="nav-item"><span class="nav-icon">⚖️</span> Kafka vs Others</a>
+      <a href="operations.html" class="nav-item"><span class="nav-icon">🔧</span> Operations<span class="nav-badge">NEW</span></a>
+      <div class="nav-section-label">Reference</div>
+      <a href="cheatsheet.html" class="nav-item"><span class="nav-icon">📋</span> Cheatsheet</a>
+      <a href="interview.html" class="nav-item"><span class="nav-icon">🎯</span> Interview Prep<span class="nav-badge">NEW</span></a>
+    </nav>
+    <div class="sidebar-footer"><div class="sidebar-footer-text">Apache Kafka® is a trademark of<br>the Apache Software Foundation.</div></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="header">
+      <div class="header-breadcrumb">
+        <span>kafka-guide</span><span style="color:var(--text-muted)">/</span><span class="current">performance</span>
+      </div>
+      <div class="header-right"><span class="header-tag">Tuning Guide</span></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-block">
+        <div class="page-tag">// PERFORMANCE</div>
+        <h1 class="page-h1"><span>Performance</span> Tuning</h1>
+        <p class="page-subtitle">From 50K to 10M+ messages per second. Complete tuning guide for broker, producer, and consumer configuration.</p>
+      </div>
+
+      <!-- PERF METRICS -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// BENCHMARKS</div>
+        <h2>What's Achievable</h2>
+        <div class="perf-grid fade-in">
+          <div class="perf-card">
+            <div class="perf-label">Producer Throughput (single broker)</div>
+            <div class="perf-value">800 MB/s</div>
+            <div class="perf-bar"><div class="perf-fill" data-width="85"></div></div>
+            <div class="perf-desc">batch.size=64KB, linger.ms=20, snappy compression</div>
+          </div>
+          <div class="perf-card">
+            <div class="perf-label">Consumer Throughput</div>
+            <div class="perf-value">940 MB/s</div>
+            <div class="perf-bar"><div class="perf-fill green" data-width="95"></div></div>
+            <div class="perf-desc">Zero-copy fetch, large fetch.min.bytes</div>
+          </div>
+          <div class="perf-card">
+            <div class="perf-label">End-to-End Latency (p99)</div>
+            <div class="perf-value">~5ms</div>
+            <div class="perf-bar"><div class="perf-fill orange" data-width="90"></div></div>
+            <div class="perf-desc">linger.ms=0, acks=1, no compression</div>
+          </div>
+          <div class="perf-card">
+            <div class="perf-label">Messages per Second</div>
+            <div class="perf-value">10M+</div>
+            <div class="perf-bar"><div class="perf-fill" data-width="100"></div></div>
+            <div class="perf-desc">Multi-broker cluster, optimized config</div>
+          </div>
+          <div class="perf-card">
+            <div class="perf-label">Replication Throughput</div>
+            <div class="perf-value">500 MB/s</div>
+            <div class="perf-bar"><div class="perf-fill green" data-width="70"></div></div>
+            <div class="perf-desc">RF=3, async replication</div>
+          </div>
+          <div class="perf-card">
+            <div class="perf-label">Compression Ratio (JSON/Snappy)</div>
+            <div class="perf-value">4-8x</div>
+            <div class="perf-bar"><div class="perf-fill orange" data-width="75"></div></div>
+            <div class="perf-desc">Reduces network + storage costs significantly</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- BROKER TUNING -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// BROKER</div>
+        <h2>Broker Configuration</h2>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">server.properties — Production broker tuning</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre><span class="cm">## ── NETWORK THREADS ──────────────────────────────</span>
+<span class="cm"># Threads handling incoming requests (default: 3)</span>
+num.network.threads=<span class="num">8</span>
+
+<span class="cm"># Threads doing I/O (default: 8)</span>
+num.io.threads=<span class="num">16</span>
+
+<span class="cm"># Send/receive socket buffer sizes</span>
+socket.send.buffer.bytes=<span class="num">102400</span>
+socket.receive.buffer.bytes=<span class="num">102400</span>
+socket.request.max.bytes=<span class="num">104857600</span>
+
+<span class="cm">## ── LOG / STORAGE ────────────────────────────────</span>
+<span class="cm"># Spread across multiple disk paths for parallelism</span>
+log.dirs=/data/kafka/disk1,/data/kafka/disk2,/data/kafka/disk3
+
+<span class="cm"># Retention</span>
+log.retention.hours=<span class="num">168</span>         <span class="cm"># 7 days</span>
+log.retention.bytes=<span class="num">-1</span>           <span class="cm"># unlimited (use hours)</span>
+log.segment.bytes=<span class="num">1073741824</span>    <span class="cm"># 1GB segments</span>
+log.segment.ms=<span class="num">604800000</span>        <span class="cm"># Roll weekly</span>
+
+<span class="cm">## ── REPLICATION ──────────────────────────────────</span>
+default.replication.factor=<span class="num">3</span>
+min.insync.replicas=<span class="num">2</span>
+unclean.leader.election.enable=<span class="num">false</span>  <span class="cm"># Never sacrifice durability</span>
+auto.leader.rebalance.enable=<span class="num">true</span>
+
+<span class="cm">## ── PERFORMANCE ──────────────────────────────────</span>
+<span class="cm"># Max in-memory message batches</span>
+num.replica.fetchers=<span class="num">4</span>
+replica.fetch.max.bytes=<span class="num">10485760</span>   <span class="cm"># 10MB replica fetch</span>
+
+<span class="cm"># Flush to disk (let OS manage — don't flush manually)</span>
+log.flush.interval.messages=<span class="num">9223372036854775807</span>
+log.flush.interval.ms=<span class="num">9223372036854775807</span></pre>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- PRODUCER TUNING -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// PRODUCER</div>
+        <h2>Producer Tuning</h2>
+
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-icon cyan">⚡</div>
+            <div class="card-title">High Throughput Config</div>
+            <div class="card-desc">Maximize messages per second. Accept slightly higher latency in exchange for massive batching efficiency.</div>
+            <div class="card-tags"><span class="tag cyan">Throughput</span></div>
+          </div>
+          <div class="card">
+            <div class="card-icon green">⏱️</div>
+            <div class="card-title">Low Latency Config</div>
+            <div class="card-desc">Minimize end-to-end latency. Accept lower throughput. Use for interactive applications and real-time alerts.</div>
+            <div class="card-tags"><span class="tag green">Latency</span></div>
+          </div>
+          <div class="card">
+            <div class="card-icon orange">🛡️</div>
+            <div class="card-title">High Durability Config</div>
+            <div class="card-desc">Zero data loss guarantee. Accept throughput trade-off. Use for financial data, audit logs, critical events.</div>
+            <div class="card-tags"><span class="tag orange">Durability</span></div>
+          </div>
+        </div>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">Python — Three producer profiles compared</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre><span class="cm"># ── PROFILE 1: Maximum Throughput ─────────────────</span>
+high_throughput_config = {
+    <span class="str">'bootstrap_servers'</span>: <span class="str">'kafka:9092'</span>,
+    <span class="str">'acks'</span>: <span class="num">1</span>,                   <span class="cm"># Leader ack only (not all replicas)</span>
+    <span class="str">'linger_ms'</span>: <span class="num">50</span>,              <span class="cm"># Wait 50ms to fill batches</span>
+    <span class="str">'batch_size'</span>: <span class="num">131072</span>,         <span class="cm"># 128KB batches</span>
+    <span class="str">'compression_type'</span>: <span class="str">'lz4'</span>,    <span class="cm"># Fast compression</span>
+    <span class="str">'buffer_memory'</span>: <span class="num">67108864</span>,   <span class="cm"># 64MB producer buffer</span>
+    <span class="str">'max_in_flight_requests_per_connection'</span>: <span class="num">5</span>,
+}
+<span class="cm"># Result: ~800 MB/s, latency ~100ms</span>
+
+<span class="cm"># ── PROFILE 2: Minimum Latency ────────────────────</span>
+low_latency_config = {
+    <span class="str">'bootstrap_servers'</span>: <span class="str">'kafka:9092'</span>,
+    <span class="str">'acks'</span>: <span class="num">1</span>,
+    <span class="str">'linger_ms'</span>: <span class="num">0</span>,               <span class="cm"># Send immediately — no waiting</span>
+    <span class="str">'batch_size'</span>: <span class="num">1</span>,               <span class="cm"># Effectively no batching</span>
+    <span class="str">'compression_type'</span>: <span class="str">'none'</span>,   <span class="cm"># Skip compression overhead</span>
+    <span class="str">'max_in_flight_requests_per_connection'</span>: <span class="num">1</span>,
+}
+<span class="cm"># Result: ~1ms latency, lower throughput</span>
+
+<span class="cm"># ── PROFILE 3: Maximum Durability ────────────────</span>
+high_durability_config = {
+    <span class="str">'bootstrap_servers'</span>: <span class="str">'kafka:9092'</span>,
+    <span class="str">'acks'</span>: <span class="str">'all'</span>,                <span class="cm"># All ISR replicas must ack</span>
+    <span class="str">'retries'</span>: <span class="num">2147483647</span>,        <span class="cm"># Retry forever</span>
+    <span class="str">'retry_backoff_ms'</span>: <span class="num">300</span>,
+    <span class="str">'enable_idempotence'</span>: <span class="kw">True</span>,  <span class="cm"># No duplicate messages on retry</span>
+    <span class="str">'max_in_flight_requests_per_connection'</span>: <span class="num">5</span>,
+    <span class="str">'compression_type'</span>: <span class="str">'snappy'</span>,
+    <span class="str">'linger_ms'</span>: <span class="num">20</span>,
+}</pre>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- CONSUMER TUNING -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// CONSUMER</div>
+        <h2>Consumer Tuning</h2>
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">Python — High-throughput consumer config</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre>consumer = KafkaConsumer(
+    <span class="str">'events'</span>,
+    bootstrap_servers=<span class="str">'kafka:9092'</span>,
+    group_id=<span class="str">'analytics'</span>,
+    
+    <span class="cm"># Fetch: pull large batches to maximize throughput</span>
+    fetch_min_bytes=<span class="num">1048576</span>,     <span class="cm"># Wait for 1MB before returning</span>
+    fetch_max_wait_ms=<span class="num">500</span>,       <span class="cm"># Or wait max 500ms</span>
+    max_partition_fetch_bytes=<span class="num">10485760</span>,  <span class="cm"># 10MB per partition</span>
+    max_poll_records=<span class="num">1000</span>,        <span class="cm"># 1000 records per poll</span>
+    
+    <span class="cm"># Prevent rebalance timeouts on slow processing</span>
+    max_poll_interval_ms=<span class="num">300000</span>,  <span class="cm"># 5 minutes</span>
+    session_timeout_ms=<span class="num">45000</span>,
+    heartbeat_interval_ms=<span class="num">15000</span>,
+    
+    <span class="cm"># Networking</span>
+    receive_buffer_bytes=<span class="num">65536</span>,
+)
+
+<span class="cm"># Process in parallel using thread pool</span>
+<span class="kw">import</span> concurrent.futures
+
+<span class="kw">with</span> concurrent.futures.<span class="fn">ThreadPoolExecutor</span>(max_workers=<span class="num">8</span>) <span class="kw">as</span> executor:
+    <span class="kw">while</span> <span class="kw">True</span>:
+        records = consumer.poll(timeout_ms=<span class="num">1000</span>)
+        futures = [executor.<span class="fn">submit</span>(process_record, r) 
+                  <span class="kw">for</span> msgs <span class="kw">in</span> records.values() 
+                  <span class="kw">for</span> r <span class="kw">in</span> msgs]
+        concurrent.futures.<span class="fn">wait</span>(futures)
+        consumer.<span class="fn">commit</span>()</pre>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- CONFIG REFERENCE TABLE -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// REFERENCE</div>
+        <h2>Complete Config Reference</h2>
+        <div class="table-wrap fade-in">
+          <table>
+            <thead><tr><th>Config</th><th>Default</th><th>Throughput</th><th>Latency</th><th>Durability</th></tr></thead>
+            <tbody>
+              <tr><td><strong>acks=0</strong></td><td>—</td><td class="yes">⬆⬆ Max</td><td class="yes">⬆⬆ Min</td><td class="no">⬇⬇ None</td></tr>
+              <tr><td><strong>acks=1</strong></td><td>—</td><td class="yes">⬆ High</td><td class="yes">⬆ Low</td><td class="partial">⬆ Leader only</td></tr>
+              <tr><td><strong>acks=all</strong></td><td>—</td><td class="partial">⬇ Lower</td><td class="partial">⬇ Higher</td><td class="yes">⬆⬆ Full ISR</td></tr>
+              <tr><td><strong>linger.ms=0</strong></td><td>0</td><td class="no">⬇ Low</td><td class="yes">⬆⬆ Min</td><td>—</td></tr>
+              <tr><td><strong>linger.ms=20</strong></td><td>—</td><td class="yes">⬆⬆ High</td><td class="partial">⬇ +20ms</td><td>—</td></tr>
+              <tr><td><strong>batch.size=16KB</strong></td><td>16384</td><td class="partial">Medium</td><td class="yes">Lower</td><td>—</td></tr>
+              <tr><td><strong>batch.size=128KB</strong></td><td>—</td><td class="yes">⬆⬆ High</td><td class="partial">Higher</td><td>—</td></tr>
+              <tr><td><strong>compression=none</strong></td><td>none</td><td class="partial">Medium</td><td class="yes">⬆ Lower</td><td>—</td></tr>
+              <tr><td><strong>compression=snappy</strong></td><td>—</td><td class="yes">⬆ High net</td><td class="partial">+CPU time</td><td>—</td></tr>
+              <tr><td><strong>replication.factor=1</strong></td><td>—</td><td class="yes">⬆⬆ Max</td><td class="yes">⬆⬆ Min</td><td class="no">⬇⬇ Dev only</td></tr>
+              <tr><td><strong>replication.factor=3</strong></td><td>—</td><td class="partial">⬇ Lower</td><td class="partial">⬇ Higher</td><td class="yes">⬆⬆ Production</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CONSUMER LAG -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// MONITORING</div>
+        <h2>Consumer Lag Management</h2>
+        <p>Consumer lag is the difference between the latest produced offset and the consumer's committed offset. <strong>Growing lag = consumers can't keep up with producers.</strong></p>
+
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-icon cyan">📡</div>
+            <div class="card-title">Monitor Lag</div>
+            <div class="card-desc">Use <code>kafka-consumer-groups.sh --describe</code>, Kafka's JMX metrics (<code>records-lag-max</code>), or tools like Burrow, Lag Exporter for Prometheus/Grafana.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon orange">⚠️</div>
+            <div class="card-title">Causes of Lag</div>
+            <div class="card-desc">Slow consumer processing, insufficient consumer instances, rebalancing storms, network bottlenecks, consumer crashes, or underpowered consumer machines.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon green">✅</div>
+            <div class="card-title">Fix Lag</div>
+            <div class="card-desc">Add consumers (up to partition count), increase <code>max.poll.records</code>, optimize processing logic, increase partitions (with caution), or use parallel processing within consumers.</div>
+          </div>
+        </div>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">bash — Monitor consumer lag</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre><span class="cm"># Show all consumer groups and their lag</span>
+kafka-consumer-groups.sh \
+  --bootstrap-server localhost:9092 \
+  --describe --group order-processor
+
+<span class="cm"># Output:</span>
+<span class="cm"># GROUP          TOPIC    PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG</span>
+<span class="cm"># order-proc     orders   0          1000000         1000500         500</span>
+<span class="cm"># order-proc     orders   1          998000          1000200         2200  ← HIGH</span>
+<span class="cm"># order-proc     orders   2          1001000         1001100         100</span>
+
+<span class="cm"># Reset offset (use with extreme caution in production)</span>
+kafka-consumer-groups.sh \
+  --bootstrap-server localhost:9092 \
+  --group order-processor \
+  --topic orders \
+  --reset-offsets --to-latest --execute</pre>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <span class="footer-text">// kafka-developer-guide • Performance Tuning</span>
+      <div class="footer-links">
+        <a href="usecases.html" class="footer-link">← Use Cases</a>
+        <a href="comparison.html" class="footer-link">Comparison →</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script src="js/app.js"></script>
+</body>
+</html>

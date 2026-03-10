@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Roadmap — Kafka Developer Guide</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="sidebar-toggle">☰</button>
+<div class="site-wrapper">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">⚡</div>
+      <div class="sidebar-logo-text"><span class="name">KafkaGuide</span><span class="version">v3.x • Developer Portal</span></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Getting Started</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a>
+      <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Learning Roadmap</a>
+      <div class="nav-section-label">Core Knowledge</div>
+      <a href="architecture.html" class="nav-item"><span class="nav-icon">🏗️</span> Architecture</a>
+      <a href="advanced.html" class="nav-item"><span class="nav-icon">⚡</span> Advanced Concepts</a>
+      <a href="security.html" class="nav-item"><span class="nav-icon">🔒</span> Security</a>
+      <div class="nav-section-label">Applied Kafka</div>
+      <a href="usecases.html" class="nav-item"><span class="nav-icon">🚀</span> Use Cases</a>
+      <a href="performance.html" class="nav-item"><span class="nav-icon">📊</span> Performance Tuning</a>
+      <a href="comparison.html" class="nav-item"><span class="nav-icon">⚖️</span> Kafka vs Others</a>
+      <a href="operations.html" class="nav-item"><span class="nav-icon">🔧</span> Operations<span class="nav-badge">NEW</span></a>
+      <div class="nav-section-label">Reference</div>
+      <a href="cheatsheet.html" class="nav-item"><span class="nav-icon">📋</span> Cheatsheet</a>
+      <a href="interview.html" class="nav-item"><span class="nav-icon">🎯</span> Interview Prep<span class="nav-badge">NEW</span></a>
+    </nav>
+    <div class="sidebar-footer"><div class="sidebar-footer-text">Apache Kafka® is a trademark of<br>the Apache Software Foundation.</div></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="header">
+      <div class="header-breadcrumb">
+        <span>kafka-guide</span><span style="color:var(--text-muted)">/</span><span class="current">roadmap</span>
+      </div>
+      <div class="header-right"><span class="header-tag">10 Milestones</span></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-block">
+        <div class="page-tag">// LEARNING PATH</div>
+        <h1 class="page-h1"><span>Developer</span> Roadmap</h1>
+        <p class="page-subtitle">A structured 10-milestone path from Kafka beginner to production architect. Each milestone includes what to learn, what to build, and how to validate your skills.</p>
+      </div>
+
+      <!-- OVERVIEW STATS -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:48px" class="fade-in">
+        <div class="perf-card" style="text-align:center">
+          <div class="perf-value" style="font-size:36px">10</div>
+          <div class="perf-label">Milestones</div>
+        </div>
+        <div class="perf-card" style="text-align:center">
+          <div class="perf-value" style="font-size:36px;background:var(--gradient-green);-webkit-background-clip:text;background-clip:text;">3</div>
+          <div class="perf-label">Skill Levels</div>
+        </div>
+        <div class="perf-card" style="text-align:center">
+          <div class="perf-value" style="font-size:36px;background:var(--gradient-orange);-webkit-background-clip:text;background-clip:text;">6-12</div>
+          <div class="perf-label">Weeks to Expert</div>
+        </div>
+        <div class="perf-card" style="text-align:center">
+          <div class="perf-value" style="font-size:36px;background:var(--gradient-purple);-webkit-background-clip:text;background-clip:text;">∞</div>
+          <div class="perf-label">Practice Projects</div>
+        </div>
+      </div>
+
+      <!-- PHASE 1: BEGINNER -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// PHASE 1 — WEEKS 1-2</div>
+        <h2>Beginner: <span style="background:var(--gradient-cyan);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Foundation</span></h2>
+
+        <div class="timeline fade-in">
+
+          <div class="timeline-item">
+            <div class="timeline-dot done"></div>
+            <div class="timeline-content">
+              <div class="timeline-step">MILESTONE 01</div>
+              <div class="timeline-title">🧠 Kafka Fundamentals</div>
+              <div class="timeline-desc">
+                Understand what Kafka is, what problems it solves, and when to use it. Learn the core vocabulary: topics, partitions, offsets, producers, consumers, consumer groups, brokers, and clusters. Understand event streaming vs traditional messaging.
+                <br><br>
+                <strong>Study:</strong> Read the official Kafka documentation intro. Watch Confluent's "Kafka in 5 minutes". Understand the commit log concept.
+                <br><br>
+                <strong>✅ Milestone achieved when:</strong> You can explain Kafka to a colleague without looking at notes, and articulate why a system would use Kafka vs RabbitMQ vs REST.
+              </div>
+              <div class="timeline-skills">
+                <span class="tag cyan">Event Streaming</span>
+                <span class="tag green">Core Concepts</span>
+                <span class="tag orange">Architecture Overview</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot done"></div>
+            <div class="timeline-content">
+              <div class="timeline-step">MILESTONE 02</div>
+              <div class="timeline-title">⚙️ Local Setup & First Messages</div>
+              <div class="timeline-desc">
+                Get Kafka running locally using Docker Compose. Use the CLI tools to create topics, produce messages, and consume them. Understand the command-line tools: <code>kafka-topics.sh</code>, <code>kafka-console-producer.sh</code>, <code>kafka-console-consumer.sh</code>.
+                <br><br>
+                <strong>Project:</strong> Run Kafka locally, create a "hello-world" topic with 3 partitions, produce 100 messages with keys, consume them and observe partition assignment.
+              </div>
+              <div class="timeline-skills">
+                <span class="tag cyan">Docker</span>
+                <span class="tag green">CLI Tools</span>
+                <span class="tag orange">First Messages</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot active"></div>
+            <div class="timeline-content">
+              <div class="timeline-step">MILESTONE 03</div>
+              <div class="timeline-title">📤📥 Producer & Consumer APIs</div>
+              <div class="timeline-desc">
+                Write your first producer and consumer in Python or Java. Understand serialization/deserialization, acks, offset management, auto-commit vs manual commit, and consumer group behavior.
+                <br><br>
+                <strong>Project:</strong> Build a simple e-commerce order pipeline. Producer sends order events, consumer processes them and prints order confirmations. Add error handling and manual offset commits.
+              </div>
+              <div class="timeline-skills">
+                <span class="tag cyan">Python/Java SDK</span>
+                <span class="tag green">Serialization</span>
+                <span class="tag purple">Offset Management</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- PHASE 2: INTERMEDIATE -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// PHASE 2 — WEEKS 3-5</div>
+        <h2>Intermediate: <span style="background:var(--gradient-green);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Building Systems</span></h2>
+
+        <div class="timeline fade-in">
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-step">MILESTONE 04</div>
+              <div class="timeline-title">🐳 Docker & Production-Like Setup</div>
+              <div class="timeline-desc">
+                Set up a multi-broker Kafka cluster using Docker Compose (3 brokers + ZooKeeper or KRaft). Configure replication factors, understand ISR, test broker failure and recovery. Set up Schema Registry and Kafka UI.
+                <br><br>
+                <strong>Project:</strong> Kill a broker and observe that your producer/consumer keep working. Watch leader election happen. Verify data wasn't lost.
+              </div>
+              <div class="timeline-skills">
+                <span class="tag cyan">Multi-broker</span>
+                <span class="tag green">Replication</span>
+                <span class="tag orange">Fault Tolerance</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-step">MILESTONE 05</div>
+              <div class="timeline-title">📋 Schema Registry & Avro</div>
+              <div class="timeline-desc">
+                Integrate Confluent Schema Registry. Define Avro schemas for your events. Understand schema evolution and compatibility modes. Replace JSON with Avro serialization and observe the size reduction.
+                <br><br>
+                <strong>Project:</strong> Migrate your order pipeline to use Avro schemas. Add a new optional field and verify backward compatibility. Try a breaking change and see the registry reject it.
+              </div>
+              <div class="timeline-skills">
+                <span class="tag cyan">Avro</span>
+                <span class="tag green">Schema Evolution</span>
+                <span class="tag purple">Data Contracts</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-step">MILESTONE 06</div>
+              <div class="timeline-title">🌊 Kafka Streams</div>
+              <div class="timeline-desc">
+                Build stateful stream processing applications using the Kafka Streams DSL. Learn KStream, KTable, joins, aggregations, and windowing. Understand state stores backed by RocksDB.
+                <br><br>
+                <strong>Project:</strong> Real-time order analytics — count orders per customer in 5-minute windows, join with a customer profile KTable, emit enriched analytics events. Test late-arriving data handling.
+              </div>
+              <div class="timeline-skills">
+                <span class="tag cyan">KStream/KTable</span>
+                <span class="tag green">Windowing</span>
+                <span class="tag orange">State Stores</span>
+                <span class="tag purple">Joins</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-step">MILESTONE 07</div>
+              <div class="timeline-title">🔌 Kafka Connect</div>
+              <div class="timeline-desc">
+                Deploy Kafka Connect and configure source and sink connectors. Set up Debezium CDC from a PostgreSQL database. Route changes to Elasticsearch using the Elasticsearch Sink connector.
+                <br><br>
+                <strong>Project:</strong> Build a CDC pipeline: PostgreSQL → Debezium → Kafka → Elasticsearch. Insert/update/delete rows in Postgres and watch search results update in real-time.
+              </div>
+              <div class="timeline-skills">
+                <span class="tag cyan">Debezium</span>
+                <span class="tag green">CDC</span>
+                <span class="tag orange">Connectors</span>
+                <span class="tag purple">SMTs</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- PHASE 3: ADVANCED -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// PHASE 3 — WEEKS 6-10</div>
+        <h2>Advanced: <span style="background:var(--gradient-orange);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Production Systems</span></h2>
+
+        <div class="timeline fade-in">
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-step">MILESTONE 08</div>
+              <div class="timeline-title">🏗️ Build a Real System</div>
+              <div class="timeline-desc">
+                Build a complete event-driven application with multiple services communicating through Kafka. Implement the outbox pattern for reliable event publishing, saga pattern for distributed transactions, and CQRS for read scaling.
+                <br><br>
+                <strong>Project:</strong> E-commerce backend with Order Service, Inventory Service, Payment Service, and Notification Service — all communicating through Kafka topics. Implement the saga pattern for order fulfillment.
+              </div>
+              <div class="timeline-skills">
+                <span class="tag cyan">Microservices</span>
+                <span class="tag green">Outbox Pattern</span>
+                <span class="tag orange">Saga Pattern</span>
+                <span class="tag purple">CQRS</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-step">MILESTONE 09</div>
+              <div class="timeline-title">📊 Performance & Production Tuning</div>
+              <div class="timeline-desc">
+                Benchmark your cluster. Tune producer and consumer configurations for your target SLOs. Set up monitoring with Prometheus + Grafana. Configure JMX metrics, create consumer lag alerting, and build operational runbooks.
+                <br><br>
+                <strong>Project:</strong> Run kafka-producer-perf-test.sh and kafka-consumer-perf-test.sh. Build a Grafana dashboard tracking throughput, consumer lag, and broker health. Document tuning decisions.
+              </div>
+              <div class="timeline-skills">
+                <span class="tag cyan">Prometheus</span>
+                <span class="tag green">Grafana</span>
+                <span class="tag orange">JMX Metrics</span>
+                <span class="tag yellow">Benchmarking</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-step">MILESTONE 10</div>
+              <div class="timeline-title">🏛️ Architecture Design & Security</div>
+              <div class="timeline-desc">
+                Design event schemas that can evolve. Implement TLS encryption + SASL authentication + ACL authorization. Plan partition strategies for your data. Design for multi-datacenter with MirrorMaker 2. Create disaster recovery procedures.
+                <br><br>
+                <strong>✅ Expert Level Achieved when:</strong> You can design a Kafka-based architecture for a new system, justify partition/replication choices, implement security, operate in production, and debug issues under pressure.
+              </div>
+              <div class="timeline-skills">
+                <span class="tag cyan">TLS/SASL</span>
+                <span class="tag green">ACLs</span>
+                <span class="tag orange">MirrorMaker 2</span>
+                <span class="tag purple">Disaster Recovery</span>
+                <span class="tag yellow">Architecture</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RESOURCES -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// RESOURCES</div>
+        <h2>Essential Learning Resources</h2>
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-icon cyan">📖</div>
+            <div class="card-title">Official Documentation</div>
+            <div class="card-desc"><a href="https://kafka.apache.org/documentation">kafka.apache.org/documentation</a> — The authoritative source. Read the design section thoroughly.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon green">🎓</div>
+            <div class="card-title">Confluent Developer</div>
+            <div class="card-desc"><a href="https://developer.confluent.io">developer.confluent.io</a> — Free courses, tutorials, and the "Kafka: The Definitive Guide" (free PDF).</div>
+          </div>
+          <div class="card">
+            <div class="card-icon orange">📕</div>
+            <div class="card-title">Kafka: The Definitive Guide</div>
+            <div class="card-desc">By Neha Narkhede, Gwen Shapira, Todd Palino. The essential book for serious Kafka developers. Free at Confluent's website.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon purple">🎥</div>
+            <div class="card-title">Confluent YouTube</div>
+            <div class="card-desc">Hundreds of technical talks, conference sessions, and tutorials. The "Event-Driven Microservices" and "Kafka Internals" series are excellent.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <span class="footer-text">// kafka-developer-guide • Learning Roadmap</span>
+      <div class="footer-links">
+        <a href="index.html" class="footer-link">← Home</a>
+        <a href="architecture.html" class="footer-link">Architecture →</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script src="js/app.js"></script>
+</body>
+</html>

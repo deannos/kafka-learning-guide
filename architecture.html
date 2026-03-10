@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kafka Architecture — Kafka Developer Guide</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+<button class="sidebar-toggle">☰</button>
+<div class="site-wrapper">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">⚡</div>
+      <div class="sidebar-logo-text"><span class="name">KafkaGuide</span><span class="version">v3.x • Developer Portal</span></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Getting Started</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a>
+      <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Learning Roadmap</a>
+      <div class="nav-section-label">Core Knowledge</div>
+      <a href="architecture.html" class="nav-item"><span class="nav-icon">🏗️</span> Architecture</a>
+      <a href="advanced.html" class="nav-item"><span class="nav-icon">⚡</span> Advanced Concepts</a>
+      <a href="security.html" class="nav-item"><span class="nav-icon">🔒</span> Security</a>
+      <div class="nav-section-label">Applied Kafka</div>
+      <a href="usecases.html" class="nav-item"><span class="nav-icon">🚀</span> Use Cases</a>
+      <a href="performance.html" class="nav-item"><span class="nav-icon">📊</span> Performance Tuning</a>
+      <a href="comparison.html" class="nav-item"><span class="nav-icon">⚖️</span> Kafka vs Others</a>
+      <a href="operations.html" class="nav-item"><span class="nav-icon">🔧</span> Operations<span class="nav-badge">NEW</span></a>
+      <div class="nav-section-label">Reference</div>
+      <a href="cheatsheet.html" class="nav-item"><span class="nav-icon">📋</span> Cheatsheet</a>
+      <a href="interview.html" class="nav-item"><span class="nav-icon">🎯</span> Interview Prep<span class="nav-badge">NEW</span></a>
+    </nav>
+    <div class="sidebar-footer"><div class="sidebar-footer-text">Apache Kafka® is a trademark of<br>the Apache Software Foundation.</div></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="header">
+      <div class="header-breadcrumb">
+        <span>kafka-guide</span><span style="color:var(--text-muted)">/</span><span class="current">architecture</span>
+      </div>
+      <div class="header-right">
+        <span class="header-tag">Core Concepts</span>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-block">
+        <div class="page-tag">// ARCHITECTURE</div>
+        <h1 class="page-h1">Kafka <span>Architecture</span></h1>
+        <p class="page-subtitle">Deep dive into every component — from individual brokers to multi-cluster deployments. Understand how Kafka achieves its remarkable reliability and performance.</p>
+      </div>
+
+      <!-- CLUSTER DIAGRAM -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// OVERVIEW</div>
+        <h2>Cluster Architecture</h2>
+        <div class="diagram-block">
+          <div class="diagram-label">// Kafka Cluster — Full Architecture</div>
+          <div class="mermaid">
+graph LR
+    subgraph PRODUCERS["📤 PRODUCERS"]
+        P1["App Service"]
+        P2["DB Connector"]
+        P3["IoT Device"]
+    end
+
+    subgraph CLUSTER["⚡ KAFKA CLUSTER"]
+        subgraph B1["Broker 1 (Leader)"]
+            T1P0["Topic-A P0 ★"]
+            T2P1["Topic-B P1"]
+        end
+        subgraph B2["Broker 2"]
+            T1P1["Topic-A P1 ★"]
+            T2P0["Topic-B P0"]
+        end
+        subgraph B3["Broker 3"]
+            T1P2["Topic-A P2 ★"]
+            T2P2["Topic-B P2"]
+        end
+        ZK["🔧 Controller\n(KRaft/ZK)"]
+    end
+
+    subgraph CONSUMERS["📥 CONSUMERS"]
+        C1["Analytics\nGroup A"]
+        C2["Search Index\nGroup B"]
+        C3["Alerts\nGroup C"]
+    end
+
+    P1 -->|produce| B1
+    P2 -->|produce| B2
+    P3 -->|produce| B1
+    B1 -->|consume| C1
+    B2 -->|consume| C2
+    B3 -->|consume| C3
+    ZK -.->|coordinates| B1
+    ZK -.->|coordinates| B2
+    ZK -.->|coordinates| B3
+          </div>
+        </div>
+      </div>
+
+      <!-- CORE CONCEPTS -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// COMPONENTS</div>
+        <h2>Core Components</h2>
+
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">01</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">Broker</div>
+              <div class="concept-subtitle">kafka.server.KafkaServer</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p>A <strong>broker</strong> is a Kafka server — the core process that stores data and serves client requests. A Kafka cluster is made of multiple brokers (typically 3 or more in production). One broker is elected as the <strong>Controller</strong>, which manages cluster metadata, partition leadership, and handles broker failures.</p>
+            <p>Each broker handles hundreds of thousands of reads and writes per second across thousands of partitions while using only a few percent of CPU. Brokers use the OS page cache aggressively, meaning recently-written data is served from RAM without any application-level cache management.</p>
+          </div>
+          <div class="info-box cyan" style="margin-top:16px">
+            <div class="info-label">💡 Broker Configuration</div>
+            <div class="info-text">Key broker settings: <code>log.dirs</code> (partition storage), <code>num.network.threads</code> (I/O threads), <code>log.retention.hours</code> (data TTL), <code>log.segment.bytes</code> (segment rollover size).</div>
+          </div>
+        </div>
+
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">02</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">Topics & Partitions</div>
+              <div class="concept-subtitle">The fundamental storage unit</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p>A <strong>topic</strong> is a named feed of events — like a table in a database or a folder in a filesystem. Topics are split into <strong>partitions</strong>, which are the actual unit of parallelism and ordering in Kafka.</p>
+            <p>Each partition is an <strong>ordered, immutable sequence of records</strong> that is continually appended to — an append-only log file on disk. Records in a partition are each assigned a sequential identifier called the <strong>offset</strong>.</p>
+            <p>Partitions enable Kafka to scale horizontally. More partitions = higher parallelism for both producers and consumers. The total throughput of a topic scales with the number of partitions.</p>
+          </div>
+          <div class="diagram-block" style="margin-top:16px">
+            <div class="diagram-label">// Topic Partition Layout</div>
+            <div class="mermaid">
+graph LR
+    subgraph TOPIC["Topic: orders (3 partitions)"]
+        subgraph P0["Partition 0"]
+            direction LR
+            M0["offset 0\norder-A"] --> M1["offset 1\norder-B"] --> M2["offset 2\norder-C"] --> M3["offset 3\n★ HEAD"]
+        end
+        subgraph P1["Partition 1"]
+            direction LR
+            N0["offset 0\norder-D"] --> N1["offset 1\norder-E"] --> N2["offset 2\n★ HEAD"]
+        end
+        subgraph P2["Partition 2"]
+            direction LR
+            O0["offset 0\norder-F"] --> O1["offset 1\norder-G"] --> O2["offset 2\norder-H"] --> O3["offset 3\norder-I"] --> O4["offset 4\n★ HEAD"]
+        end
+    end
+            </div>
+          </div>
+        </div>
+
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">03</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">Producers</div>
+              <div class="concept-subtitle">org.apache.kafka.clients.producer.KafkaProducer</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p>A <strong>producer</strong> publishes records to Kafka topics. The producer handles <strong>partition selection</strong> — either by explicit key (same key → same partition, guaranteeing ordering per key), round-robin (default, maximizing throughput), or a custom partitioner.</p>
+            <p>Producers batch messages internally before sending. The <code>linger.ms</code> config controls how long to wait to accumulate a batch, and <code>batch.size</code> controls the max batch size. This makes Kafka's network protocol extremely efficient.</p>
+          </div>
+          <div class="code-wrap" style="margin-top:16px">
+            <div class="code-header">
+              <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+              <span class="code-title">Python — KafkaProducer with key-based partitioning</span>
+              <button class="copy-btn">COPY</button>
+            </div>
+            <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaProducer
+<span class="kw">import</span> json
+
+producer = KafkaProducer(
+    bootstrap_servers=<span class="str">'localhost:9092'</span>,
+    <span class="cm"># Serializers convert Python objects → bytes</span>
+    value_serializer=<span class="kw">lambda</span> v: json.dumps(v).encode(<span class="str">'utf-8'</span>),
+    key_serializer=<span class="kw">lambda</span> k: k.encode(<span class="str">'utf-8'</span>),
+    <span class="cm"># Reliability: all ISR replicas must ack</span>
+    acks=<span class="str">'all'</span>,
+    <span class="cm"># Batching: wait 20ms to fill 64KB batch</span>
+    linger_ms=<span class="num">20</span>,
+    batch_size=<span class="num">65536</span>,
+    <span class="cm"># Compression reduces network + storage by 3-10x</span>
+    compression_type=<span class="str">'snappy'</span>,
+    <span class="cm"># Enable exactly-once idempotent producer</span>
+    enable_idempotence=<span class="kw">True</span>,
+)
+
+<span class="cm"># Key ensures all events for user-123 go to same partition</span>
+<span class="cm"># → guaranteed ordering per user</span>
+producer.send(
+    topic=<span class="str">'user-events'</span>,
+    key=<span class="str">'user-123'</span>,
+    value={<span class="str">'type'</span>: <span class="str">'checkout'</span>, <span class="str">'cart_total'</span>: <span class="num">149.99</span>}
+)
+producer.flush()</pre>
+          </div>
+        </div>
+
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">04</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">Consumers & Consumer Groups</div>
+              <div class="concept-subtitle">org.apache.kafka.clients.consumer.KafkaConsumer</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p>A <strong>consumer</strong> reads records from Kafka topics by polling for new messages. Consumers track their position using <strong>offsets</strong> — stored either in Kafka's internal <code>__consumer_offsets</code> topic or externally.</p>
+            <p>A <strong>consumer group</strong> is a set of consumers that cooperatively consume a topic. Kafka ensures each partition is consumed by exactly one group member at a time. This enables horizontal scaling: adding consumers to a group increases read parallelism up to the partition count.</p>
+          </div>
+          <div class="diagram-block" style="margin-top:16px">
+            <div class="diagram-label">// Consumer Group Partition Assignment</div>
+            <div class="mermaid">
+graph TB
+    subgraph TOPIC["Topic: orders — 6 Partitions"]
+        P0["P0"] 
+        P1["P1"]
+        P2["P2"]
+        P3["P3"]
+        P4["P4"]
+        P5["P5"]
+    end
+    subgraph GRP["Consumer Group: order-processors"]
+        C1["Consumer 1"]
+        C2["Consumer 2"]
+        C3["Consumer 3"]
+    end
+    P0 --> C1
+    P1 --> C1
+    P2 --> C2
+    P3 --> C2
+    P4 --> C3
+    P5 --> C3
+            </div>
+          </div>
+          <div class="code-wrap" style="margin-top:16px">
+            <div class="code-header">
+              <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+              <span class="code-title">Python — Consumer with manual offset commit</span>
+              <button class="copy-btn">COPY</button>
+            </div>
+            <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaConsumer
+<span class="kw">import</span> json
+
+consumer = KafkaConsumer(
+    <span class="str">'orders'</span>,
+    bootstrap_servers=<span class="str">'localhost:9092'</span>,
+    group_id=<span class="str">'order-processor'</span>,
+    value_deserializer=<span class="kw">lambda</span> m: json.loads(m.decode(<span class="str">'utf-8'</span>)),
+    <span class="cm"># Manual commit = at-least-once delivery</span>
+    enable_auto_commit=<span class="kw">False</span>,
+    <span class="cm"># Start from beginning if no prior offset</span>
+    auto_offset_reset=<span class="str">'earliest'</span>,
+    max_poll_records=<span class="num">500</span>,
+)
+
+<span class="kw">try</span>:
+    <span class="kw">while</span> <span class="kw">True</span>:
+        batch = consumer.poll(timeout_ms=<span class="num">1000</span>)
+        <span class="kw">for</span> tp, messages <span class="kw">in</span> batch.items():
+            <span class="kw">for</span> msg <span class="kw">in</span> messages:
+                process_order(msg.value)
+        <span class="cm"># Commit after successful processing batch</span>
+        <span class="kw">if</span> batch:
+            consumer.commit()
+<span class="kw">finally</span>:
+    consumer.close()  <span class="cm"># Triggers graceful group rebalance</span></pre>
+          </div>
+        </div>
+
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">05</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">Replication & ISR</div>
+              <div class="concept-subtitle">Fault tolerance through data duplication</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p>Each partition has one <strong>leader</strong> and N-1 <strong>followers</strong> (replicas). All reads and writes go through the leader. Followers continuously replicate the leader's data. If the leader fails, one of the in-sync followers is automatically elected as the new leader.</p>
+            <p>The <strong>ISR (In-Sync Replicas)</strong> is the set of replicas that are caught up with the leader within <code>replica.lag.time.max.ms</code>. A message is considered <strong>committed</strong> only when all ISR members have acknowledged it (with <code>acks=all</code>).</p>
+          </div>
+          <div class="info-box green" style="margin-top:16px">
+            <div class="info-label">✅ Production Durability Formula</div>
+            <div class="info-text"><strong>replication.factor=3 + min.insync.replicas=2 + acks=all</strong> = Zero data loss guarantee. Can tolerate 1 broker failure for writes, 2 broker failures for reads.</div>
+          </div>
+          <div class="diagram-block" style="margin-top:16px">
+            <div class="diagram-label">// Partition Replication across 3 brokers</div>
+            <div class="mermaid">
+graph LR
+    PROD["Producer\n(acks=all)"] --> LEADER
+
+    subgraph B1["Broker 1"]
+        LEADER["Partition P0\n★ LEADER"]
+    end
+    subgraph B2["Broker 2"]
+        F1["Partition P0\nFollower (ISR)"]
+    end
+    subgraph B3["Broker 3"]
+        F2["Partition P0\nFollower (ISR)"]
+    end
+
+    LEADER -->|replicate| F1
+    LEADER -->|replicate| F2
+    LEADER -->|ack to producer| PROD
+    F1 -.->|ack| LEADER
+    F2 -.->|ack| LEADER
+            </div>
+          </div>
+        </div>
+
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">06</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">KRaft — Kafka Without ZooKeeper</div>
+              <div class="concept-subtitle">Kafka Raft Metadata Mode (Production-ready: Kafka 3.3+)</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p>Historically Kafka depended on <strong>Apache ZooKeeper</strong> for cluster coordination, controller election, and metadata storage. KRaft (Kafka Raft) replaces this with a <strong>built-in Raft consensus layer</strong> using an internal <code>@metadata</code> topic.</p>
+            <p>KRaft brings dramatic improvements: metadata propagation goes from seconds to <strong>milliseconds</strong>, the cluster can support <strong>millions of partitions</strong> (vs ~200k with ZooKeeper), and controller failover drops from 30–60 seconds to under a second. All new Kafka deployments should use KRaft.</p>
+          </div>
+          <div class="table-wrap" style="margin-top:16px">
+            <table>
+              <thead><tr><th>Aspect</th><th>ZooKeeper Mode</th><th>KRaft Mode</th></tr></thead>
+              <tbody>
+                <tr><td>External dependency</td><td>ZooKeeper cluster required</td><td class="yes">None — self-contained</td></tr>
+                <tr><td>Max partitions</td><td>~200,000</td><td class="yes">Millions</td></tr>
+                <tr><td>Controller failover</td><td>30–60 seconds</td><td class="yes">Milliseconds</td></tr>
+                <tr><td>Metadata propagation</td><td>Seconds</td><td class="yes">Milliseconds</td></tr>
+                <tr><td>Operational complexity</td><td>Two systems to manage</td><td class="yes">Single system</td></tr>
+                <tr><td>Recommended for new clusters</td><td class="no">❌ Deprecated</td><td class="yes">✅ Yes (3.3+)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOG STORAGE -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// INTERNALS</div>
+        <h2>Log Storage Internals</h2>
+        <p>Kafka stores each partition as a <strong>directory of segment files</strong> on disk. Understanding this structure explains how Kafka achieves high performance and how retention works.</p>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">filesystem — Kafka partition directory structure</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre>/kafka-logs/
+  orders-0/                    <span class="cm"># topic=orders, partition=0</span>
+    00000000000000000000.log   <span class="cm"># Segment file: offsets 0–999</span>
+    00000000000000000000.index <span class="cm"># Sparse offset index (offset→position)</span>
+    00000000000000000000.timeindex
+    00000000000000001000.log   <span class="cm"># Segment file: offsets 1000–1999</span>
+    00000000000000001000.index
+    00000000000000002000.log   <span class="cm"># Active segment (writes go here)</span>
+    00000000000000002000.index
+    leader-epoch-checkpoint
+  orders-1/                    <span class="cm"># topic=orders, partition=1</span>
+    ...</pre>
+        </div>
+
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-icon cyan">🔄</div>
+            <div class="card-title">Zero-Copy Transfers</div>
+            <div class="card-desc">Kafka uses the Linux <code>sendfile()</code> syscall to transfer data directly from disk to network without copying through user space. This eliminates 2 context switches and 2 data copies per message batch.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon green">💾</div>
+            <div class="card-title">OS Page Cache</div>
+            <div class="card-desc">Kafka doesn't manage its own memory cache. It relies on the OS page cache. Recently written data is automatically served from RAM. Kafka can consume disk at RAM speed for recent data.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon orange">📦</div>
+            <div class="card-title">Compression</div>
+            <div class="card-desc">Batches are compressed end-to-end: stored compressed on broker, transferred compressed to consumer. Snappy/LZ4/ZSTD can reduce payload 5–10x on JSON data.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <span class="footer-text">// kafka-developer-guide • Architecture</span>
+      <div class="footer-links">
+        <a href="index.html" class="footer-link">Home</a>
+        <a href="advanced.html" class="footer-link">Advanced →</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script src="js/app.js"></script>
+</body>
+</html>
