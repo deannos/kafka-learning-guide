@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kafka Operations — Kafka Developer Guide</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="sidebar-toggle">☰</button>
+<div class="site-wrapper">
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">⚡</div>
+      <div class="sidebar-logo-text"><span class="name">KafkaGuide</span><span class="version">v3.x • Developer Portal</span></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Getting Started</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a>
+      <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Learning Roadmap</a>
+      <div class="nav-section-label">Core Knowledge</div>
+      <a href="architecture.html" class="nav-item"><span class="nav-icon">🏗️</span> Architecture</a>
+      <a href="advanced.html" class="nav-item"><span class="nav-icon">⚡</span> Advanced Concepts</a>
+      <a href="security.html" class="nav-item"><span class="nav-icon">🔒</span> Security</a>
+      <div class="nav-section-label">Applied Kafka</div>
+      <a href="usecases.html" class="nav-item"><span class="nav-icon">🚀</span> Use Cases</a>
+      <a href="performance.html" class="nav-item"><span class="nav-icon">📊</span> Performance Tuning</a>
+      <a href="comparison.html" class="nav-item"><span class="nav-icon">⚖️</span> Kafka vs Others</a>
+      <a href="operations.html" class="nav-item active"><span class="nav-icon">🔧</span> Operations<span class="nav-badge">NEW</span></a>
+      <div class="nav-section-label">Reference</div>
+      <a href="cheatsheet.html" class="nav-item"><span class="nav-icon">📋</span> Cheatsheet</a>
+      <a href="interview.html" class="nav-item"><span class="nav-icon">🎯</span> Interview Prep<span class="nav-badge">NEW</span></a>
+    </nav>
+    <div class="sidebar-footer"><div class="sidebar-footer-text">Apache Kafka® is a trademark of<br>the Apache Software Foundation.</div></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="header">
+      <div class="header-breadcrumb">
+        <span>kafka-guide</span><span style="color:var(--text-muted)">/</span><span class="current">operations</span>
+      </div>
+      <div class="header-right"><span class="header-tag">Ops Runbook</span></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-block">
+        <div class="page-tag">// OPERATIONS</div>
+        <h1 class="page-h1">Kafka <span>Operations</span></h1>
+        <p class="page-subtitle">Day-to-day operations, monitoring, alerting, common failure scenarios, and disaster recovery. The runbook every Kafka operator needs.</p>
+      </div>
+
+      <!-- MONITORING -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// MONITORING</div>
+        <h2>Critical Metrics to Monitor</h2>
+        <p>Kafka exposes metrics via JMX. Use Prometheus JMX Exporter + Grafana for dashboards, or Confluent Control Center for a managed UI.</p>
+
+        <div class="table-wrap fade-in">
+          <table>
+            <thead><tr><th>Metric (JMX / Prometheus)</th><th>Normal</th><th>Alert Threshold</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><code>UnderReplicatedPartitions</code></td>
+                <td><span class="status-ok">0</span></td>
+                <td><span class="status-crit">&gt; 0</span></td>
+                <td>Partitions not fully replicated — broker may be down or lagging</td>
+              </tr>
+              <tr>
+                <td><code>ActiveControllerCount</code></td>
+                <td><span class="status-ok">1</span></td>
+                <td><span class="status-crit">≠ 1</span></td>
+                <td>Should always be exactly 1. 0 = no controller elected</td>
+              </tr>
+              <tr>
+                <td><code>OfflinePartitionsCount</code></td>
+                <td><span class="status-ok">0</span></td>
+                <td><span class="status-crit">&gt; 0</span></td>
+                <td>Partitions with no elected leader — reads/writes failing</td>
+              </tr>
+              <tr>
+                <td><code>consumer_lag</code> (per group)</td>
+                <td><span class="status-ok">Stable/decreasing</span></td>
+                <td><span class="status-warn">Growing for &gt;5min</span></td>
+                <td>Consumers falling behind producers</td>
+              </tr>
+              <tr>
+                <td><code>RequestHandlerAvgIdlePercent</code></td>
+                <td><span class="status-ok">&gt; 30%</span></td>
+                <td><span class="status-warn">&lt; 20%</span></td>
+                <td>Broker threads saturated — will cause latency spikes</td>
+              </tr>
+              <tr>
+                <td><code>NetworkProcessorAvgIdlePercent</code></td>
+                <td><span class="status-ok">&gt; 30%</span></td>
+                <td><span class="status-warn">&lt; 20%</span></td>
+                <td>Network I/O bottleneck</td>
+              </tr>
+              <tr>
+                <td><code>BytesInPerSec</code> / <code>BytesOutPerSec</code></td>
+                <td>Baseline normal</td>
+                <td><span class="status-warn">Drops suddenly</span></td>
+                <td>Traffic anomaly — producer/consumer issues</td>
+              </tr>
+              <tr>
+                <td><code>LogFlushRateAndTimeMs</code></td>
+                <td><span class="status-ok">&lt; 100ms p99</span></td>
+                <td><span class="status-warn">&gt; 500ms</span></td>
+                <td>Disk I/O latency impacting producers</td>
+              </tr>
+              <tr>
+                <td><code>IsrShrinkRate</code></td>
+                <td><span class="status-ok">0</span></td>
+                <td><span class="status-crit">&gt; 0</span></td>
+                <td>Replicas falling out of sync — durability at risk</td>
+              </tr>
+              <tr>
+                <td><code>LeaderElectionRateAndTimeMs</code></td>
+                <td><span class="status-ok">Rare</span></td>
+                <td><span class="status-warn">Frequent</span></td>
+                <td>Brokers crashing or network partitions occurring</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-wrap fade-in">
+          <div class="code-header">
+            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+            <span class="code-title">docker-compose.yml — Kafka + Prometheus + Grafana stack</span>
+            <button class="copy-btn">COPY</button>
+          </div>
+          <pre><span class="prop">version</span>: <span class="str">'3.8'</span>
+<span class="prop">services</span>:
+  <span class="prop">kafka</span>:
+    <span class="prop">image</span>: <span class="str">confluentinc/cp-kafka:7.5.0</span>
+    <span class="prop">environment</span>:
+      <span class="cm"># Enable JMX for metrics</span>
+      KAFKA_JMX_PORT: <span class="num">9999</span>
+      KAFKA_JMX_HOSTNAME: kafka
+    <span class="prop">ports</span>: [<span class="str">"9092:9092"</span>, <span class="str">"9999:9999"</span>]
+
+  <span class="prop">jmx-exporter</span>:
+    <span class="prop">image</span>: <span class="str">bitnami/jmx-exporter:latest</span>
+    <span class="prop">ports</span>: [<span class="str">"7071:7071"</span>]
+    <span class="prop">volumes</span>:
+      - <span class="str">./jmx-kafka-config.yml:/etc/jmx-kafka/config.yml</span>
+    <span class="prop">command</span>: <span class="str">"7071 /etc/jmx-kafka/config.yml"</span>
+    <span class="prop">environment</span>:
+      SERVICE_PORT: <span class="num">7071</span>
+      JMX_HOST: kafka
+      JMX_PORT: <span class="num">9999</span>
+
+  <span class="prop">prometheus</span>:
+    <span class="prop">image</span>: <span class="str">prom/prometheus</span>
+    <span class="prop">ports</span>: [<span class="str">"9090:9090"</span>]
+    <span class="prop">volumes</span>: [<span class="str">"./prometheus.yml:/etc/prometheus/prometheus.yml"</span>]
+
+  <span class="prop">grafana</span>:
+    <span class="prop">image</span>: <span class="str">grafana/grafana</span>
+    <span class="prop">ports</span>: [<span class="str">"3000:3000"</span>]
+    <span class="prop">environment</span>:
+      GF_SECURITY_ADMIN_PASSWORD: <span class="str">kafkademo</span></pre>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- COMMON FAILURES -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// TROUBLESHOOTING</div>
+        <h2>Common Failure Scenarios & Fixes</h2>
+
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">🔴</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">Consumer Lag is Growing</div>
+              <div class="concept-subtitle">Consumers cannot keep up with message production rate</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p><strong>Symptoms:</strong> <code>consumer_lag</code> metric growing, consumers stuck on older offsets, processing appears slow or stalled.</p>
+            <p><strong>Diagnosis steps:</strong></p>
+            <ul>
+              <li>Check if consumer is alive: <code>kafka-consumer-groups.sh --describe --group &lt;name&gt;</code></li>
+              <li>Check consumer processing time per record — is it too slow?</li>
+              <li>Check if partition count limits parallelism (lag on specific partitions only)</li>
+              <li>Look for frequent rebalances in consumer logs (<code>Rebalance triggered</code>)</li>
+            </ul>
+            <p><strong>Fixes:</strong> Add more consumer instances (up to partition count), optimize processing logic, increase <code>max.poll.records</code>, increase partition count (create new topic), use parallel processing within consumer.</p>
+          </div>
+        </div>
+
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">🔴</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">UnderReplicatedPartitions &gt; 0</div>
+              <div class="concept-subtitle">Partition replicas falling behind or broker down</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p><strong>Symptoms:</strong> Alert fires for <code>UnderReplicatedPartitions</code>, durability at risk, possible producer errors if <code>min.insync.replicas</code> not met.</p>
+            <p><strong>Diagnosis:</strong></p>
+            <ul>
+              <li>Check if a broker is down: <code>kafka-broker-api-versions.sh --bootstrap-server broker:9092</code></li>
+              <li>Check ISR: <code>kafka-topics.sh --describe --topic &lt;name&gt;</code> — look for ISR smaller than RF</li>
+              <li>Check replica lag in broker logs: search for <code>replica.lag.time.max.ms exceeded</code></li>
+            </ul>
+            <p><strong>Fixes:</strong> If broker is down — restart it; Kafka will automatically replicate missing data. If disk I/O is too slow — tune <code>num.replica.fetchers</code>. If network is the bottleneck — check bandwidth between brokers.</p>
+          </div>
+        </div>
+
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">🔴</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">Producer Getting NotEnoughReplicas</div>
+              <div class="concept-subtitle">Can't meet min.insync.replicas requirement</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p><strong>Cause:</strong> Too many brokers are down. With RF=3 and min.insync.replicas=2, losing 2 brokers means producers get <code>NotEnoughReplicasException</code>.</p>
+            <p><strong>Immediate fix:</strong> Bring brokers back online. Kafka will catch up replicas automatically.</p>
+            <p><strong>Temporary workaround (data loss risk):</strong> Reduce <code>min.insync.replicas</code> temporarily to 1 — use only as last resort, never in financial systems.</p>
+            <div class="info-box orange" style="margin-top:12px">
+              <div class="info-label">⚠ Never do this permanently</div>
+              <div class="info-text">Setting <code>min.insync.replicas=1</code> means you can lose data if the single in-sync broker dies before replication catches up. It's a temporary disaster recovery step only.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="concept-block fade-in">
+          <div class="concept-header">
+            <div class="concept-num">🔴</div>
+            <div class="concept-title-wrap">
+              <div class="concept-title">Constant Consumer Group Rebalancing</div>
+              <div class="concept-subtitle">Consumers keep joining and leaving the group</div>
+            </div>
+          </div>
+          <div class="concept-body">
+            <p><strong>Symptoms:</strong> Consumer logs show repeated <code>Revoked partitions</code> and <code>Assigned partitions</code>. Processing stalls during rebalance.</p>
+            <p><strong>Causes:</strong></p>
+            <ul>
+              <li><strong>Consumer taking too long to process a batch</strong> — exceeds <code>max.poll.interval.ms</code>, broker thinks it's dead</li>
+              <li><strong>Heartbeat failure</strong> — GC pauses or CPU starvation cause missed heartbeats</li>
+              <li><strong>Consumer crashing</strong> and restarting repeatedly</li>
+            </ul>
+            <p><strong>Fixes:</strong> Increase <code>max.poll.interval.ms</code>, reduce <code>max.poll.records</code> to process faster, fix the slow processing bottleneck, switch to <code>CooperativeStickyAssignor</code> to minimize partition movement during rebalance.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- SCALING -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// SCALING</div>
+        <h2>Scaling Kafka</h2>
+        <div class="two-col fade-in">
+          <div>
+            <h3>Adding Brokers</h3>
+            <p>Kafka supports adding brokers to a running cluster with zero downtime. New brokers don't automatically receive existing partition replicas — you must trigger partition reassignment.</p>
+            <div class="cmd-ref">
+              <div class="cmd-line">
+                <span class="cmd-text">kafka-reassign-partitions.sh --generate</span>
+                <span class="cmd-desc">Plan reassignment</span>
+              </div>
+              <div class="cmd-line">
+                <span class="cmd-text">kafka-reassign-partitions.sh --execute</span>
+                <span class="cmd-desc">Start reassignment</span>
+              </div>
+              <div class="cmd-line">
+                <span class="cmd-text">kafka-reassign-partitions.sh --verify</span>
+                <span class="cmd-desc">Check progress</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Adding Partitions</h3>
+            <p>You can increase partition count but <strong>never decrease it</strong>. Adding partitions to an existing topic changes key-to-partition routing for new messages — existing data in old partitions is not redistributed.</p>
+            <div class="info-box orange" style="margin:12px 0">
+              <div class="info-label">⚠ Warning</div>
+              <div class="info-text">Adding partitions breaks key ordering for messages already in the topic. For ordering-sensitive topics, create a new topic with more partitions and migrate.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- ROLLING RESTART -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// MAINTENANCE</div>
+        <h2>Rolling Restarts & Upgrades</h2>
+        <p>Rolling restarts allow you to restart brokers one at a time without downtime. The cluster continues serving traffic through the remaining brokers.</p>
+
+        <div class="steps fade-in">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Check Cluster Health First</div>
+              <div class="step-desc">Verify <code>UnderReplicatedPartitions=0</code> and no offline partitions before starting. Never restart a broker when the cluster is already degraded.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Trigger Controlled Shutdown</div>
+              <div class="step-desc">Use <code>kafka-server-stop.sh</code> which triggers a controlled shutdown — Kafka migrates partition leaders away before stopping. Much faster than a hard kill.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Wait for Full ISR Recovery</div>
+              <div class="step-desc">After restarting the broker, wait until <code>UnderReplicatedPartitions</code> returns to 0 before proceeding to the next broker. This ensures full durability is maintained throughout.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Rebalance Leaders (Optional)</div>
+              <div class="step-desc">After all brokers are back, run preferred leader election to redistribute partition leaders evenly: <code>kafka-leader-election.sh --all-topic-partitions --election-type preferred</code></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- BACKUP & DR -->
+      <div class="content-section fade-in">
+        <div class="section-eyebrow">// DISASTER RECOVERY</div>
+        <h2>Backup & Disaster Recovery</h2>
+        <div class="cards-grid fade-in">
+          <div class="card">
+            <div class="card-icon cyan">🔁</div>
+            <div class="card-title">MirrorMaker 2</div>
+            <div class="card-desc">Kafka's built-in cross-cluster replication tool. Replicates topics between clusters in different datacenters or cloud regions. Supports active-active and active-passive topologies. Handles offset translation so consumers can failover seamlessly.</div>
+            <div class="card-tags"><span class="tag cyan">Geo-replication</span><span class="tag green">Failover</span></div>
+          </div>
+          <div class="card">
+            <div class="card-icon green">☁️</div>
+            <div class="card-title">S3 Backup (Tiered Storage)</div>
+            <div class="card-desc">Kafka 3.6+ supports Tiered Storage — older log segments are automatically offloaded to S3/GCS/Azure Blob. Dramatically reduces broker disk requirements while retaining unlimited history.</div>
+            <div class="card-tags"><span class="tag green">Tiered Storage</span><span class="tag orange">Cost Saving</span></div>
+          </div>
+          <div class="card">
+            <div class="card-icon orange">📸</div>
+            <div class="card-title">Snapshot Backups</div>
+            <div class="card-desc">For KRaft clusters, take filesystem-level snapshots of the <code>__cluster_metadata</code> partition. For ZooKeeper clusters, back up ZooKeeper data directories. Combined with S3 tiered storage for full protection.</div>
+            <div class="card-tags"><span class="tag orange">Backup</span><span class="tag purple">Recovery</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <span class="footer-text">// kafka-developer-guide • Operations</span>
+      <div class="footer-links">
+        <a href="security.html" class="footer-link">← Security</a>
+        <a href="cheatsheet.html" class="footer-link">Cheatsheet →</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script src="js/app.js"></script>
+</body>
+</html>
