@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kafka Mastery — From Zero to Hero</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #ff6b35;
+    --accent2: #00d4aa;
+    --accent3: #7c3aed;
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --code-bg: #0d0d1a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(255,107,53,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,107,53,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hero {
+    position: relative;
+    padding: 80px 40px 60px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -100px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(255,107,53,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    border: 1px solid rgba(255,107,53,0.4);
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 28px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-size: clamp(42px, 7vw, 80px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 560px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  .progress-bar-wrap {
+    max-width: 600px;
+    margin: 0 auto 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .progress-label { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
+  .progress-count { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent2); }
+
+  .progress-bar {
+    max-width: 600px;
+    margin: 0 auto;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  /* Layout */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Nav pills */
+  .nav-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+  }
+
+  .nav-pills {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav-pills::-webkit-scrollbar { display: none; }
+
+  .nav-pill {
+    flex-shrink: 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    padding: 7px 16px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+
+  .nav-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* Sections */
+  .section {
+    display: none;
+    padding: 60px 0;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .section.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--border);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .section-title { font-size: 36px; font-weight: 800; letter-spacing: -1px; line-height: 1.1; }
+  .section-desc { font-size: 15px; color: var(--muted); margin-top: 10px; line-height: 1.6; font-weight: 400; }
+
+  .level-tag {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    margin-bottom: 10px;
+  }
+
+  .level-beginner { background: rgba(0,212,170,0.1); color: var(--accent2); border: 1px solid rgba(0,212,170,0.3); }
+  .level-intermediate { background: rgba(255,107,53,0.1); color: var(--accent); border: 1px solid rgba(255,107,53,0.3); }
+  .level-advanced { background: rgba(124,58,237,0.1); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+
+  /* Cards */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .card:hover { border-color: rgba(255,107,53,0.4); transform: translateY(-2px); }
+  .card:hover::before { transform: scaleX(1); }
+  .card.completed { border-color: rgba(0,212,170,0.3); background: rgba(0,212,170,0.03); }
+  .card.completed::before { transform: scaleX(1); background: var(--accent2); }
+
+  .card-icon { font-size: 28px; margin-bottom: 16px; }
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.3px; }
+  .card-desc { font-size: 13px; color: var(--muted); line-height: 1.6; font-weight: 400; }
+  
+  .card-check {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 22px; height: 22px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: transparent;
+    transition: all 0.2s;
+  }
+  
+  .card.completed .card-check {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    color: #0a0a0f;
+  }
+
+  /* Code blocks */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin: 24px 0;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .code-lang {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+
+  .copy-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .copy-btn:hover { color: var(--accent2); border-color: var(--accent2); }
+
+  code, pre {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  pre { padding: 20px; overflow-x: auto; color: #c8d3f5; }
+
+  .kw { color: #bb9af7; }
+  .str { color: #9ece6a; }
+  .cm { color: #565f89; font-style: italic; }
+  .fn { color: #7aa2f7; }
+  .num { color: #ff9e64; }
+  .prop { color: #73daca; }
+
+  /* Info boxes */
+  .info-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 4px 4px 0;
+    padding: 20px 24px;
+    margin: 24px 0;
+  }
+
+  .info-box.warn { border-left-color: var(--accent); }
+  .info-box.tip { border-left-color: var(--accent3); }
+
+  .info-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent2);
+    margin-bottom: 8px;
+  }
+
+  .info-box.warn .info-label { color: var(--accent); }
+  .info-box.tip .info-label { color: #a78bfa; }
+
+  .info-text { font-size: 14px; color: var(--muted); line-height: 1.7; font-weight: 400; }
+
+  /* Diagram */
+  .diagram {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    margin: 28px 0;
+    overflow-x: auto;
+  }
+
+  .diagram-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  /* Topic content */
+  .topic-content {
+    display: none;
+    margin-top: 24px;
+    padding: 28px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .topic-content.open { display: block; }
+
+  h3 { font-size: 20px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.5px; }
+  h4 { font-size: 15px; font-weight: 700; margin: 20px 0 10px; color: var(--accent); }
+
+  p { font-size: 14px; line-height: 1.8; color: var(--muted); margin-bottom: 14px; font-weight: 400; }
+  p strong { color: var(--text); font-weight: 700; }
+
+  ul, ol { padding-left: 20px; margin-bottom: 14px; }
+  li { font-size: 14px; line-height: 1.8; color: var(--muted); margin-bottom: 6px; font-weight: 400; }
+  li strong { color: var(--text); }
+
+  /* Architecture SVG diagram */
+  .arch-diagram {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  /* Quiz */
+  .quiz-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    margin-top: 40px;
+  }
+
+  .quiz-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .quiz-q { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  
+  .quiz-options { display: grid; gap: 10px; margin-bottom: 16px; }
+
+  .quiz-opt {
+    padding: 12px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--muted);
+    transition: all 0.2s;
+    text-align: left;
+    font-family: 'Syne', sans-serif;
+    font-weight: 400;
+  }
+
+  .quiz-opt:hover { border-color: var(--accent); color: var(--text); }
+  .quiz-opt.correct { border-color: var(--accent2); background: rgba(0,212,170,0.08); color: var(--accent2); }
+  .quiz-opt.wrong { border-color: #f87171; background: rgba(248,113,113,0.08); color: #f87171; }
+
+  .quiz-result { font-size: 14px; font-weight: 600; margin-top: 12px; min-height: 24px; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+  th { background: var(--surface2); color: var(--accent); font-weight: 700; text-align: left; padding: 12px 16px; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 16px; border-bottom: 1px solid rgba(42,42,58,0.5); color: var(--muted); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { color: var(--text); background: rgba(255,255,255,0.01); }
+
+  /* Inline code */
+  code:not(pre code) {
+    background: rgba(255,107,53,0.1);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 40px 0 60px;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+
+  .nav-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    padding: 12px 24px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .nav-btn.primary:hover { background: #ff8a5b; }
+
+  .section-indicator {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div style="position:relative;z-index:1">
+    <div class="hero-badge">Complete Learning Path</div>
+    <h1>Master<br><span>Apache Kafka</span></h1>
+    <p class="hero-sub">A structured journey from core concepts to production-grade stream processing — everything you need to become a Kafka expert.</p>
+    <div class="progress-bar-wrap">
+      <span class="progress-label">OVERALL PROGRESS</span>
+      <span class="progress-count" id="progressCount">0 / 0 topics</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-wrap">
+  <div class="nav-pills" id="navPills"></div>
+</div>
+
+<div class="container">
+  <!-- SECTION 1: Foundations -->
+  <div class="section active" id="section-0">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div>
+        <div class="level-tag level-beginner">BEGINNER</div>
+        <div class="section-title">Foundations &amp; Core Concepts</div>
+        <div class="section-desc">Understand what Kafka is, why it exists, and the fundamental building blocks of the platform.</div>
+      </div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card" onclick="toggleTopic(this, 'what-is-kafka')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🌊</div>
+        <div class="card-title">What is Apache Kafka?</div>
+        <div class="card-desc">A distributed event streaming platform designed for high-throughput, fault-tolerant data pipelines.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'why-kafka')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">⚡</div>
+        <div class="card-title">Why Kafka? Problems it Solves</div>
+        <div class="card-desc">Traditional messaging vs. event streaming. Real-world use cases across industries.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'core-components')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🧩</div>
+        <div class="card-title">Core Components</div>
+        <div class="card-desc">Brokers, Topics, Partitions, Producers, Consumers — the Kafka vocabulary you must know.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'kafka-vs-others')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">⚖️</div>
+        <div class="card-title">Kafka vs. RabbitMQ vs. Redis</div>
+        <div class="card-desc">When to choose Kafka and how it differs from traditional message brokers.</div>
+      </div>
+    </div>
+
+    <!-- Topic: What is Kafka -->
+    <div class="topic-content" id="what-is-kafka">
+      <h3>What is Apache Kafka?</h3>
+      <p>Apache Kafka is an <strong>open-source distributed event streaming platform</strong> originally developed at LinkedIn in 2011 and later donated to the Apache Software Foundation. It's designed to handle trillions of events per day.</p>
+      
+      <div class="diagram">
+        <div class="diagram-title">// KAFKA HIGH-LEVEL ARCHITECTURE</div>
+        <svg class="arch-diagram" viewBox="0 0 700 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Producers -->
+          <rect x="10" y="80" width="120" height="44" rx="3" fill="#1a1a24" stroke="#2a2a3a"/>
+          <text x="70" y="97" fill="#7070a0" text-anchor="middle" font-family="Space Mono" font-size="9">PRODUCER</text>
+          <text x="70" y="113" fill="#e8e8f0" text-anchor="middle" font-family="Space Mono" font-size="10">App / Service</text>
+          
+          <rect x="10" y="140" width="120" height="44" rx="3" fill="#1a1a24" stroke="#2a2a3a"/>
+          <text x="70" y="157" fill="#7070a0" text-anchor="middle" font-family="Space Mono" font-size="9">PRODUCER</text>
+          <text x="70" y="173" fill="#e8e8f0" text-anchor="middle" font-family="Space Mono" font-size="10">DB / Stream</text>
+
+          <!-- Arrow in -->
+          <line x1="130" y1="102" x2="195" y2="118" stroke="#ff6b35" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+          <line x1="130" y1="162" x2="195" y2="148" stroke="#ff6b35" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+
+          <!-- Kafka Cluster -->
+          <rect x="200" y="40" width="300" height="180" rx="4" fill="#111118" stroke="#ff6b35" stroke-opacity="0.4" stroke-dasharray="4 3"/>
+          <text x="350" y="62" fill="#ff6b35" text-anchor="middle" font-family="Space Mono" font-size="10" letter-spacing="2">KAFKA CLUSTER</text>
+          
+          <rect x="220" y="75" width="80" height="120" rx="3" fill="#1a1a24" stroke="#2a2a3a"/>
+          <text x="260" y="93" fill="#7070a0" text-anchor="middle" font-family="Space Mono" font-size="8">BROKER 1</text>
+          <rect x="228" y="100" width="64" height="16" rx="2" fill="#0d0d1a" stroke="#2a2a3a"/>
+          <text x="260" y="113" fill="#73daca" text-anchor="middle" font-family="Space Mono" font-size="8">TOPIC-A P0</text>
+          <rect x="228" y="122" width="64" height="16" rx="2" fill="#0d0d1a" stroke="#2a2a3a"/>
+          <text x="260" y="135" fill="#73daca" text-anchor="middle" font-family="Space Mono" font-size="8">TOPIC-B P1</text>
+          <rect x="228" y="144" width="64" height="16" rx="2" fill="#0d0d1a" stroke="#2a2a3a"/>
+          <text x="260" y="157" fill="#73daca" text-anchor="middle" font-family="Space Mono" font-size="8">TOPIC-A P2</text>
+          <rect x="228" y="166" width="64" height="16" rx="2" fill="#0d0d1a" stroke="#2a2a3a"/>
+          <text x="260" y="179" fill="#73daca" text-anchor="middle" font-family="Space Mono" font-size="8">TOPIC-B P0</text>
+
+          <rect x="310" y="75" width="80" height="120" rx="3" fill="#1a1a24" stroke="#2a2a3a"/>
+          <text x="350" y="93" fill="#7070a0" text-anchor="middle" font-family="Space Mono" font-size="8">BROKER 2</text>
+          <rect x="318" y="100" width="64" height="16" rx="2" fill="#0d0d1a" stroke="#2a2a3a"/>
+          <text x="350" y="113" fill="#73daca" text-anchor="middle" font-family="Space Mono" font-size="8">TOPIC-A P1</text>
+          <rect x="318" y="122" width="64" height="16" rx="2" fill="#0d0d1a" stroke="#2a2a3a"/>
+          <text x="350" y="135" fill="#73daca" text-anchor="middle" font-family="Space Mono" font-size="8">TOPIC-B P2</text>
+          <rect x="318" y="144" width="64" height="16" rx="2" fill="#0d0d1a" stroke="#2a2a3a"/>
+          <text x="350" y="157" fill="#73daca" text-anchor="middle" font-family="Space Mono" font-size="8">TOPIC-A P0*</text>
+          <rect x="318" y="166" width="64" height="16" rx="2" fill="#0d0d1a" stroke="#2a2a3a"/>
+          <text x="350" y="179" fill="#73daca" text-anchor="middle" font-family="Space Mono" font-size="8">TOPIC-B P1*</text>
+
+          <rect x="400" y="75" width="80" height="120" rx="3" fill="#1a1a24" stroke="#2a2a3a"/>
+          <text x="440" y="93" fill="#7070a0" text-anchor="middle" font-family="Space Mono" font-size="8">BROKER 3</text>
+          <rect x="408" y="100" width="64" height="16" rx="2" fill="#0d0d1a" stroke="#2a2a3a"/>
+          <text x="440" y="113" fill="#73daca" text-anchor="middle" font-family="Space Mono" font-size="8">TOPIC-B P0*</text>
+          <rect x="408" y="122" width="64" height="16" rx="2" fill="#0d0d1a" stroke="#2a2a3a"/>
+          <text x="440" y="135" fill="#73daca" text-anchor="middle" font-family="Space Mono" font-size="8">TOPIC-A P2*</text>
+          <rect x="408" y="144" width="64" height="16" rx="2" fill="#0d0d1a" stroke="#2a2a3a"/>
+          <text x="440" y="157" fill="#73daca" text-anchor="middle" font-family="Space Mono" font-size="8">TOPIC-A P1*</text>
+          <rect x="408" y="166" width="64" height="16" rx="2" fill="#0d0d1a" stroke="#2a2a3a"/>
+          <text x="440" y="179" fill="#73daca" text-anchor="middle" font-family="Space Mono" font-size="8">TOPIC-B P2*</text>
+
+          <!-- Arrow out -->
+          <line x1="500" y1="118" x2="565" y2="102" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+          <line x1="500" y1="148" x2="565" y2="162" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+          <!-- Consumers -->
+          <rect x="570" y="80" width="120" height="44" rx="3" fill="#1a1a24" stroke="#2a2a3a"/>
+          <text x="630" y="97" fill="#7070a0" text-anchor="middle" font-family="Space Mono" font-size="9">CONSUMER</text>
+          <text x="630" y="113" fill="#e8e8f0" text-anchor="middle" font-family="Space Mono" font-size="10">Analytics</text>
+
+          <rect x="570" y="140" width="120" height="44" rx="3" fill="#1a1a24" stroke="#2a2a3a"/>
+          <text x="630" y="157" fill="#7070a0" text-anchor="middle" font-family="Space Mono" font-size="9">CONSUMER</text>
+          <text x="630" y="173" fill="#e8e8f0" text-anchor="middle" font-family="Space Mono" font-size="10">Search / DB</text>
+
+          <!-- Zookeeper/KRaft note -->
+          <rect x="260" y="218" width="180" height="26" rx="3" fill="#111118" stroke="#2a2a3a"/>
+          <text x="350" y="235" fill="#565f89" text-anchor="middle" font-family="Space Mono" font-size="8">ZooKeeper / KRaft (Coordination)</text>
+
+          <defs>
+            <marker id="arrowOrange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#ff6b35"/>
+            </marker>
+            <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#00d4aa"/>
+            </marker>
+          </defs>
+        </svg>
+        <p style="text-align:center;font-family:Space Mono,monospace;font-size:10px;color:#565f89;margin-top:12px">* = replica partition</p>
+      </div>
+
+      <h4>Core Guarantees</h4>
+      <ul>
+        <li><strong>Durability</strong> — Messages are persisted to disk and replicated across brokers</li>
+        <li><strong>Scalability</strong> — Horizontal scaling via partitions; can handle millions of messages/sec</li>
+        <li><strong>High Throughput</strong> — Sequential disk I/O, batching, and compression</li>
+        <li><strong>Fault Tolerance</strong> — Replication factor ensures no single point of failure</li>
+        <li><strong>Ordering</strong> — Messages within a partition are strictly ordered</li>
+      </ul>
+
+      <div class="info-box">
+        <div class="info-label">💡 KEY INSIGHT</div>
+        <div class="info-text">Unlike traditional message queues that delete messages after consumption, Kafka <strong>retains messages</strong> for a configurable period (default 7 days). This allows multiple consumers to independently read the same data and enables replaying events.</div>
+      </div>
+    </div>
+
+    <!-- Topic: Core Components -->
+    <div class="topic-content" id="core-components">
+      <h3>Core Components Deep Dive</h3>
+      
+      <h4>📦 Topics &amp; Partitions</h4>
+      <p>A <strong>Topic</strong> is a named category to which records are published. Topics are split into <strong>Partitions</strong> — ordered, immutable sequences of records. Each partition is an append-only log file.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">BASH — Topic Operations</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><span class="cm"># Create a topic with 3 partitions, replication factor 2</span>
+kafka-topics.sh --create \
+  --bootstrap-server localhost:9092 \
+  --topic orders \
+  --partitions 3 \
+  --replication-factor 2
+
+<span class="cm"># List all topics</span>
+kafka-topics.sh --list --bootstrap-server localhost:9092
+
+<span class="cm"># Describe a topic (see partition leaders, replicas)</span>
+kafka-topics.sh --describe \
+  --bootstrap-server localhost:9092 \
+  --topic orders</pre>
+      </div>
+
+      <h4>🏭 Brokers</h4>
+      <p>A <strong>Broker</strong> is a Kafka server that stores data and serves client requests. A Kafka <strong>cluster</strong> consists of multiple brokers. One broker acts as the <strong>Controller</strong> (manages cluster metadata, leader elections).</p>
+
+      <h4>📍 Offsets</h4>
+      <p>Each message in a partition has a unique sequential ID called an <strong>offset</strong>. Consumers track their position using offsets — this is how Kafka enables re-reading and exactly-once processing.</p>
+
+      <table>
+        <thead>
+          <tr><th>Concept</th><th>Description</th><th>Analogy</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Topic</td><td>Category/feed name</td><td>Table in a DB</td></tr>
+          <tr><td>Partition</td><td>Ordered sub-log of a topic</td><td>Shard of a table</td></tr>
+          <tr><td>Offset</td><td>Sequential ID within partition</td><td>Row number</td></tr>
+          <tr><td>Broker</td><td>Server storing partitions</td><td>Database server</td></tr>
+          <tr><td>Producer</td><td>Writes messages to topics</td><td>INSERT statement</td></tr>
+          <tr><td>Consumer</td><td>Reads messages from topics</td><td>SELECT statement</td></tr>
+          <tr><td>Consumer Group</td><td>Set of consumers sharing load</td><td>Multiple DB replicas</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Topic: Why Kafka -->
+    <div class="topic-content" id="why-kafka">
+      <h3>Why Apache Kafka?</h3>
+      <h4>The Problem Before Kafka</h4>
+      <p>Before event streaming, systems used <strong>point-to-point integrations</strong>. If you have 10 services that need to share data, you end up with up to 45 direct connections — a maintenance nightmare.</p>
+      
+      <div class="info-box warn">
+        <div class="info-label">⚠ THE INTEGRATION HELL</div>
+        <div class="info-text">N services = N×(N-1)/2 potential connections. With 100 services that's ~5,000 pipelines to maintain, each with its own failure modes, schemas, and scaling characteristics.</div>
+      </div>
+
+      <h4>Real-World Use Cases</h4>
+      <ul>
+        <li><strong>Activity Tracking</strong> — LinkedIn uses Kafka to track user activity (page views, clicks) at billions of events/day</li>
+        <li><strong>Metrics &amp; Monitoring</strong> — Aggregating operational data from distributed systems (think Datadog, Splunk)</li>
+        <li><strong>Log Aggregation</strong> — Centralizing logs from hundreds of microservices</li>
+        <li><strong>Event Sourcing</strong> — Storing state changes as an immutable event log (financial transactions)</li>
+        <li><strong>Stream Processing</strong> — Real-time fraud detection, recommendations, ETL pipelines</li>
+        <li><strong>Microservice Decoupling</strong> — Services communicate via events, not direct API calls</li>
+      </ul>
+    </div>
+
+    <!-- Topic: Kafka vs Others -->
+    <div class="topic-content" id="kafka-vs-others">
+      <h3>Kafka vs. Other Systems</h3>
+      <table>
+        <thead>
+          <tr><th>Feature</th><th>Kafka</th><th>RabbitMQ</th><th>Redis Pub/Sub</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Message Retention</td><td>✅ Configurable (days/weeks)</td><td>❌ Deleted after consume</td><td>❌ Fire and forget</td></tr>
+          <tr><td>Throughput</td><td>✅ Millions/sec</td><td>~50k/sec</td><td>High but volatile</td></tr>
+          <tr><td>Replay Messages</td><td>✅ Yes</td><td>❌ No</td><td>❌ No</td></tr>
+          <tr><td>Consumer Groups</td><td>✅ Native</td><td>Limited</td><td>❌ No</td></tr>
+          <tr><td>Ordering Guarantee</td><td>Per-partition</td><td>Per-queue</td><td>❌ No</td></tr>
+          <tr><td>Persistence</td><td>✅ Disk-based</td><td>Optional</td><td>In-memory</td></tr>
+          <tr><td>Use Case Fit</td><td>Stream processing, event sourcing</td><td>Task queues, RPC</td><td>Real-time pub/sub</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Quiz -->
+    <div class="quiz-section">
+      <div class="quiz-title">// KNOWLEDGE CHECK — SECTION 01</div>
+      <div class="quiz-q">What is the fundamental unit of parallelism in Kafka?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkAnswer(this, false)">Topic</button>
+        <button class="quiz-opt" onclick="checkAnswer(this, true)">Partition</button>
+        <button class="quiz-opt" onclick="checkAnswer(this, false)">Consumer Group</button>
+        <button class="quiz-opt" onclick="checkAnswer(this, false)">Broker</button>
+      </div>
+      <div class="quiz-result" id="quiz-result-0"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-btn" disabled>← Previous</button>
+      <span class="section-indicator">1 / 6</span>
+      <button class="nav-btn primary" onclick="goToSection(1)">Producers & Consumers →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Producers & Consumers -->
+  <div class="section" id="section-1">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div>
+        <div class="level-tag level-beginner">BEGINNER</div>
+        <div class="section-title">Producers &amp; Consumers</div>
+        <div class="section-desc">Writing and reading messages with the Kafka client APIs. Configuration, patterns, and best practices.</div>
+      </div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card" onclick="toggleTopic(this, 'producer-api')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">📤</div>
+        <div class="card-title">Producer API &amp; Config</div>
+        <div class="card-desc">KafkaProducer setup, serializers, acks, retries, batching, and compression.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'consumer-api')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">📥</div>
+        <div class="card-title">Consumer API &amp; Config</div>
+        <div class="card-desc">KafkaConsumer, poll loop, offset management, auto-commit vs. manual commit.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'consumer-groups')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">👥</div>
+        <div class="card-title">Consumer Groups &amp; Rebalancing</div>
+        <div class="card-desc">How Kafka distributes partitions, what triggers rebalancing, and cooperative protocols.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'delivery-semantics')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🎯</div>
+        <div class="card-title">Delivery Semantics</div>
+        <div class="card-desc">At-most-once, at-least-once, and exactly-once delivery guarantees explained.</div>
+      </div>
+    </div>
+
+    <div class="topic-content" id="producer-api">
+      <h3>Kafka Producer API</h3>
+      <p>The <strong>KafkaProducer</strong> is thread-safe and typically you create one instance per application. It handles batching, compression, retries, and serialization internally.</p>
+      
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">PYTHON — Basic Producer</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaProducer
+<span class="kw">import</span> json
+
+<span class="cm"># Create producer with recommended config</span>
+producer = KafkaProducer(
+    bootstrap_servers=<span class="str">'localhost:9092'</span>,
+    value_serializer=<span class="kw">lambda</span> v: json.dumps(v).encode(<span class="str">'utf-8'</span>),
+    key_serializer=<span class="kw">lambda</span> k: k.encode(<span class="str">'utf-8'</span>) <span class="kw">if</span> k <span class="kw">else None</span>,
+    
+    <span class="cm"># Reliability: wait for leader + all ISR replicas to ack</span>
+    acks=<span class="str">'all'</span>,
+    
+    <span class="cm"># Retry on transient failures</span>
+    retries=<span class="num">5</span>,
+    retry_backoff_ms=<span class="num">300</span>,
+    
+    <span class="cm"># Batching for throughput</span>
+    batch_size=<span class="num">16384</span>,       <span class="cm"># 16KB batch</span>
+    linger_ms=<span class="num">10</span>,            <span class="cm"># Wait 10ms to fill batch</span>
+    
+    <span class="cm"># Compression</span>
+    compression_type=<span class="str">'snappy'</span>,
+)
+
+<span class="cm"># Send with key (same key → same partition = ordering)</span>
+future = producer.send(
+    topic=<span class="str">'orders'</span>,
+    key=<span class="str">'user-123'</span>,
+    value={<span class="str">'order_id'</span>: <span class="str">'ord-456'</span>, <span class="str">'amount'</span>: <span class="num">99.99</span>}
+)
+
+<span class="cm"># Block until send completes (for critical messages)</span>
+record_metadata = future.get(timeout=<span class="num">10</span>)
+<span class="fn">print</span>(<span class="str">f"Sent to partition {record_metadata.partition} @ offset {record_metadata.offset}"</span>)
+
+producer.flush()  <span class="cm"># Ensure all pending messages are sent</span>
+producer.close()</pre>
+      </div>
+
+      <h4>Key Producer Configurations</h4>
+      <table>
+        <thead><tr><th>Config</th><th>Values</th><th>Impact</th></tr></thead>
+        <tbody>
+          <tr><td><code>acks</code></td><td>0, 1, all</td><td>0=fastest/unsafe, 1=leader only, all=safest</td></tr>
+          <tr><td><code>linger.ms</code></td><td>0–100ms</td><td>Higher=better batching, more latency</td></tr>
+          <tr><td><code>batch.size</code></td><td>bytes</td><td>Max batch size per partition</td></tr>
+          <tr><td><code>compression.type</code></td><td>none/gzip/snappy/lz4/zstd</td><td>Reduces network & storage</td></tr>
+          <tr><td><code>max.in.flight.requests</code></td><td>1–5</td><td>1=strict ordering, 5=higher throughput</td></tr>
+          <tr><td><code>enable.idempotence</code></td><td>true/false</td><td>true=exactly-once producer</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="topic-content" id="consumer-api">
+      <h3>Kafka Consumer API</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">PYTHON — Consumer with Manual Commit</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaConsumer, TopicPartition
+<span class="kw">import</span> json
+
+consumer = KafkaConsumer(
+    <span class="str">'orders'</span>,
+    bootstrap_servers=<span class="str">'localhost:9092'</span>,
+    group_id=<span class="str">'order-processor-group'</span>,
+    value_deserializer=<span class="kw">lambda</span> m: json.loads(m.decode(<span class="str">'utf-8'</span>)),
+    
+    <span class="cm"># Manual offset control (safer than auto-commit)</span>
+    enable_auto_commit=<span class="kw">False</span>,
+    
+    <span class="cm"># Where to start if no committed offset exists</span>
+    auto_offset_reset=<span class="str">'earliest'</span>,  <span class="cm"># or 'latest'</span>
+    
+    <span class="cm"># Max records per poll()</span>
+    max_poll_records=<span class="num">500</span>,
+)
+
+<span class="kw">try</span>:
+    <span class="kw">while</span> <span class="kw">True</span>:
+        <span class="cm"># Poll with 1 second timeout</span>
+        records = consumer.poll(timeout_ms=<span class="num">1000</span>)
+        
+        <span class="kw">for</span> tp, messages <span class="kw">in</span> records.items():
+            <span class="kw">for</span> msg <span class="kw">in</span> messages:
+                <span class="cm"># Process message</span>
+                process_order(msg.value)
+                
+        <span class="cm"># Commit only AFTER processing (at-least-once)</span>
+        <span class="kw">if</span> records:
+            consumer.commit()
+<span class="kw">except</span> KeyboardInterrupt:
+    <span class="fn">pass</span>
+<span class="kw">finally</span>:
+    consumer.close()  <span class="cm"># Triggers graceful rebalance</span></pre>
+      </div>
+    </div>
+
+    <div class="topic-content" id="consumer-groups">
+      <h3>Consumer Groups &amp; Partition Assignment</h3>
+      <p>A <strong>Consumer Group</strong> allows multiple consumer instances to share the load of consuming a topic. Each partition is assigned to <strong>exactly one consumer</strong> within the group at any time.</p>
+
+      <div class="info-box">
+        <div class="info-label">📐 PARTITION ASSIGNMENT RULE</div>
+        <div class="info-text">
+          <strong>Max parallelism = number of partitions.</strong> If you have 6 partitions and 3 consumers: 2 partitions/consumer. If you have 6 partitions and 6 consumers: 1 partition each. If you have 6 partitions and 8 consumers: 2 consumers idle. More consumers than partitions = no additional parallelism.
+        </div>
+      </div>
+
+      <h4>Rebalancing Protocols</h4>
+      <ul>
+        <li><strong>Eager Rebalance (Classic)</strong> — All partitions are revoked from all consumers, then reassigned. Causes a "stop the world" pause.</li>
+        <li><strong>Cooperative/Incremental Rebalance</strong> — Only the partitions being moved are revoked. Available since Kafka 2.4. Use <code>CooperativeStickyAssignor</code>.</li>
+      </ul>
+    </div>
+
+    <div class="topic-content" id="delivery-semantics">
+      <h3>Message Delivery Semantics</h3>
+      <table>
+        <thead><tr><th>Semantic</th><th>How</th><th>Risk</th><th>Use Case</th></tr></thead>
+        <tbody>
+          <tr><td><strong>At-Most-Once</strong></td><td>Commit before processing</td><td>Messages can be lost</td><td>Metrics (loss OK)</td></tr>
+          <tr><td><strong>At-Least-Once</strong></td><td>Commit after processing</td><td>Duplicate messages possible</td><td>Most applications</td></tr>
+          <tr><td><strong>Exactly-Once</strong></td><td>Idempotent producer + transactions</td><td>Complex, lower throughput</td><td>Financial transactions</td></tr>
+        </tbody>
+      </table>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JAVA — Exactly-Once (Transactional Producer)</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre>Properties props = <span class="kw">new</span> <span class="fn">Properties</span>();
+props.<span class="fn">put</span>(<span class="str">"enable.idempotence"</span>, <span class="str">"true"</span>);
+props.<span class="fn">put</span>(<span class="str">"transactional.id"</span>, <span class="str">"my-transactional-id"</span>);
+props.<span class="fn">put</span>(<span class="str">"acks"</span>, <span class="str">"all"</span>);
+
+KafkaProducer&lt;String, String&gt; producer = <span class="kw">new</span> <span class="fn">KafkaProducer</span>&lt;&gt;(props);
+producer.<span class="fn">initTransactions</span>();
+
+<span class="kw">try</span> {
+    producer.<span class="fn">beginTransaction</span>();
+    producer.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">ProducerRecord</span>&lt;&gt;(<span class="str">"payments"</span>, key, value));
+    producer.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">ProducerRecord</span>&lt;&gt;(<span class="str">"ledger"</span>, key, value));
+    producer.<span class="fn">commitTransaction</span>();  <span class="cm">// Atomic!</span>
+} <span class="kw">catch</span> (Exception e) {
+    producer.<span class="fn">abortTransaction</span>();  <span class="cm">// Rollback both</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="quiz-section">
+      <div class="quiz-title">// KNOWLEDGE CHECK — SECTION 02</div>
+      <div class="quiz-q">You have a topic with 4 partitions and a consumer group with 6 consumers. How many consumers will be idle?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkAnswer(this, false)">0 — all consume</button>
+        <button class="quiz-opt" onclick="checkAnswer(this, true)">2 — excess consumers idle</button>
+        <button class="quiz-opt" onclick="checkAnswer(this, false)">4 — only leaders active</button>
+        <button class="quiz-opt" onclick="checkAnswer(this, false)">6 — consumers rotate</button>
+      </div>
+      <div class="quiz-result"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-btn" onclick="goToSection(0)">← Foundations</button>
+      <span class="section-indicator">2 / 6</span>
+      <button class="nav-btn primary" onclick="goToSection(2)">Internals →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Internals -->
+  <div class="section" id="section-2">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div>
+        <div class="level-tag level-intermediate">INTERMEDIATE</div>
+        <div class="section-title">Kafka Internals</div>
+        <div class="section-desc">How Kafka achieves its remarkable performance — storage, replication, and the log.</div>
+      </div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card" onclick="toggleTopic(this, 'log-storage')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">💾</div>
+        <div class="card-title">Log-Based Storage</div>
+        <div class="card-desc">Segments, indices, log compaction, and why sequential writes make Kafka fast.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'replication')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🔄</div>
+        <div class="card-title">Replication &amp; Leader Election</div>
+        <div class="card-desc">ISR, leader/follower dynamics, unclean leader election tradeoffs.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'kraft')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🏗️</div>
+        <div class="card-title">ZooKeeper vs KRaft</div>
+        <div class="card-desc">The architectural evolution from ZooKeeper to the new KRaft consensus protocol.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'performance')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🚀</div>
+        <div class="card-title">Performance Secrets</div>
+        <div class="card-desc">Zero-copy, page cache, sendfile(), and why Kafka is faster than RAM in some cases.</div>
+      </div>
+    </div>
+
+    <div class="topic-content" id="log-storage">
+      <h3>Kafka's Log Storage</h3>
+      <p>Kafka stores data as <strong>append-only log files</strong> on disk. Each partition is a directory containing multiple <strong>segment files</strong>.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">FILESYSTEM — Partition Directory Layout</span></div>
+        <pre>/kafka-logs/orders-0/          <span class="cm"># Topic 'orders', Partition 0</span>
+  00000000000000000000.log     <span class="cm"># Segment: messages 0–999</span>
+  00000000000000000000.index   <span class="cm"># Sparse offset index</span>
+  00000000000000000000.timeindex
+  00000000000000001000.log     <span class="cm"># Segment: messages 1000+</span>
+  00000000000000001000.index
+  leader-epoch-checkpoint</pre>
+      </div>
+
+      <h4>Log Compaction</h4>
+      <p>For topics used as <strong>event sourcing / change data capture</strong>, Kafka supports log compaction. Instead of time-based retention, it retains the <strong>latest value for each key</strong>, enabling topics to act as a key-value store snapshot.</p>
+      
+      <div class="info-box tip">
+        <div class="info-label">💡 COMPACTION USE CASE</div>
+        <div class="info-text">Database CDC (Change Data Capture). If user #123 updates their email 50 times, a compacted topic will only keep the last "user-123" record — perfect for rebuilding state from scratch without processing all historical events.</div>
+      </div>
+    </div>
+
+    <div class="topic-content" id="replication">
+      <h3>Replication &amp; Leader Election</h3>
+      <p>For each partition, Kafka elects one broker as <strong>Leader</strong> and others as <strong>Followers</strong>. All reads and writes go through the Leader.</p>
+
+      <h4>ISR — In-Sync Replicas</h4>
+      <p>The ISR is the set of replicas that are "caught up" with the leader (within <code>replica.lag.time.max.ms</code>). A message is only considered <strong>committed</strong> when all ISR replicas have acknowledged it (when <code>acks=all</code>).</p>
+
+      <table>
+        <thead><tr><th>Config</th><th>Recommended</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td><code>replication.factor</code></td><td>3</td><td>Survive 2 broker failures</td></tr>
+          <tr><td><code>min.insync.replicas</code></td><td>2</td><td>At least 2 must ack writes</td></tr>
+          <tr><td><code>unclean.leader.election</code></td><td>false</td><td>Prevent data loss (prefer unavailability)</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info-box warn">
+        <div class="info-label">⚠ DURABILITY FORMULA</div>
+        <div class="info-text"><strong>acks=all + min.insync.replicas=2 + replication.factor=3</strong> = zero data loss guarantee. You can lose 1 broker and still write. You can lose 2 brokers and still read.</div>
+      </div>
+    </div>
+
+    <div class="topic-content" id="performance">
+      <h3>Why Kafka Is So Fast</h3>
+
+      <h4>1. Sequential Disk I/O</h4>
+      <p>Kafka <strong>only appends</strong> to the end of log files. Sequential writes on modern SSDs can exceed 600MB/s — often faster than random reads from RAM due to OS page cache optimization.</p>
+
+      <h4>2. Zero-Copy via sendfile()</h4>
+      <p>Normally: Disk → Kernel buffer → User space → Socket buffer → NIC. With zero-copy: Disk → Kernel buffer → NIC (skips user space entirely). This is the <code>sendfile()</code> Linux system call — Kafka uses it to send data to consumers with minimal CPU overhead.</p>
+
+      <h4>3. OS Page Cache</h4>
+      <p>Kafka doesn't maintain its own in-memory cache. It relies on the OS page cache, which is automatically warmed by recent reads. This means recently-written messages are served from RAM without any application-level caching code.</p>
+
+      <h4>4. Batching &amp; Compression</h4>
+      <p>Messages are batched at the producer, transmitted in compressed batches, stored compressed, and only decompressed by the consumer. A snappy-compressed batch of 1000 JSON messages can be 5–10× smaller than individual messages.</p>
+    </div>
+
+    <div class="topic-content" id="kraft">
+      <h3>ZooKeeper → KRaft</h3>
+      <p>Historically, Kafka relied on <strong>Apache ZooKeeper</strong> for cluster metadata, controller election, and configuration. KRaft (Kafka Raft) — introduced in Kafka 2.8, production-ready in 3.3 — replaces ZooKeeper with a built-in Raft consensus layer.</p>
+      
+      <table>
+        <thead><tr><th>Aspect</th><th>ZooKeeper Mode</th><th>KRaft Mode</th></tr></thead>
+        <tbody>
+          <tr><td>External dependency</td><td>ZooKeeper cluster required</td><td>None — self-contained</td></tr>
+          <tr><td>Metadata storage</td><td>ZooKeeper znodes</td><td>Kafka partition (internal log)</td></tr>
+          <tr><td>Max partitions</td><td>~200k</td><td>Millions</td></tr>
+          <tr><td>Controller failover</td><td>~30–60 seconds</td><td>Milliseconds</td></tr>
+          <tr><td>Recommended for new</td><td>❌ Deprecated</td><td>✅ Yes (Kafka 3.3+)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="quiz-section">
+      <div class="quiz-title">// KNOWLEDGE CHECK — SECTION 03</div>
+      <div class="quiz-q">With replication.factor=3 and min.insync.replicas=2, what happens when 2 of 3 brokers go offline?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkAnswer(this, false)">Kafka continues writing normally</button>
+        <button class="quiz-opt" onclick="checkAnswer(this, false)">Kafka loses data silently</button>
+        <button class="quiz-opt" onclick="checkAnswer(this, true)">Producers get NotEnoughReplicas error</button>
+        <button class="quiz-opt" onclick="checkAnswer(this, false)">Consumers stop receiving messages</button>
+      </div>
+      <div class="quiz-result"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-btn" onclick="goToSection(1)">← Producers & Consumers</button>
+      <span class="section-indicator">3 / 6</span>
+      <button class="nav-btn primary" onclick="goToSection(3)">Kafka Streams →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Kafka Streams -->
+  <div class="section" id="section-3">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <div>
+        <div class="level-tag level-intermediate">INTERMEDIATE</div>
+        <div class="section-title">Kafka Streams &amp; ksqlDB</div>
+        <div class="section-desc">Real-time stream processing built right into Kafka — no separate cluster needed.</div>
+      </div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card" onclick="toggleTopic(this, 'streams-intro')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🌊</div>
+        <div class="card-title">Kafka Streams Fundamentals</div>
+        <div class="card-desc">KStream, KTable, KGroupedStream — the DSL for stream processing.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'windowing')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">⏱️</div>
+        <div class="card-title">Windowing &amp; Time</div>
+        <div class="card-desc">Tumbling, hopping, sliding windows. Event time vs. processing time.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'ksqldb')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🗄️</div>
+        <div class="card-title">ksqlDB</div>
+        <div class="card-desc">SQL-like streaming queries on Kafka topics. Push vs. pull queries.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'state-stores')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🏪</div>
+        <div class="card-title">State Stores &amp; Joins</div>
+        <div class="card-desc">RocksDB-backed state, stream-stream joins, stream-table joins.</div>
+      </div>
+    </div>
+
+    <div class="topic-content" id="streams-intro">
+      <h3>Kafka Streams DSL</h3>
+      <p>Kafka Streams is a <strong>client library</strong> (not a separate cluster) for building stream processing applications. It runs inside your application process.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JAVA — Word Count with Kafka Streams</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre>StreamsBuilder builder = <span class="kw">new</span> <span class="fn">StreamsBuilder</span>();
+
+KStream&lt;String, String&gt; textLines = builder
+    .<span class="fn">stream</span>(<span class="str">"text-input"</span>);
+
+KTable&lt;String, Long&gt; wordCounts = textLines
+    .<span class="fn">flatMapValues</span>(v -&gt; Arrays.<span class="fn">asList</span>(v.<span class="fn">split</span>(<span class="str">"\\s+"</span>)))
+    .<span class="fn">groupBy</span>((key, word) -&gt; word)         <span class="cm">// group by word</span>
+    .<span class="fn">count</span>(Materialized.<span class="fn">as</span>(<span class="str">"word-counts"</span>)); <span class="cm">// stateful aggregation</span>
+
+wordCounts
+    .<span class="fn">toStream</span>()
+    .<span class="fn">to</span>(<span class="str">"word-count-output"</span>,
+       Produced.<span class="fn">with</span>(Serdes.String(), Serdes.Long()));
+
+KafkaStreams streams = <span class="kw">new</span> <span class="fn">KafkaStreams</span>(builder.<span class="fn">build</span>(), props);
+streams.<span class="fn">start</span>();</pre>
+      </div>
+
+      <h4>KStream vs KTable</h4>
+      <ul>
+        <li><strong>KStream</strong> — Unbounded stream of records. Each record is independent (think: append-only log). Example: click events.</li>
+        <li><strong>KTable</strong> — Changelog stream. Each record <em>upserts</em> a key. Latest value per key (think: current state). Example: user profile.</li>
+        <li><strong>GlobalKTable</strong> — Like KTable but replicated to all instances (good for small lookup tables).</li>
+      </ul>
+    </div>
+
+    <div class="topic-content" id="ksqldb">
+      <h3>ksqlDB — SQL on Streams</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">SQL — ksqlDB Streaming Queries</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><span class="cm">-- Create a stream from a Kafka topic</span>
+<span class="kw">CREATE STREAM</span> orders (
+    order_id <span class="prop">VARCHAR</span>,
+    user_id  <span class="prop">VARCHAR</span>,
+    amount   <span class="prop">DOUBLE</span>,
+    status   <span class="prop">VARCHAR</span>
+) <span class="kw">WITH</span> (
+    KAFKA_TOPIC=<span class="str">'orders'</span>,
+    VALUE_FORMAT=<span class="str">'JSON'</span>
+);
+
+<span class="cm">-- Push query: continuously stream results as new data arrives</span>
+<span class="kw">SELECT</span> user_id, SUM(amount) <span class="kw">AS</span> total
+<span class="kw">FROM</span> orders
+<span class="kw">WINDOW TUMBLING</span> (SIZE 1 <span class="prop">HOUR</span>)
+<span class="kw">GROUP BY</span> user_id
+<span class="kw">EMIT CHANGES</span>;
+
+<span class="cm">-- Create materialized view (persistent query)</span>
+<span class="kw">CREATE TABLE</span> fraud_alerts <span class="kw">AS</span>
+    <span class="kw">SELECT</span> user_id, COUNT(*) <span class="kw">AS</span> tx_count
+    <span class="kw">FROM</span> orders
+    <span class="kw">WINDOW TUMBLING</span> (SIZE 5 <span class="prop">MINUTES</span>)
+    <span class="kw">GROUP BY</span> user_id
+    <span class="kw">HAVING</span> COUNT(*) > <span class="num">10</span>
+    <span class="kw">EMIT CHANGES</span>;</pre>
+      </div>
+    </div>
+
+    <div class="topic-content" id="windowing">
+      <h3>Windowing Operations</h3>
+      <table>
+        <thead><tr><th>Window Type</th><th>Description</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Tumbling</strong></td><td>Fixed-size, non-overlapping</td><td>Count orders per hour (00:00–01:00, 01:00–02:00...)</td></tr>
+          <tr><td><strong>Hopping</strong></td><td>Fixed-size, overlapping</td><td>5-min window, sliding every 1 min (rolling average)</td></tr>
+          <tr><td><strong>Sliding</strong></td><td>Triggered by events</td><td>All events within 10 min of each other</td></tr>
+          <tr><td><strong>Session</strong></td><td>Activity-based gaps</td><td>User session: events within 30 min inactivity gap</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info-box warn">
+        <div class="info-label">⚠ LATE ARRIVING DATA</div>
+        <div class="info-text">In distributed systems, events can arrive out of order. Use <strong>event time</strong> (the timestamp in the message) not processing time (when Kafka receives it). Configure <code>grace periods</code> to handle late data: <code>TimeWindows.of(Duration.ofMinutes(5)).grace(Duration.ofMinutes(1))</code></div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-btn" onclick="goToSection(2)">← Internals</button>
+      <span class="section-indicator">4 / 6</span>
+      <button class="nav-btn primary" onclick="goToSection(4)">Schema & Connect →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Schema Registry & Connect -->
+  <div class="section" id="section-4">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <div>
+        <div class="level-tag level-intermediate">INTERMEDIATE</div>
+        <div class="section-title">Schema Registry &amp; Kafka Connect</div>
+        <div class="section-desc">Manage data contracts with Schema Registry and build data pipelines with Kafka Connect.</div>
+      </div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card" onclick="toggleTopic(this, 'schema-registry')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">📋</div>
+        <div class="card-title">Schema Registry</div>
+        <div class="card-desc">Avro, Protobuf, and JSON Schema. Schema evolution and compatibility modes.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'kafka-connect')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🔌</div>
+        <div class="card-title">Kafka Connect</div>
+        <div class="card-desc">Source and Sink connectors for databases, S3, Elasticsearch, and 200+ systems.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'cdc')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🔀</div>
+        <div class="card-title">CDC with Debezium</div>
+        <div class="card-desc">Capture database changes in real-time using Debezium connector.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'smt')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🔧</div>
+        <div class="card-title">Single Message Transforms</div>
+        <div class="card-desc">Transform messages in-flight without writing code using SMTs.</div>
+      </div>
+    </div>
+
+    <div class="topic-content" id="schema-registry">
+      <h3>Schema Registry</h3>
+      <p>Schema Registry is a centralized service for managing <strong>Avro/Protobuf/JSON schemas</strong> for Kafka topics. It enables schema evolution without breaking consumers.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">PYTHON — Producer with Avro Schema</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><span class="kw">from</span> confluent_kafka <span class="kw">import</span> SerializingProducer
+<span class="kw">from</span> confluent_kafka.schema_registry <span class="kw">import</span> SchemaRegistryClient
+<span class="kw">from</span> confluent_kafka.schema_registry.avro <span class="kw">import</span> AvroSerializer
+
+schema_str = <span class="str">"""
+{
+  "type": "record",
+  "name": "Order",
+  "fields": [
+    {"name": "order_id",  "type": "string"},
+    {"name": "user_id",   "type": "string"},
+    {"name": "amount",    "type": "double"},
+    {"name": "timestamp", "type": "long", "logicalType": "timestamp-millis"}
+  ]
+}
+"""</span>
+
+schema_registry = SchemaRegistryClient({<span class="str">'url'</span>: <span class="str">'http://schema-registry:8081'</span>})
+avro_serializer = <span class="fn">AvroSerializer</span>(schema_registry, schema_str)
+
+producer = <span class="fn">SerializingProducer</span>({
+    <span class="str">'bootstrap.servers'</span>: <span class="str">'localhost:9092'</span>,
+    <span class="str">'value.serializer'</span>: avro_serializer,
+})
+
+producer.<span class="fn">produce</span>(topic=<span class="str">'orders'</span>, value={
+    <span class="str">'order_id'</span>: <span class="str">'ord-001'</span>,
+    <span class="str">'user_id'</span>: <span class="str">'usr-123'</span>,
+    <span class="str">'amount'</span>: <span class="num">49.99</span>,
+    <span class="str">'timestamp'</span>: <span class="num">1709000000000</span>,
+})</pre>
+      </div>
+
+      <h4>Compatibility Modes</h4>
+      <table>
+        <thead><tr><th>Mode</th><th>Can Add Fields?</th><th>Can Remove Fields?</th><th>Use When</th></tr></thead>
+        <tbody>
+          <tr><td>BACKWARD</td><td>With default</td><td>❌</td><td>New consumers read old data</td></tr>
+          <tr><td>FORWARD</td><td>❌</td><td>With default</td><td>Old consumers read new data</td></tr>
+          <tr><td>FULL</td><td>With default</td><td>With default</td><td>Both directions safe</td></tr>
+          <tr><td>NONE</td><td>✅</td><td>✅</td><td>Development only</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="topic-content" id="kafka-connect">
+      <h3>Kafka Connect</h3>
+      <p>Kafka Connect is a framework for <strong>scalable, fault-tolerant</strong> data integration between Kafka and external systems. No custom code needed for standard integrations.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JSON — PostgreSQL Source Connector Config</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre>{
+  <span class="prop">"name"</span>: <span class="str">"postgres-source"</span>,
+  <span class="prop">"config"</span>: {
+    <span class="prop">"connector.class"</span>: <span class="str">"io.debezium.connector.postgresql.PostgresConnector"</span>,
+    <span class="prop">"database.hostname"</span>: <span class="str">"postgres"</span>,
+    <span class="prop">"database.port"</span>: <span class="str">"5432"</span>,
+    <span class="prop">"database.user"</span>: <span class="str">"kafkauser"</span>,
+    <span class="prop">"database.password"</span>: <span class="str">"secret"</span>,
+    <span class="prop">"database.dbname"</span>: <span class="str">"mydb"</span>,
+    <span class="prop">"table.include.list"</span>: <span class="str">"public.orders,public.users"</span>,
+    <span class="prop">"topic.prefix"</span>: <span class="str">"mydb"</span>,
+    <span class="prop">"plugin.name"</span>: <span class="str">"pgoutput"</span>
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-btn" onclick="goToSection(3)">← Kafka Streams</button>
+      <span class="section-indicator">5 / 6</span>
+      <button class="nav-btn primary" onclick="goToSection(5)">Production & Advanced →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Production & Advanced -->
+  <div class="section" id="section-5">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <div>
+        <div class="level-tag level-advanced">ADVANCED</div>
+        <div class="section-title">Production &amp; Advanced Topics</div>
+        <div class="section-desc">Security, monitoring, tuning, and architectural patterns for production Kafka deployments.</div>
+      </div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card" onclick="toggleTopic(this, 'security')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🔒</div>
+        <div class="card-title">Security (TLS, SASL, ACLs)</div>
+        <div class="card-desc">Encryption in transit, authentication mechanisms, and authorization.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'monitoring')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">📊</div>
+        <div class="card-title">Monitoring &amp; Observability</div>
+        <div class="card-desc">Critical JMX metrics, consumer lag monitoring, Prometheus + Grafana.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'tuning')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">⚙️</div>
+        <div class="card-title">Performance Tuning</div>
+        <div class="card-desc">Broker, producer, and consumer configs for maximum throughput or minimum latency.</div>
+      </div>
+      <div class="card" onclick="toggleTopic(this, 'patterns')">
+        <div class="card-check">✓</div>
+        <div class="card-icon">🏛️</div>
+        <div class="card-title">Architectural Patterns</div>
+        <div class="card-desc">Saga pattern, CQRS/Event Sourcing, outbox pattern, multi-tenancy.</div>
+      </div>
+    </div>
+
+    <div class="topic-content" id="security">
+      <h3>Kafka Security</h3>
+      <h4>Authentication (SASL Mechanisms)</h4>
+      <ul>
+        <li><strong>SASL/PLAIN</strong> — Username/password. Use only over TLS. Development-friendly.</li>
+        <li><strong>SASL/SCRAM-SHA-256/512</strong> — Salted challenge-response. More secure than PLAIN.</li>
+        <li><strong>SASL/GSSAPI (Kerberos)</strong> — Enterprise environments with existing Kerberos.</li>
+        <li><strong>SASL/OAUTHBEARER</strong> — OAuth 2.0 token-based. Modern cloud-native setups.</li>
+        <li><strong>mTLS</strong> — Mutual TLS. Certificate-based authentication.</li>
+      </ul>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">PROPERTIES — Client with TLS + SASL/SCRAM</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre>security.protocol=SASL_SSL
+sasl.mechanism=SCRAM-SHA-256
+sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required \
+  username="myapp" \
+  password="supersecret";
+
+ssl.truststore.location=/certs/kafka.truststore.jks
+ssl.truststore.password=truststore-pwd</pre>
+      </div>
+
+      <h4>Authorization (ACLs)</h4>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">BASH — Grant Consumer Group Access</span>
+          <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+        </div>
+        <pre><span class="cm"># Allow 'analytics-service' to read from 'orders' topic</span>
+kafka-acls.sh --bootstrap-server localhost:9092 \
+  --add --allow-principal User:analytics-service \
+  --operation Read --topic orders
+
+<span class="cm"># Allow access to consumer group</span>
+kafka-acls.sh --bootstrap-server localhost:9092 \
+  --add --allow-principal User:analytics-service \
+  --operation Read --group analytics-cg</pre>
+      </div>
+    </div>
+
+    <div class="topic-content" id="monitoring">
+      <h3>Critical Kafka Metrics</h3>
+      <table>
+        <thead><tr><th>Metric</th><th>What It Means</th><th>Alert If</th></tr></thead>
+        <tbody>
+          <tr><td><code>consumer_lag</code></td><td>How far behind consumers are</td><td>Growing for > 5 min</td></tr>
+          <tr><td><code>under_replicated_partitions</code></td><td>Partitions not fully replicated</td><td>&gt; 0 (any value)</td></tr>
+          <tr><td><code>active_controller_count</code></td><td>Number of active controllers</td><td>≠ 1</td></tr>
+          <tr><td><code>offline_partitions_count</code></td><td>Partitions with no leader</td><td>&gt; 0</td></tr>
+          <tr><td><code>request_handler_pool_idle</code></td><td>Broker thread utilization</td><td>&lt; 20%</td></tr>
+          <tr><td><code>produce_request_rate</code></td><td>Producer throughput</td><td>Drops unexpectedly</td></tr>
+          <tr><td><code>fetch_consumer_total_rate</code></td><td>Consumer throughput</td><td>Drops while lag grows</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="topic-content" id="patterns">
+      <h3>Architectural Patterns</h3>
+
+      <h4>Outbox Pattern</h4>
+      <p>Solve the dual-write problem (database + Kafka): write to an <code>outbox</code> table in your DB transaction, then use Debezium to capture that table and publish to Kafka. Guarantees atomicity without distributed transactions.</p>
+
+      <h4>Event Sourcing</h4>
+      <p>Store all state changes as an immutable stream of events in Kafka. Current state = replay of all events. Enables time travel debugging, audit trails, and building multiple read models from one event stream.</p>
+
+      <h4>CQRS with Kafka</h4>
+      <p>Commands go through Kafka as events. Query models (read replicas) are materialized by consumers. Decouple write throughput from read patterns.</p>
+
+      <h4>Saga Pattern (Distributed Transactions)</h4>
+      <p>Break a distributed transaction into a sequence of local transactions, each publishing events to Kafka. If a step fails, compensating transactions are published. Choreography (each service reacts to events) vs. Orchestration (coordinator topic).</p>
+
+      <div class="info-box tip">
+        <div class="info-label">🏆 PRODUCTION CHECKLIST</div>
+        <div class="info-text">
+          ✅ Replication factor ≥ 3 | ✅ min.insync.replicas = 2 | ✅ TLS + Auth enabled | ✅ Consumer lag alerting | ✅ Schema Registry for contracts | ✅ Retention policy set | ✅ Rack awareness configured | ✅ JVM heap tuned (6–8GB for brokers) | ✅ Compaction enabled for CDC topics
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-content" id="tuning">
+      <h3>Performance Tuning Reference</h3>
+
+      <h4>For Maximum Throughput</h4>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PROPERTIES — High Throughput Producer</span></div>
+        <pre>batch.size=131072          <span class="cm"># 128KB batches</span>
+linger.ms=20               <span class="cm"># Wait to fill batches</span>
+compression.type=lz4       <span class="cm"># Fast compression</span>
+acks=1                     <span class="cm"># Leader ack only</span>
+buffer.memory=67108864     <span class="cm"># 64MB send buffer</span>
+max.in.flight.requests.per.connection=5</pre>
+      </div>
+
+      <h4>For Minimum Latency</h4>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PROPERTIES — Low Latency Producer</span></div>
+        <pre>linger.ms=0                <span class="cm"># Send immediately</span>
+batch.size=1               <span class="cm"># Don't batch</span>
+acks=1                     <span class="cm"># Don't wait for replicas</span>
+compression.type=none      <span class="cm"># Skip compression overhead</span></pre>
+      </div>
+    </div>
+
+    <div class="quiz-section">
+      <div class="quiz-title">// FINAL KNOWLEDGE CHECK</div>
+      <div class="quiz-q">Which pattern solves the dual-write problem (writing to both a database and Kafka atomically)?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkAnswer(this, false)">Saga Pattern</button>
+        <button class="quiz-opt" onclick="checkAnswer(this, false)">CQRS</button>
+        <button class="quiz-opt" onclick="checkAnswer(this, true)">Outbox Pattern</button>
+        <button class="quiz-opt" onclick="checkAnswer(this, false)">Event Sourcing</button>
+      </div>
+      <div class="quiz-result"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-btn" onclick="goToSection(4)">← Schema & Connect</button>
+      <span class="section-indicator">6 / 6</span>
+      <div style="text-align:right">
+        <div style="font-family:Space Mono,monospace;font-size:11px;color:var(--accent2);margin-bottom:8px">🎉 COURSE COMPLETE</div>
+        <button class="nav-btn primary" onclick="goToSection(0)">Start Over ↩</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const sections = [
+  "Foundations",
+  "Producers & Consumers",
+  "Internals",
+  "Streams & ksqlDB",
+  "Schema & Connect",
+  "Production"
+];
+
+let currentSection = 0;
+const totalCards = document.querySelectorAll('.card').length;
+
+// Build nav
+const navPills = document.getElementById('navPills');
+sections.forEach((name, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'nav-pill' + (i === 0 ? ' active' : '');
+  btn.textContent = `${String(i+1).padStart(2,'0')} — ${name}`;
+  btn.onclick = () => goToSection(i);
+  navPills.appendChild(btn);
+});
+
+function goToSection(index) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('section-' + index).classList.add('active');
+  navPills.children[index].classList.add('active');
+  currentSection = index;
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function toggleTopic(card, id) {
+  const content = document.getElementById(id);
+  const isOpen = content.classList.contains('open');
+  
+  // Close all in this section
+  card.closest('.section').querySelectorAll('.topic-content').forEach(t => t.classList.remove('open'));
+  
+  if (!isOpen) {
+    content.classList.add('open');
+    card.classList.add('completed');
+    // Scroll to content
+    setTimeout(() => content.scrollIntoView({behavior: 'smooth', block: 'nearest'}), 50);
+  }
+  
+  updateProgress();
+}
+
+function updateProgress() {
+  const completed = document.querySelectorAll('.card.completed').length;
+  const total = totalCards;
+  document.getElementById('progressCount').textContent = `${completed} / ${total} topics`;
+  document.getElementById('progressFill').style.width = (completed / total * 100) + '%';
+}
+
+function checkAnswer(btn, isCorrect) {
+  const parent = btn.parentElement;
+  // Disable all options
+  parent.querySelectorAll('.quiz-opt').forEach(b => b.disabled = true);
+  
+  const result = parent.nextElementSibling;
+  if (isCorrect) {
+    btn.classList.add('correct');
+    result.textContent = '✓ Correct!';
+    result.style.color = 'var(--accent2)';
+  } else {
+    btn.classList.add('wrong');
+    result.textContent = '✗ Not quite. Think about how Kafka distributes partitions.';
+    result.style.color = '#f87171';
+    // Show correct
+    parent.querySelectorAll('.quiz-opt').forEach(b => {
+      if (b.onclick.toString().includes('true')) b.classList.add('correct');
+    });
+  }
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'COPIED!';
+    btn.style.color = 'var(--accent2)';
+    setTimeout(() => { btn.textContent = 'COPY'; btn.style.color = ''; }, 2000);
+  });
+}
+
+updateProgress();
+</script>
+</body>
+</html>
