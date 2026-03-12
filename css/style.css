@@ -57,7 +57,7 @@ body::after { content: ''; position: fixed; inset: 0; background-image: linear-g
 .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; text-decoration: none; }
 .sidebar-logo-icon { width: 36px; height: 36px; background: var(--gradient-cyan); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; box-shadow: var(--shadow-glow-cyan); }
 .sidebar-logo-text .name { font-size: 15px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.3px; }
-.sidebar-logo-text .version { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+.sidebar-logo-text .version { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 3px; display: block; }
 .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
 .nav-section-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); padding: 12px 8px 6px; font-family: var(--font-mono); }
 .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); text-decoration: none; color: var(--text-secondary); font-size: 14px; font-weight: 500; transition: var(--transition); position: relative; cursor: pointer; border: 1px solid transparent; }
