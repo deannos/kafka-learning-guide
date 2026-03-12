@@ -11,25 +11,25 @@
 <div class="site-wrapper">
   <aside class="sidebar">
     <a href="index.html" class="sidebar-logo">
-      <div class="sidebar-logo-icon">⚡</div>
+      <div class="sidebar-logo-icon" aria-label="Apache Kafka logo"><svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-3.5 6.5h7v1.5h-7V8.5Zm0 4h7v1.5h-7v-1.5Zm0 4h7v1.5h-7v-1.5Z"/></svg></div>
       <div class="sidebar-logo-text"><span class="name">KafkaGuide</span><span class="version">v3.x • Developer Portal</span></div>
     </a>
     <nav class="sidebar-nav">
       <div class="nav-section-label">Getting Started</div>
-      <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a>
-      <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Learning Roadmap</a>
+      <a href="index.html" class="nav-item"><span class="nav-icon"></span> Home</a>
+      <a href="roadmap.html" class="nav-item"><span class="nav-icon"></span> Learning Roadmap</a>
       <div class="nav-section-label">Core Knowledge</div>
-      <a href="architecture.html" class="nav-item"><span class="nav-icon">🏗️</span> Architecture</a>
-      <a href="advanced.html" class="nav-item"><span class="nav-icon">⚡</span> Advanced Concepts</a>
-      <a href="security.html" class="nav-item"><span class="nav-icon">🔒</span> Security</a>
+      <a href="architecture.html" class="nav-item"><span class="nav-icon"></span> Architecture</a>
+      <a href="advanced.html" class="nav-item"><span class="nav-icon"></span> Advanced Concepts</a>
+      <a href="security.html" class="nav-item"><span class="nav-icon"></span> Security</a>
       <div class="nav-section-label">Applied Kafka</div>
-      <a href="usecases.html" class="nav-item"><span class="nav-icon">🚀</span> Use Cases</a>
-      <a href="performance.html" class="nav-item"><span class="nav-icon">📊</span> Performance Tuning</a>
-      <a href="comparison.html" class="nav-item"><span class="nav-icon">⚖️</span> Kafka vs Others</a>
-      <a href="operations.html" class="nav-item"><span class="nav-icon">🔧</span> Operations<span class="nav-badge">NEW</span></a>
+      <a href="usecases.html" class="nav-item"><span class="nav-icon"></span> Use Cases</a>
+      <a href="performance.html" class="nav-item"><span class="nav-icon"></span> Performance Tuning</a>
+      <a href="comparison.html" class="nav-item"><span class="nav-icon"></span> Kafka vs Others</a>
+      <a href="operations.html" class="nav-item"><span class="nav-icon"></span> Operations<span class="nav-badge">NEW</span></a>
       <div class="nav-section-label">Reference</div>
-      <a href="cheatsheet.html" class="nav-item"><span class="nav-icon">📋</span> Cheatsheet</a>
-      <a href="interview.html" class="nav-item"><span class="nav-icon">🎯</span> Interview Prep<span class="nav-badge">NEW</span></a>
+      <a href="cheatsheet.html" class="nav-item"><span class="nav-icon"></span> Cheatsheet</a>
+      <a href="interview.html" class="nav-item"><span class="nav-icon"></span> Interview Prep<span class="nav-badge">NEW</span></a>
     </nav>
     <div class="sidebar-footer"><div class="sidebar-footer-text">Apache Kafka® is a trademark of<br>the Apache Software Foundation.</div></div>
   </aside>
@@ -80,7 +80,7 @@
             <div class="timeline-dot done"></div>
             <div class="timeline-content">
               <div class="timeline-step">MILESTONE 01</div>
-              <div class="timeline-title">🧠 Kafka Fundamentals</div>
+              <div class="timeline-title"> Kafka Fundamentals</div>
               <div class="timeline-desc">
                 Understand what Kafka is, what problems it solves, and when to use it. Learn the core vocabulary: topics, partitions, offsets, producers, consumers, consumer groups, brokers, and clusters. Understand event streaming vs traditional messaging.
                 <br><br>
@@ -100,7 +100,7 @@
             <div class="timeline-dot done"></div>
             <div class="timeline-content">
               <div class="timeline-step">MILESTONE 02</div>
-              <div class="timeline-title">⚙️ Local Setup & First Messages</div>
+              <div class="timeline-title"> Local Setup & First Messages</div>
               <div class="timeline-desc">
                 Get Kafka running locally using Docker Compose. Use the CLI tools to create topics, produce messages, and consume them. Understand the command-line tools: <code>kafka-topics.sh</code>, <code>kafka-console-producer.sh</code>, <code>kafka-console-consumer.sh</code>.
                 <br><br>
@@ -118,7 +118,7 @@
             <div class="timeline-dot active"></div>
             <div class="timeline-content">
               <div class="timeline-step">MILESTONE 03</div>
-              <div class="timeline-title">📤📥 Producer & Consumer APIs</div>
+              <div class="timeline-title"> Producer & Consumer APIs</div>
               <div class="timeline-desc">
                 Write your first producer and consumer in Python or Java. Understand serialization/deserialization, acks, offset management, auto-commit vs manual commit, and consumer group behavior.
                 <br><br>
@@ -148,7 +148,7 @@
             <div class="timeline-dot"></div>
             <div class="timeline-content">
               <div class="timeline-step">MILESTONE 04</div>
-              <div class="timeline-title">🐳 Docker & Production-Like Setup</div>
+              <div class="timeline-title"> Docker & Production-Like Setup</div>
               <div class="timeline-desc">
                 Set up a multi-broker Kafka cluster using Docker Compose (3 brokers + ZooKeeper or KRaft). Configure replication factors, understand ISR, test broker failure and recovery. Set up Schema Registry and Kafka UI.
                 <br><br>
@@ -166,7 +166,7 @@
             <div class="timeline-dot"></div>
             <div class="timeline-content">
               <div class="timeline-step">MILESTONE 05</div>
-              <div class="timeline-title">📋 Schema Registry & Avro</div>
+              <div class="timeline-title"> Schema Registry & Avro</div>
               <div class="timeline-desc">
                 Integrate Confluent Schema Registry. Define Avro schemas for your events. Understand schema evolution and compatibility modes. Replace JSON with Avro serialization and observe the size reduction.
                 <br><br>
@@ -184,7 +184,7 @@
             <div class="timeline-dot"></div>
             <div class="timeline-content">
               <div class="timeline-step">MILESTONE 06</div>
-              <div class="timeline-title">🌊 Kafka Streams</div>
+              <div class="timeline-title"> Kafka Streams</div>
               <div class="timeline-desc">
                 Build stateful stream processing applications using the Kafka Streams DSL. Learn KStream, KTable, joins, aggregations, and windowing. Understand state stores backed by RocksDB.
                 <br><br>
@@ -203,7 +203,7 @@
             <div class="timeline-dot"></div>
             <div class="timeline-content">
               <div class="timeline-step">MILESTONE 07</div>
-              <div class="timeline-title">🔌 Kafka Connect</div>
+              <div class="timeline-title"> Kafka Connect</div>
               <div class="timeline-desc">
                 Deploy Kafka Connect and configure source and sink connectors. Set up Debezium CDC from a PostgreSQL database. Route changes to Elasticsearch using the Elasticsearch Sink connector.
                 <br><br>
@@ -234,7 +234,7 @@
             <div class="timeline-dot"></div>
             <div class="timeline-content">
               <div class="timeline-step">MILESTONE 08</div>
-              <div class="timeline-title">🏗️ Build a Real System</div>
+              <div class="timeline-title"> Build a Real System</div>
               <div class="timeline-desc">
                 Build a complete event-driven application with multiple services communicating through Kafka. Implement the outbox pattern for reliable event publishing, saga pattern for distributed transactions, and CQRS for read scaling.
                 <br><br>
@@ -253,7 +253,7 @@
             <div class="timeline-dot"></div>
             <div class="timeline-content">
               <div class="timeline-step">MILESTONE 09</div>
-              <div class="timeline-title">📊 Performance & Production Tuning</div>
+              <div class="timeline-title"> Performance & Production Tuning</div>
               <div class="timeline-desc">
                 Benchmark your cluster. Tune producer and consumer configurations for your target SLOs. Set up monitoring with Prometheus + Grafana. Configure JMX metrics, create consumer lag alerting, and build operational runbooks.
                 <br><br>
@@ -272,7 +272,7 @@
             <div class="timeline-dot"></div>
             <div class="timeline-content">
               <div class="timeline-step">MILESTONE 10</div>
-              <div class="timeline-title">🏛️ Architecture Design & Security</div>
+              <div class="timeline-title"> Architecture Design & Security</div>
               <div class="timeline-desc">
                 Design event schemas that can evolve. Implement TLS encryption + SASL authentication + ACL authorization. Plan partition strategies for your data. Design for multi-datacenter with MirrorMaker 2. Create disaster recovery procedures.
                 <br><br>

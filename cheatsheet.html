@@ -11,25 +11,25 @@
 <div class="site-wrapper">
   <aside class="sidebar">
     <a href="index.html" class="sidebar-logo">
-      <div class="sidebar-logo-icon">⚡</div>
+      <div class="sidebar-logo-icon" aria-label="Apache Kafka logo"><svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-3.5 6.5h7v1.5h-7V8.5Zm0 4h7v1.5h-7v-1.5Zm0 4h7v1.5h-7v-1.5Z"/></svg></div>
       <div class="sidebar-logo-text"><span class="name">KafkaGuide</span><span class="version">v3.x • Developer Portal</span></div>
     </a>
     <nav class="sidebar-nav">
       <div class="nav-section-label">Getting Started</div>
-      <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a>
-      <a href="roadmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Learning Roadmap</a>
+      <a href="index.html" class="nav-item"><span class="nav-icon"></span> Home</a>
+      <a href="roadmap.html" class="nav-item"><span class="nav-icon"></span> Learning Roadmap</a>
       <div class="nav-section-label">Core Knowledge</div>
-      <a href="architecture.html" class="nav-item"><span class="nav-icon">🏗️</span> Architecture</a>
-      <a href="advanced.html" class="nav-item"><span class="nav-icon">⚡</span> Advanced Concepts</a>
-      <a href="security.html" class="nav-item"><span class="nav-icon">🔒</span> Security</a>
+      <a href="architecture.html" class="nav-item"><span class="nav-icon"></span> Architecture</a>
+      <a href="advanced.html" class="nav-item"><span class="nav-icon"></span> Advanced Concepts</a>
+      <a href="security.html" class="nav-item"><span class="nav-icon"></span> Security</a>
       <div class="nav-section-label">Applied Kafka</div>
-      <a href="usecases.html" class="nav-item"><span class="nav-icon">🚀</span> Use Cases</a>
-      <a href="performance.html" class="nav-item"><span class="nav-icon">📊</span> Performance Tuning</a>
-      <a href="comparison.html" class="nav-item"><span class="nav-icon">⚖️</span> Kafka vs Others</a>
-      <a href="operations.html" class="nav-item"><span class="nav-icon">🔧</span> Operations</a>
+      <a href="usecases.html" class="nav-item"><span class="nav-icon"></span> Use Cases</a>
+      <a href="performance.html" class="nav-item"><span class="nav-icon"></span> Performance Tuning</a>
+      <a href="comparison.html" class="nav-item"><span class="nav-icon"></span> Kafka vs Others</a>
+      <a href="operations.html" class="nav-item"><span class="nav-icon"></span> Operations</a>
       <div class="nav-section-label">Reference</div>
-      <a href="cheatsheet.html" class="nav-item active"><span class="nav-icon">📋</span> Cheatsheet</a>
-      <a href="interview.html" class="nav-item"><span class="nav-icon">🎯</span> Interview Prep<span class="nav-badge">NEW</span></a>
+      <a href="cheatsheet.html" class="nav-item active"><span class="nav-icon"></span> Cheatsheet</a>
+      <a href="interview.html" class="nav-item"><span class="nav-icon"></span> Interview Prep<span class="nav-badge">NEW</span></a>
     </nav>
     <div class="sidebar-footer"><div class="sidebar-footer-text">Apache Kafka® is a trademark of<br>the Apache Software Foundation.</div></div>
   </aside>
@@ -57,7 +57,7 @@
         <div class="cheat-grid fade-in">
           <div class="cheat-card">
             <div class="cheat-card-header">
-              <span>📁</span>
+              <span></span>
               <span class="cheat-card-title">TOPICS</span>
             </div>
             <pre><span class="cm"># Create topic</span>
@@ -90,7 +90,7 @@ kafka-topics.sh --alter \
 
           <div class="cheat-card">
             <div class="cheat-card-header">
-              <span>📤</span>
+              <span></span>
               <span class="cheat-card-title">PRODUCE & CONSUME</span>
             </div>
             <pre><span class="cm"># Console producer</span>
@@ -122,7 +122,7 @@ kafka-console-consumer.sh \
 
           <div class="cheat-card">
             <div class="cheat-card-header">
-              <span>👥</span>
+              <span></span>
               <span class="cheat-card-title">CONSUMER GROUPS</span>
             </div>
             <pre><span class="cm"># List all groups</span>
@@ -154,7 +154,7 @@ kafka-consumer-groups.sh \
 
           <div class="cheat-card">
             <div class="cheat-card-header">
-              <span>⚙️</span>
+              <span></span>
               <span class="cheat-card-title">CONFIGS & ADMIN</span>
             </div>
             <pre><span class="cm"># Describe topic config</span>
@@ -183,7 +183,7 @@ kafka-configs.sh \
 
           <div class="cheat-card">
             <div class="cheat-card-header">
-              <span>📊</span>
+              <span></span>
               <span class="cheat-card-title">PERFORMANCE TEST</span>
             </div>
             <pre><span class="cm"># Producer performance test</span>
@@ -208,7 +208,7 @@ kafka-consumer-perf-test.sh \
 
           <div class="cheat-card">
             <div class="cheat-card-header">
-              <span>🔍</span>
+              <span></span>
               <span class="cheat-card-title">OFFSETS & LOG</span>
             </div>
             <pre><span class="cm"># Get latest offset per partition</span>
@@ -311,7 +311,7 @@ kafka-dump-log.sh \
 
         <div class="cheat-grid fade-in">
           <div class="cheat-card">
-            <div class="cheat-card-header"><span>🐍</span><span class="cheat-card-title">BASIC PRODUCER</span></div>
+            <div class="cheat-card-header"><span></span><span class="cheat-card-title">BASIC PRODUCER</span></div>
             <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaProducer
 <span class="kw">import</span> json
 
@@ -334,7 +334,7 @@ producer.flush()</pre>
           </div>
 
           <div class="cheat-card">
-            <div class="cheat-card-header"><span>🐍</span><span class="cheat-card-title">BASIC CONSUMER</span></div>
+            <div class="cheat-card-header"><span></span><span class="cheat-card-title">BASIC CONSUMER</span></div>
             <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaConsumer
 <span class="kw">import</span> json
 
@@ -354,7 +354,7 @@ consumer = <span class="fn">KafkaConsumer</span>(
           </div>
 
           <div class="cheat-card">
-            <div class="cheat-card-header"><span>🐍</span><span class="cheat-card-title">ADMIN CLIENT</span></div>
+            <div class="cheat-card-header"><span></span><span class="cheat-card-title">ADMIN CLIENT</span></div>
             <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaAdminClient
 <span class="kw">from</span> kafka.admin <span class="kw">import</span> NewTopic
 
@@ -380,7 +380,7 @@ admin.close()</pre>
           </div>
 
           <div class="cheat-card">
-            <div class="cheat-card-header"><span>🐍</span><span class="cheat-card-title">ASYNC PRODUCER</span></div>
+            <div class="cheat-card-header"><span></span><span class="cheat-card-title">ASYNC PRODUCER</span></div>
             <pre"><span class="kw">from</span> kafka <span class="kw">import</span> KafkaProducer
 
 producer = <span class="fn">KafkaProducer</span>(
