@@ -1,64 +1,150 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kafka Developer Guide — Learn Apache Kafka</title>
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kafka Developer Guide — Learn Apache Kafka</title>
+    <meta
+      name="description"
+      content="The complete developer guide to Apache Kafka — event streaming, real-time data pipelines, stream processing, and production architecture from zero to expert."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script>
+      !(function () {
+        var t = localStorage.getItem("kguide-theme");
+        t && document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <button class="sidebar-toggle">☰</button>
 
-<button class="sidebar-toggle">☰</button>
-
-<div class="site-wrapper">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <a href="index.html" class="sidebar-logo">
-      <div class="sidebar-logo-icon" aria-label="Apache Kafka logo"><svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-3.5 6.5h7v1.5h-7V8.5Zm0 4h7v1.5h-7v-1.5Zm0 4h7v1.5h-7v-1.5Z"/></svg></div>
-      <div class="sidebar-logo-text">
-        <span class="name">KafkaGuide</span>
-        <span class="version">v1.0  Developer Portal</span>
-      </div>
-    </a>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Getting Started</div>
-      <a href="index.html" class="nav-item"><span class="nav-icon"></span> Home</a>
-      <a href="roadmap.html" class="nav-item"><span class="nav-icon"></span> Learning Roadmap</a>
-      <div class="nav-section-label">Core Knowledge</div>
-      <a href="architecture.html" class="nav-item"><span class="nav-icon"></span> Architecture</a>
-      <a href="advanced.html" class="nav-item"><span class="nav-icon"></span> Advanced Concepts</a>
-      <a href="security.html" class="nav-item"><span class="nav-icon"></span> Security</a>
-      <div class="nav-section-label">Applied Kafka</div>
-      <a href="usecases.html" class="nav-item"><span class="nav-icon"></span> Use Cases</a>
-      <a href="performance.html" class="nav-item"><span class="nav-icon"></span> Performance Tuning</a>
-      <a href="comparison.html" class="nav-item"><span class="nav-icon"></span> Kafka vs Others</a>
-      <a href="operations.html" class="nav-item"><span class="nav-icon"></span> Operations<span class="nav-badge">NEW</span></a>
-      <div class="nav-section-label">Reference</div>
-      <a href="cheatsheet.html" class="nav-item"><span class="nav-icon"></span> Cheatsheet</a>
-      <a href="interview.html" class="nav-item"><span class="nav-icon"></span> Interview Prep<span class="nav-badge">NEW</span></a>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-footer-text">
-        Apache Kafka® is a trademark of<br>the Apache Software Foundation.
-      </div>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <div class="main-content">
-    <header class="header">
-      <div class="header-breadcrumb">
-        <span>kafka-guide</span>
-        <span style="color:var(--text-muted)">/</span>
-        <span class="current">home</span>
-      </div>
-      <div class="header-right"><button class="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle theme"><span class="icon-sun"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span><span class="icon-moon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span></button>
-        <span class="header-tag">Apache Kafka 3.7</span>
-        <a href="https://kafka.apache.org/documentation" target="_blank" class="github-btn">
-          📖 Official Docs
+    <div class="site-wrapper">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <a href="index.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">⚡</div>
+          <div class="sidebar-logo-text">
+            <span class="name">KafkaGuide</span>
+            <span class="version">v1.0 Developer Portal</span>
+          </div>
         </a>
-      </div>
-    </header>
+        <nav class="sidebar-nav">
+          <div class="nav-section-label">Getting Started</div>
+          <a href="index.html" class="nav-item"
+            ><span class="nav-icon">🏠</span> Home</a
+          >
+          <a href="roadmap.html" class="nav-item"
+            ><span class="nav-icon">🗺️</span> Learning Roadmap</a
+          >
+          <div class="nav-section-label">Core Knowledge</div>
+          <a href="architecture.html" class="nav-item"
+            ><span class="nav-icon">🏗️</span> Architecture</a
+          >
+          <a href="advanced.html" class="nav-item"
+            ><span class="nav-icon">⚡</span> Advanced Concepts</a
+          >
+          <a href="security.html" class="nav-item"
+            ><span class="nav-icon">🔒</span> Security</a
+          >
+          <div class="nav-section-label">Applied Kafka</div>
+          <a href="usecases.html" class="nav-item"
+            ><span class="nav-icon">🚀</span> Use Cases</a
+          >
+          <a href="performance.html" class="nav-item"
+            ><span class="nav-icon">📊</span> Performance Tuning</a
+          >
+          <a href="comparison.html" class="nav-item"
+            ><span class="nav-icon">⚖️</span> Kafka vs Others</a
+          >
+          <a href="operations.html" class="nav-item"
+            ><span class="nav-icon">🔧</span> Operations<span class="nav-badge"
+              >NEW</span
+            ></a
+          >
+          <div class="nav-section-label">Reference</div>
+          <a href="cheatsheet.html" class="nav-item"
+            ><span class="nav-icon">📋</span> Cheatsheet</a
+          >
+          <a href="interview.html" class="nav-item"
+            ><span class="nav-icon">🎯</span> Interview Prep<span
+              class="nav-badge"
+              >NEW</span
+            ></a
+          >
+        </nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-footer-text">
+            Apache Kafka® is a trademark of<br />the Apache Software Foundation.
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <div class="main-content">
+        <header class="header">
+          <div class="header-breadcrumb">
+            <span>kafka-guide</span>
+            <span style="color: var(--text-muted)">/</span>
+            <span class="current">home</span>
+          </div>
+          <div class="header-right">
+            <button
+              class="theme-toggle"
+              title="Toggle dark/light mode"
+              aria-label="Toggle theme"
+            >
+              <span class="icon-sun"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg></span
+              ><span class="icon-moon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                  /></svg
+              ></span>
+            </button>
+            <span class="header-tag">Apache Kafka 3.7</span>
+            <a
+              href="https://kafka.apache.org/documentation"
+              target="_blank"
+              class="github-btn"
+            >
+              📖 Official Docs
+            </a>
+          </div>
+        </header>
 
     <!-- HERO -->
     <section class="hero">
@@ -72,8 +158,8 @@
         The complete developer guide to building real-time data pipelines, event-driven architectures, and stream processing systems with Apache Kafka.
       </p>
       <div class="hero-actions">
-        <a href="roadmap.html" class="btn-primary"> Start Learning Path</a>
-        <a href="architecture.html" class="btn-secondary"> Explore Architecture</a>
+        <a href="roadmap.html" class="btn-primary">🗺️ Start Learning Path</a>
+        <a href="architecture.html" class="btn-secondary">📐 Explore Architecture</a>
       </div>
       <div class="hero-stats">
         <div class="stat-item">
@@ -95,194 +181,324 @@
       </div>
     </section>
 
-    <!-- WHAT IS KAFKA -->
-    <div class="page-content">
-      <div class="content-section fade-in">
-        <div class="section-eyebrow">// FOUNDATION</div>
-        <h2 class="section-title">What is <span>Apache Kafka?</span></h2>
-        <p class="section-subtitle">A distributed event streaming platform built for high-throughput, fault-tolerant, real-time data processing at any scale.</p>
+        <!-- WHAT IS KAFKA -->
+        <div class="page-content">
+          <div class="content-section fade-in">
+            <div class="section-eyebrow">// FOUNDATION</div>
+            <h2 class="section-title">What is <span>Apache Kafka?</span></h2>
+            <p class="section-subtitle">
+              A distributed event streaming platform built for high-throughput,
+              fault-tolerant, real-time data processing at any scale.
+            </p>
 
-        <div class="cards-grid">
-          <div class="card fade-in stagger-1">
-            <div class="card-accent-top"></div>
-            <div class="card-icon cyan">🌊</div>
-            <div class="card-title">Event Streaming Platform</div>
-            <div class="card-desc">Kafka enables you to publish, subscribe to, store, and process streams of events in real-time. It's the nervous system of your data infrastructure.</div>
-            <div class="card-tags"><span class="tag cyan">Streaming</span><span class="tag green">Real-time</span></div>
-          </div>
-          <div class="card fade-in stagger-2">
-            <div class="card-accent-top"></div>
-            <div class="card-icon green">🔗</div>
-            <div class="card-title">Distributed by Design</div>
-            <div class="card-desc">Built to run as a cluster across multiple servers, providing horizontal scalability and fault tolerance through replication.</div>
-            <div class="card-tags"><span class="tag green">Distributed</span><span class="tag orange">Fault Tolerant</span></div>
-          </div>
-          <div class="card fade-in stagger-3">
-            <div class="card-accent-top"></div>
-            <div class="card-icon orange">⚡</div>
-            <div class="card-title">Extreme Performance</div>
-            <div class="card-desc">Sequential disk I/O, zero-copy transfers, and intelligent batching deliver millions of messages per second with sub-millisecond latency.</div>
-            <div class="card-tags"><span class="tag orange">High Throughput</span><span class="tag cyan">Low Latency</span></div>
-          </div>
-          <div class="card fade-in stagger-4">
-            <div class="card-accent-top"></div>
-            <div class="card-icon purple">♾️</div>
-            <div class="card-title">Durable Storage</div>
-            <div class="card-desc">Messages are persisted to disk and replicated. Unlike queues, consumers can replay events days or weeks later with configurable retention.</div>
-            <div class="card-tags"><span class="tag purple">Persistent</span><span class="tag cyan">Replayable</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-divider"></div>
-
-      <!-- WHY KAFKA -->
-      <div class="content-section fade-in">
-        <div class="section-eyebrow">// THE PROBLEM</div>
-        <h2 class="section-title">Why <span>Kafka Exists</span></h2>
-        <p class="section-subtitle">Before event streaming, systems suffered from tight coupling, integration complexity, and scalability ceilings.</p>
-
-        <div class="info-box orange fade-in">
-          <div class="info-label">⚠ The Integration Problem</div>
-          <div class="info-text">With N services, point-to-point integration creates <strong>N×(N-1)/2 connections</strong>. 50 services = 1,225 pipelines. Each has custom schemas, different failure modes, and independent scaling. This is unsustainable.</div>
-        </div>
-
-        <div class="cards-grid-2 cards-grid fade-in">
-          <div class="card">
-            <div class="card-icon red">❌</div>
-            <div class="card-title">Before Kafka</div>
-            <div class="card-desc">
-              <ul style="padding-left:16px;margin:0">
-                <li>Point-to-point integrations between every service pair</li>
-                <li>Data consumers must poll source systems repeatedly</li>
-                <li>No message history — if a consumer is down, data is lost</li>
-                <li>Tight coupling makes changes catastrophically risky</li>
-                <li>Different teams maintain their own integration pipelines</li>
-              </ul>
+            <div class="cards-grid">
+              <div class="card fade-in stagger-1">
+                <div class="card-accent-top"></div>
+                <div class="card-icon cyan">🌊</div>
+                <div class="card-title">Event Streaming Platform</div>
+                <div class="card-desc">
+                  Kafka enables you to publish, subscribe to, store, and process
+                  streams of events in real-time. It's the nervous system of
+                  your data infrastructure.
+                </div>
+                <div class="card-tags">
+                  <span class="tag cyan">Streaming</span
+                  ><span class="tag green">Real-time</span>
+                </div>
+              </div>
+              <div class="card fade-in stagger-2">
+                <div class="card-accent-top"></div>
+                <div class="card-icon green">🔗</div>
+                <div class="card-title">Distributed by Design</div>
+                <div class="card-desc">
+                  Built to run as a cluster across multiple servers, providing
+                  horizontal scalability and fault tolerance through
+                  replication.
+                </div>
+                <div class="card-tags">
+                  <span class="tag green">Distributed</span
+                  ><span class="tag orange">Fault Tolerant</span>
+                </div>
+              </div>
+              <div class="card fade-in stagger-3">
+                <div class="card-accent-top"></div>
+                <div class="card-icon orange">⚡</div>
+                <div class="card-title">Extreme Performance</div>
+                <div class="card-desc">
+                  Sequential disk I/O, zero-copy transfers, and intelligent
+                  batching deliver millions of messages per second with
+                  sub-millisecond latency.
+                </div>
+                <div class="card-tags">
+                  <span class="tag orange">High Throughput</span
+                  ><span class="tag cyan">Low Latency</span>
+                </div>
+              </div>
+              <div class="card fade-in stagger-4">
+                <div class="card-accent-top"></div>
+                <div class="card-icon purple">♾️</div>
+                <div class="card-title">Durable Storage</div>
+                <div class="card-desc">
+                  Messages are persisted to disk and replicated. Unlike queues,
+                  consumers can replay events days or weeks later with
+                  configurable retention.
+                </div>
+                <div class="card-tags">
+                  <span class="tag purple">Persistent</span
+                  ><span class="tag cyan">Replayable</span>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="card">
-            <div class="card-icon green">✅</div>
-            <div class="card-title">After Kafka</div>
-            <div class="card-desc">
-              <ul style="padding-left:16px;margin:0">
-                <li>Producers write to topics; any consumer can subscribe independently</li>
-                <li>Consumers read at their own pace from persistent log</li>
-                <li>Messages retained for days/weeks — replay anytime</li>
-                <li>Producers don't know about consumers — fully decoupled</li>
-                <li>One central platform serves all teams and use cases</li>
-              </ul>
+
+          <div class="section-divider"></div>
+
+          <!-- WHY KAFKA -->
+          <div class="content-section fade-in">
+            <div class="section-eyebrow">// THE PROBLEM</div>
+            <h2 class="section-title">Why <span>Kafka Exists</span></h2>
+            <p class="section-subtitle">
+              Before event streaming, systems suffered from tight coupling,
+              integration complexity, and scalability ceilings.
+            </p>
+
+            <div class="info-box orange fade-in">
+              <div class="info-label">⚠ The Integration Problem</div>
+              <div class="info-text">
+                With N services, point-to-point integration creates
+                <strong>N×(N-1)/2 connections</strong>. 50 services = 1,225
+                pipelines. Each has custom schemas, different failure modes, and
+                independent scaling. This is unsustainable.
+              </div>
+            </div>
+
+            <div class="cards-grid-2 cards-grid fade-in">
+              <div class="card">
+                <div class="card-icon red">❌</div>
+                <div class="card-title">Before Kafka</div>
+                <div class="card-desc">
+                  <ul style="padding-left: 16px; margin: 0">
+                    <li>
+                      Point-to-point integrations between every service pair
+                    </li>
+                    <li>Data consumers must poll source systems repeatedly</li>
+                    <li>
+                      No message history — if a consumer is down, data is lost
+                    </li>
+                    <li>Tight coupling makes changes catastrophically risky</li>
+                    <li>
+                      Different teams maintain their own integration pipelines
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-icon green">✅</div>
+                <div class="card-title">After Kafka</div>
+                <div class="card-desc">
+                  <ul style="padding-left: 16px; margin: 0">
+                    <li>
+                      Producers write to topics; any consumer can subscribe
+                      independently
+                    </li>
+                    <li>
+                      Consumers read at their own pace from persistent log
+                    </li>
+                    <li>Messages retained for days/weeks — replay anytime</li>
+                    <li>
+                      Producers don't know about consumers — fully decoupled
+                    </li>
+                    <li>One central platform serves all teams and use cases</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="section-divider"></div>
+          <div class="section-divider"></div>
 
-      <!-- EVENT STREAMING -->
-      <div class="content-section fade-in">
-        <div class="section-eyebrow">// CORE CONCEPT</div>
-        <h2 class="section-title">Event <span>Streaming</span></h2>
+          <!-- EVENT STREAMING -->
+          <div class="content-section fade-in">
+            <div class="section-eyebrow">// CORE CONCEPT</div>
+            <h2 class="section-title">Event <span>Streaming</span></h2>
 
-        <p>An <strong>event</strong> is any notification that something happened: a user clicked, an order was placed, a sensor reported temperature. Event streaming captures these notifications in real-time and makes them available to any system that needs them.</p>
+            <p>
+              An <strong>event</strong> is any notification that something
+              happened: a user clicked, an order was placed, a sensor reported
+              temperature. Event streaming captures these notifications in
+              real-time and makes them available to any system that needs them.
+            </p>
 
-        <div class="cards-grid fade-in">
-          <div class="card">
-            <div class="card-icon cyan">📡</div>
-            <div class="card-title">Capture</div>
-            <div class="card-desc">Capture events in real-time from databases, sensors, mobile devices, cloud services, and software applications using producers.</div>
+            <div class="cards-grid fade-in">
+              <div class="card">
+                <div class="card-icon cyan">📡</div>
+                <div class="card-title">Capture</div>
+                <div class="card-desc">
+                  Capture events in real-time from databases, sensors, mobile
+                  devices, cloud services, and software applications using
+                  producers.
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-icon green">🗄️</div>
+                <div class="card-title">Store</div>
+                <div class="card-desc">
+                  Store event streams durably and reliably on a distributed log
+                  for as long as you need — hours, days, or forever with log
+                  compaction.
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-icon purple">⚙️</div>
+                <div class="card-title">Process</div>
+                <div class="card-desc">
+                  Process and react to event streams in real-time or
+                  retrospectively using Kafka Streams, ksqlDB, or any consumer
+                  application.
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-icon orange">🚀</div>
+                <div class="card-title">Deliver</div>
+                <div class="card-desc">
+                  Route processed events to the right destinations: databases,
+                  search indices, analytics systems, or other applications.
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="card">
-            <div class="card-icon green">🗄️</div>
-            <div class="card-title">Store</div>
-            <div class="card-desc">Store event streams durably and reliably on a distributed log for as long as you need — hours, days, or forever with log compaction.</div>
-          </div>
-          <div class="card">
-            <div class="card-icon purple">⚙️</div>
-            <div class="card-title">Process</div>
-            <div class="card-desc">Process and react to event streams in real-time or retrospectively using Kafka Streams, ksqlDB, or any consumer application.</div>
-          </div>
-          <div class="card">
-            <div class="card-icon orange">🚀</div>
-            <div class="card-title">Deliver</div>
-            <div class="card-desc">Route processed events to the right destinations: databases, search indices, analytics systems, or other applications.</div>
-          </div>
-        </div>
-      </div>
 
-      <div class="section-divider"></div>
+          <div class="section-divider"></div>
 
-      <!-- MESSAGING VS STREAMING -->
-      <div class="content-section fade-in">
-        <div class="section-eyebrow">// KEY DIFFERENCE</div>
-        <h2 class="section-title">Messaging vs <span>Streaming</span></h2>
+          <!-- MESSAGING VS STREAMING -->
+          <div class="content-section fade-in">
+            <div class="section-eyebrow">// KEY DIFFERENCE</div>
+            <h2 class="section-title">Messaging vs <span>Streaming</span></h2>
 
-        <div class="table-wrap fade-in">
-          <table>
-            <thead>
-              <tr>
-                <th>Aspect</th>
-                <th>Traditional Messaging</th>
-                <th>Event Streaming (Kafka)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td><strong>Message Lifecycle</strong></td><td>Deleted after consumption</td><td>Retained for configured period</td></tr>
-              <tr><td><strong>Consumption Model</strong></td><td>Each message consumed once</td><td>Multiple independent consumers</td></tr>
-              <tr><td><strong>History Access</strong></td><td>❌ No replay</td><td class="yes">✅ Full replay capability</td></tr>
-              <tr><td><strong>Consumer Coupling</strong></td><td>Producer must know consumers</td><td>Fully decoupled</td></tr>
-              <tr><td><strong>Throughput</strong></td><td>Thousands/sec</td><td class="yes">Millions/sec</td></tr>
-              <tr><td><strong>Ordering</strong></td><td>Queue-level</td><td class="yes">Per-partition ordering</td></tr>
-              <tr><td><strong>Storage</strong></td><td>In-memory / temp</td><td class="yes">Durable disk-based log</td></tr>
-              <tr><td><strong>Processing Model</strong></td><td>Task queue</td><td class="yes">Stream processing</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="section-divider"></div>
-
-      <!-- WHO USES KAFKA -->
-      <div class="content-section fade-in">
-        <div class="section-eyebrow">// ADOPTION</div>
-        <h2 class="section-title">Who Uses <span>Kafka?</span></h2>
-        <p class="section-subtitle">Kafka was born at LinkedIn and now powers the world's most critical data infrastructure.</p>
-        <div class="cards-grid fade-in">
-          <div class="card">
-            <div class="card-icon cyan">🔗</div>
-            <div class="card-title">LinkedIn</div>
-            <div class="card-desc">Created Kafka to handle activity tracking, metrics, and notifications. Processes <strong>7 trillion messages per day</strong> across their platform.</div>
+            <div class="table-wrap fade-in">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Aspect</th>
+                    <th>Traditional Messaging</th>
+                    <th>Event Streaming (Kafka)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Message Lifecycle</strong></td>
+                    <td>Deleted after consumption</td>
+                    <td>Retained for configured period</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Consumption Model</strong></td>
+                    <td>Each message consumed once</td>
+                    <td>Multiple independent consumers</td>
+                  </tr>
+                  <tr>
+                    <td><strong>History Access</strong></td>
+                    <td>❌ No replay</td>
+                    <td class="yes">✅ Full replay capability</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Consumer Coupling</strong></td>
+                    <td>Producer must know consumers</td>
+                    <td>Fully decoupled</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Throughput</strong></td>
+                    <td>Thousands/sec</td>
+                    <td class="yes">Millions/sec</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Ordering</strong></td>
+                    <td>Queue-level</td>
+                    <td class="yes">Per-partition ordering</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Storage</strong></td>
+                    <td>In-memory / temp</td>
+                    <td class="yes">Durable disk-based log</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Processing Model</strong></td>
+                    <td>Task queue</td>
+                    <td class="yes">Stream processing</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div class="card">
-            <div class="card-icon orange">🛒</div>
-            <div class="card-title">Uber</div>
-            <div class="card-desc">Uses Kafka for real-time supply/demand matching, driver location tracking, surge pricing calculation, and financial reporting pipelines.</div>
-          </div>
-          <div class="card">
-            <div class="card-icon purple">🎵</div>
-            <div class="card-title">Netflix</div>
-            <div class="card-desc">Kafka powers their event-driven microservices, real-time A/B testing infrastructure, and operational monitoring across 200M+ subscribers.</div>
-          </div>
-          <div class="card">
-            <div class="card-icon green">💳</div>
-            <div class="card-title">Goldman Sachs</div>
-            <div class="card-desc">Financial services firms use Kafka for real-time risk management, trade processing, market data distribution, and fraud detection.</div>
-          </div>
-        </div>
-      </div>
 
-      <!-- QUICK START SECTION -->
-      <div class="content-section fade-in">
-        <div class="section-eyebrow">// QUICK START</div>
-        <h2 class="section-title">Get <span>Running Fast</span></h2>
+          <div class="section-divider"></div>
 
-        <div class="code-wrap fade-in">
-          <div class="code-header">
-            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
-            <span class="code-title">docker-compose.yml — Kafka + Zookeeper</span>
-            <button class="copy-btn">COPY</button>
+          <!-- WHO USES KAFKA -->
+          <div class="content-section fade-in">
+            <div class="section-eyebrow">// ADOPTION</div>
+            <h2 class="section-title">Who Uses <span>Kafka?</span></h2>
+            <p class="section-subtitle">
+              Kafka was born at LinkedIn and now powers the world's most
+              critical data infrastructure.
+            </p>
+            <div class="cards-grid fade-in">
+              <div class="card">
+                <div class="card-icon cyan">🔗</div>
+                <div class="card-title">LinkedIn</div>
+                <div class="card-desc">
+                  Created Kafka to handle activity tracking, metrics, and
+                  notifications. Processes
+                  <strong>7 trillion messages per day</strong> across their
+                  platform.
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-icon orange">🛒</div>
+                <div class="card-title">Uber</div>
+                <div class="card-desc">
+                  Uses Kafka for real-time supply/demand matching, driver
+                  location tracking, surge pricing calculation, and financial
+                  reporting pipelines.
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-icon purple">🎵</div>
+                <div class="card-title">Netflix</div>
+                <div class="card-desc">
+                  Kafka powers their event-driven microservices, real-time A/B
+                  testing infrastructure, and operational monitoring across
+                  200M+ subscribers.
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-icon green">💳</div>
+                <div class="card-title">Goldman Sachs</div>
+                <div class="card-desc">
+                  Financial services firms use Kafka for real-time risk
+                  management, trade processing, market data distribution, and
+                  fraud detection.
+                </div>
+              </div>
+            </div>
           </div>
-          <pre><span class="prop">version</span>: <span class="str">'3.8'</span>
+
+          <!-- QUICK START SECTION -->
+          <div class="content-section fade-in">
+            <div class="section-eyebrow">// QUICK START</div>
+            <h2 class="section-title">Get <span>Running Fast</span></h2>
+
+            <div class="code-wrap fade-in">
+              <div class="code-header">
+                <div class="code-dots">
+                  <span class="code-dot red"></span
+                  ><span class="code-dot yellow"></span
+                  ><span class="code-dot green"></span>
+                </div>
+                <span class="code-title"
+                  >docker-compose.yml — Kafka + Zookeeper</span
+                >
+                <button class="copy-btn">COPY</button>
+              </div>
+              <pre><span class="prop">version</span>: <span class="str">'3.8'</span>
 <span class="prop">services</span>:
   <span class="prop">zookeeper</span>:
     <span class="prop">image</span>: <span class="str">confluentinc/cp-zookeeper:7.5.0</span>
@@ -300,15 +516,21 @@
       KAFKA_ADVERTISED_LISTENERS: <span class="str">PLAINTEXT://localhost:9092</span>
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: <span class="str">'true'</span>
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: <span class="num">1</span></pre>
-        </div>
+            </div>
 
-        <div class="code-wrap fade-in">
-          <div class="code-header">
-            <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
-            <span class="code-title">bash — Start, create topic, produce & consume</span>
-            <button class="copy-btn">COPY</button>
-          </div>
-          <pre><span class="cm"># Start Kafka</span>
+            <div class="code-wrap fade-in">
+              <div class="code-header">
+                <div class="code-dots">
+                  <span class="code-dot red"></span
+                  ><span class="code-dot yellow"></span
+                  ><span class="code-dot green"></span>
+                </div>
+                <span class="code-title"
+                  >bash — Start, create topic, produce & consume</span
+                >
+                <button class="copy-btn">COPY</button>
+              </div>
+              <pre><span class="cm"># Start Kafka</span>
 docker-compose up -d
 
 <span class="cm"># Create a topic</span>
@@ -328,23 +550,26 @@ kafka-console-consumer.sh \
   --bootstrap-server localhost:9092 \
   --topic my-events \
   --from-beginning</pre>
+            </div>
+          </div>
         </div>
+        <!-- /page-content -->
+
+        <footer class="footer">
+          <span class="footer-text"
+            >// kafka-developer-guide • Open Source Learning</span
+          >
+          <div class="footer-links">
+            <a href="architecture.html" class="footer-link">Architecture</a>
+            <a href="advanced.html" class="footer-link">Advanced</a>
+            <a href="usecases.html" class="footer-link">Use Cases</a>
+            <a href="comparison.html" class="footer-link">Comparison</a>
+          </div>
+        </footer>
       </div>
+    </div>
 
-    </div><!-- /page-content -->
-
-    <footer class="footer">
-      <span class="footer-text">// kafka-developer-guide • Open Source Learning</span>
-      <div class="footer-links">
-        <a href="architecture.html" class="footer-link">Architecture</a>
-        <a href="advanced.html" class="footer-link">Advanced</a>
-        <a href="usecases.html" class="footer-link">Use Cases</a>
-        <a href="comparison.html" class="footer-link">Comparison</a>
-      </div>
-    </footer>
-  </div>
-</div>
-
-<script src="js/app.js"></script>
-</body>
+    <script src="js/search-data.js"></script>
+    <script src="js/app.js"></script>
+  </body>
 </html>

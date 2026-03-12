@@ -4,8 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kafka Architecture — Kafka Developer Guide</title>
+<meta name="description" content="Deep dive into Kafka architecture — brokers, topics, partitions, consumer groups, replication, ZooKeeper vs KRaft, and how the distributed log works.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>!function(){var t=localStorage.getItem('kguide-theme');t&&document.documentElement.setAttribute('data-theme',t)}();</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
 <body>
 <button class="sidebar-toggle">☰</button>
@@ -174,36 +178,42 @@ graph LR
           <div class="code-wrap" style="margin-top:16px">
             <div class="code-header">
               <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
-              <span class="code-title">Python — KafkaProducer with key-based partitioning</span>
+              <span class="code-title">Go — kafka-go: Producer with key-based partitioning</span>
               <button class="copy-btn">COPY</button>
             </div>
-            <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaProducer
-<span class="kw">import</span> json
+            <pre><span class="kw">package</span> main
 
-producer = KafkaProducer(
-    bootstrap_servers=<span class="str">'localhost:9092'</span>,
-    <span class="cm"># Serializers convert Python objects → bytes</span>
-    value_serializer=<span class="kw">lambda</span> v: json.dumps(v).encode(<span class="str">'utf-8'</span>),
-    key_serializer=<span class="kw">lambda</span> k: k.encode(<span class="str">'utf-8'</span>),
-    <span class="cm"># Reliability: all ISR replicas must ack</span>
-    acks=<span class="str">'all'</span>,
-    <span class="cm"># Batching: wait 20ms to fill 64KB batch</span>
-    linger_ms=<span class="num">20</span>,
-    batch_size=<span class="num">65536</span>,
-    <span class="cm"># Compression reduces network + storage by 3-10x</span>
-    compression_type=<span class="str">'snappy'</span>,
-    <span class="cm"># Enable exactly-once idempotent producer</span>
-    enable_idempotence=<span class="kw">True</span>,
+<span class="kw">import</span> (
+    <span class="str">"context"</span>
+    <span class="str">"encoding/json"</span>
+    <span class="str">"log"</span>
+    <span class="str">"time"</span>
+    <span class="str">"github.com/segmentio/kafka-go"</span>
 )
 
-<span class="cm"># Key ensures all events for user-123 go to same partition</span>
-<span class="cm"># → guaranteed ordering per user</span>
-producer.send(
-    topic=<span class="str">'user-events'</span>,
-    key=<span class="str">'user-123'</span>,
-    value={<span class="str">'type'</span>: <span class="str">'checkout'</span>, <span class="str">'cart_total'</span>: <span class="num">149.99</span>}
-)
-producer.flush()</pre>
+<span class="kw">func</span> <span class="fn">main</span>() {
+    w := kafka.<span class="fn">NewWriter</span>(kafka.WriterConfig{
+        Brokers:          []<span class="kw">string</span>{<span class="str">"localhost:9092"</span>},
+        Topic:            <span class="str">"user-events"</span>,
+        Balancer:         &amp;kafka.Hash{},                  <span class="cm">// hash(key) % partitions</span>
+        BatchTimeout:     <span class="num">20</span> * time.Millisecond,          <span class="cm">// wait 20ms to fill batches</span>
+        BatchSize:        <span class="num">64</span> &lt;&lt; <span class="num">10</span>,                      <span class="cm">// 64 KB batch size</span>
+        CompressionCodec: kafka.Snappy.<span class="fn">Codec</span>(),          <span class="cm">// reduces network + storage 3–10x</span>
+        RequiredAcks:     -<span class="num">1</span>,                            <span class="cm">// acks=all: all ISR replicas must ack</span>
+    })
+    <span class="kw">defer</span> w.<span class="fn">Close</span>()
+
+    <span class="cm">// Key ensures all events for user-123 go to same partition</span>
+    <span class="cm">// → guaranteed ordering per user</span>
+    event, _ := json.<span class="fn">Marshal</span>(<span class="kw">map</span>[<span class="kw">string</span>]<span class="kw">any</span>{
+        <span class="str">"type"</span>: <span class="str">"checkout"</span>, <span class="str">"cart_total"</span>: <span class="num">149.99</span>,
+    })
+    <span class="kw">if</span> err := w.<span class="fn">WriteMessages</span>(context.<span class="fn">Background</span>(),
+        kafka.Message{Key: []<span class="kw">byte</span>(<span class="str">"user-123"</span>), Value: event},
+    ); err != <span class="kw">nil</span> {
+        log.<span class="fn">Fatal</span>(<span class="str">"failed to write:"</span>, err)
+    }
+}</pre>
           </div>
         </div>
 
@@ -247,35 +257,44 @@ graph TB
           <div class="code-wrap" style="margin-top:16px">
             <div class="code-header">
               <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
-              <span class="code-title">Python — Consumer with manual offset commit</span>
+              <span class="code-title">Go — kafka-go: Consumer with manual offset commit</span>
               <button class="copy-btn">COPY</button>
             </div>
-            <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaConsumer
-<span class="kw">import</span> json
+            <pre><span class="kw">package</span> main
 
-consumer = KafkaConsumer(
-    <span class="str">'orders'</span>,
-    bootstrap_servers=<span class="str">'localhost:9092'</span>,
-    group_id=<span class="str">'order-processor'</span>,
-    value_deserializer=<span class="kw">lambda</span> m: json.loads(m.decode(<span class="str">'utf-8'</span>)),
-    <span class="cm"># Manual commit = at-least-once delivery</span>
-    enable_auto_commit=<span class="kw">False</span>,
-    <span class="cm"># Start from beginning if no prior offset</span>
-    auto_offset_reset=<span class="str">'earliest'</span>,
-    max_poll_records=<span class="num">500</span>,
+<span class="kw">import</span> (
+    <span class="str">"context"</span>
+    <span class="str">"encoding/json"</span>
+    <span class="str">"log"</span>
+    <span class="str">"github.com/segmentio/kafka-go"</span>
 )
 
-<span class="kw">try</span>:
-    <span class="kw">while</span> <span class="kw">True</span>:
-        batch = consumer.poll(timeout_ms=<span class="num">1000</span>)
-        <span class="kw">for</span> tp, messages <span class="kw">in</span> batch.items():
-            <span class="kw">for</span> msg <span class="kw">in</span> messages:
-                process_order(msg.value)
-        <span class="cm"># Commit after successful processing batch</span>
-        <span class="kw">if</span> batch:
-            consumer.commit()
-<span class="kw">finally</span>:
-    consumer.close()  <span class="cm"># Triggers graceful group rebalance</span></pre>
+<span class="kw">func</span> <span class="fn">main</span>() {
+    r := kafka.<span class="fn">NewReader</span>(kafka.ReaderConfig{
+        Brokers:     []<span class="kw">string</span>{<span class="str">"localhost:9092"</span>},
+        GroupID:     <span class="str">"order-processor"</span>,
+        Topic:       <span class="str">"orders"</span>,
+        StartOffset: kafka.FirstOffset, <span class="cm">// start from beginning if no prior offset</span>
+        MaxBytes:    <span class="num">10</span>e6,              <span class="cm">// 10 MB max fetch</span>
+    })
+    <span class="kw">defer</span> r.<span class="fn">Close</span>() <span class="cm">// triggers graceful group rebalance</span>
+
+    ctx := context.<span class="fn">Background</span>()
+    <span class="kw">for</span> {
+        <span class="cm">// FetchMessage does NOT auto-commit — at-least-once delivery</span>
+        m, err := r.<span class="fn">FetchMessage</span>(ctx)
+        <span class="kw">if</span> err != <span class="kw">nil</span> {
+            log.<span class="fn">Fatal</span>(err)
+        }
+        <span class="kw">var</span> order <span class="kw">map</span>[<span class="kw">string</span>]<span class="kw">any</span>
+        json.<span class="fn">Unmarshal</span>(m.Value, &amp;order)
+
+        <span class="cm">// Commit only after successful processing (at-least-once)</span>
+        <span class="kw">if</span> err := <span class="fn">processOrder</span>(order); err == <span class="kw">nil</span> {
+            r.<span class="fn">CommitMessages</span>(ctx, m)
+        }
+    }
+}</pre>
           </div>
         </div>
 
@@ -404,6 +423,8 @@ graph LR
     </footer>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="js/search-data.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

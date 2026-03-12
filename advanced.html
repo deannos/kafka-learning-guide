@@ -4,8 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Advanced Kafka — Kafka Developer Guide</title>
+<meta name="description" content="Advanced Kafka concepts: exactly-once semantics, transactions, Kafka Streams, Schema Registry, Kafka Connect, log compaction, and partition strategies.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>!function(){var t=localStorage.getItem('kguide-theme');t&&document.documentElement.setAttribute('data-theme',t)}();</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
 <body>
 <button class="sidebar-toggle">☰</button>
@@ -80,30 +84,49 @@
           <div class="code-wrap" style="margin-top:16px">
             <div class="code-header">
               <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
-              <span class="code-title">Java — Transactional producer (exactly-once)</span>
+              <span class="code-title">Go — confluent-kafka-go: Transactional producer (exactly-once)</span>
               <button class="copy-btn">COPY</button>
             </div>
-            <pre>Properties props = <span class="kw">new</span> <span class="fn">Properties</span>();
-props.<span class="fn">put</span>(<span class="str">"bootstrap.servers"</span>, <span class="str">"localhost:9092"</span>);
-props.<span class="fn">put</span>(<span class="str">"enable.idempotence"</span>, <span class="str">"true"</span>);     <span class="cm">// No duplicate messages</span>
-props.<span class="fn">put</span>(<span class="str">"transactional.id"</span>, <span class="str">"payment-tx-1"</span>); <span class="cm">// Unique per producer</span>
-props.<span class="fn">put</span>(<span class="str">"acks"</span>, <span class="str">"all"</span>);
-props.<span class="fn">put</span>(<span class="str">"retries"</span>, Integer.MAX_VALUE);
+            <pre><span class="kw">package</span> main
 
-KafkaProducer&lt;String, String&gt; producer = <span class="kw">new</span> <span class="fn">KafkaProducer</span>&lt;&gt;(props);
-producer.<span class="fn">initTransactions</span>();
+<span class="kw">import</span> (
+    <span class="str">"fmt"</span>
+    <span class="str">"log"</span>
+    <span class="str">"github.com/confluentinc/confluent-kafka-go/v2/kafka"</span>
+)
 
-<span class="kw">try</span> {
-    producer.<span class="fn">beginTransaction</span>();
-    
-    <span class="cm">// Both writes are atomic — either both commit or both abort</span>
-    producer.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">ProducerRecord</span>&lt;&gt;(<span class="str">"payments"</span>, txId, paymentJson));
-    producer.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">ProducerRecord</span>&lt;&gt;(<span class="str">"ledger-entries"</span>, txId, ledgerJson));
-    producer.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">ProducerRecord</span>&lt;&gt;(<span class="str">"notifications"</span>, userId, notifyJson));
-    
-    producer.<span class="fn">commitTransaction</span>();  <span class="cm">// All or nothing</span>
-} <span class="kw">catch</span> (Exception e) {
-    producer.<span class="fn">abortTransaction</span>();   <span class="cm">// Rollback all three</span>
+<span class="kw">func</span> <span class="fn">main</span>() {
+    p, err := kafka.<span class="fn">NewProducer</span>(&amp;kafka.ConfigMap{
+        <span class="str">"bootstrap.servers"</span>: <span class="str">"localhost:9092"</span>,
+        <span class="str">"enable.idempotence"</span>: <span class="kw">true</span>,        <span class="cm">// no duplicate messages on retry</span>
+        <span class="str">"transactional.id"</span>:  <span class="str">"payment-tx-1"</span>, <span class="cm">// unique per producer instance</span>
+        <span class="str">"acks"</span>:              <span class="str">"all"</span>,
+    })
+    <span class="kw">if</span> err != <span class="kw">nil</span> { log.<span class="fn">Fatal</span>(err) }
+    <span class="kw">defer</span> p.<span class="fn">Close</span>()
+
+    p.<span class="fn">InitTransactions</span>(<span class="kw">nil</span>)
+    p.<span class="fn">BeginTransaction</span>()
+
+    <span class="cm">// All three writes are atomic — either all commit or all abort</span>
+    sends := []<span class="kw">struct</span>{ topic, key, val <span class="kw">string</span> }{
+        {<span class="str">"payments"</span>,       txID,   paymentJSON},
+        {<span class="str">"ledger-entries"</span>, txID,   ledgerJSON},
+        {<span class="str">"notifications"</span>,  userID, notifyJSON},
+    }
+    <span class="kw">for</span> _, s := <span class="kw">range</span> sends {
+        p.<span class="fn">Produce</span>(&amp;kafka.Message{
+            TopicPartition: kafka.TopicPartition{
+                Topic: &amp;s.topic, Partition: kafka.PartitionAny,
+            },
+            Key: []<span class="kw">byte</span>(s.key), Value: []<span class="kw">byte</span>(s.val),
+        }, <span class="kw">nil</span>)
+    }
+
+    <span class="kw">if</span> err := p.<span class="fn">CommitTransaction</span>(<span class="kw">nil</span>); err != <span class="kw">nil</span> {
+        p.<span class="fn">AbortTransaction</span>(<span class="kw">nil</span>) <span class="cm">// rollback all three</span>
+        fmt.<span class="fn">Printf</span>(<span class="str">"Transaction aborted: %v\n"</span>, err)
+    }
 }</pre>
           </div>
         </div>
@@ -146,8 +169,8 @@ producer.<span class="fn">initTransactions</span>();
       <!-- KAFKA STREAMS -->
       <div class="content-section fade-in">
         <div class="section-eyebrow">// STREAM PROCESSING</div>
-        <h2>Kafka Streams</h2>
-        <p>Kafka Streams is a <strong>client library</strong> (not a separate cluster) for building real-time stream processing applications. It runs inside your application JVM process — no additional infrastructure needed.</p>
+        <h2>Kafka Streams &amp; Stream Processing</h2>
+        <p>Kafka Streams is a <strong>Java client library</strong> for building real-time stream processing applications. In Go, the same patterns are implemented directly with <code>kafka-go</code> and goroutines — no separate infrastructure needed.</p>
 
         <div class="diagram-block fade-in">
           <div class="diagram-label">// Kafka Streams Topology</div>
@@ -165,37 +188,67 @@ graph LR
         <div class="code-wrap fade-in">
           <div class="code-header">
             <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
-            <span class="code-title">Java — Kafka Streams: Real-time fraud detection</span>
+            <span class="code-title">Go — kafka-go: Stream processing with 5-min windowed fraud detection</span>
             <button class="copy-btn">COPY</button>
           </div>
-          <pre>StreamsBuilder builder = <span class="kw">new</span> <span class="fn">StreamsBuilder</span>();
+          <pre><span class="kw">package</span> main
 
-<span class="cm">// Stream of payment events</span>
-KStream&lt;String, Payment&gt; payments = builder.<span class="fn">stream</span>(<span class="str">"payments"</span>);
+<span class="kw">import</span> (
+    <span class="str">"context"</span>; <span class="str">"encoding/json"</span>; <span class="str">"log"</span>
+    <span class="str">"sync"</span>; <span class="str">"time"</span>
+    <span class="str">"github.com/segmentio/kafka-go"</span>
+)
 
-<span class="cm">// KTable of customer risk profiles (from compacted topic)</span>
-KTable&lt;String, RiskProfile&gt; riskProfiles = builder.<span class="fn">table</span>(<span class="str">"risk-profiles"</span>);
+<span class="cm">// 5-minute sliding window counter per user</span>
+<span class="kw">type</span> WindowStore <span class="kw">struct</span> {
+    mu     sync.Mutex
+    events <span class="kw">map</span>[<span class="kw">string</span>][]time.Time
+}
 
-<span class="cm">// Fraud detection: join payments with risk profiles,</span>
-<span class="cm">// count transactions per user in 5-min tumbling window</span>
-KTable&lt;Windowed&lt;String&gt;, Long&gt; txCounts = payments
-    .<span class="fn">leftJoin</span>(riskProfiles, 
-        (payment, risk) -> <span class="kw">new</span> <span class="fn">EnrichedPayment</span>(payment, risk))
-    .<span class="fn">filter</span>((key, ep) -> ep.amount > <span class="num">10000</span>)
-    .<span class="fn">groupByKey</span>()
-    .<span class="fn">windowedBy</span>(<span class="fn">TimeWindows</span>.<span class="fn">ofSizeWithNoGrace</span>(Duration.<span class="fn">ofMinutes</span>(<span class="num">5</span>)))
-    .<span class="fn">count</span>(<span class="fn">Materialized</span>.<span class="fn">as</span>(<span class="str">"fraud-window-store"</span>));
+<span class="kw">func</span> (ws *WindowStore) <span class="fn">Add</span>(key <span class="kw">string</span>) <span class="kw">int</span> {
+    ws.mu.<span class="fn">Lock</span>(); <span class="kw">defer</span> ws.mu.<span class="fn">Unlock</span>()
+    cutoff, valid := time.<span class="fn">Now</span>().<span class="fn">Add</span>(-<span class="num">5</span>*time.Minute), ws.events[key][:<span class="num">0</span>]
+    <span class="kw">for</span> _, t := <span class="kw">range</span> ws.events[key] {
+        <span class="kw">if</span> t.<span class="fn">After</span>(cutoff) { valid = <span class="fn">append</span>(valid, t) }
+    }
+    ws.events[key] = <span class="fn">append</span>(valid, time.<span class="fn">Now</span>())
+    <span class="kw">return</span> <span class="fn">len</span>(ws.events[key])
+}
 
-<span class="cm">// Alert if > 3 large transactions in 5 minutes</span>
-txCounts
-    .<span class="fn">toStream</span>()
-    .<span class="fn">filter</span>((windowedKey, count) -> count > <span class="num">3</span>)
-    .<span class="fn">map</span>((windowedKey, count) -> 
-        KeyValue.<span class="fn">pair</span>(windowedKey.key(), <span class="fn">buildAlert</span>(count)))
-    .<span class="fn">to</span>(<span class="str">"fraud-alerts"</span>);
+<span class="kw">func</span> <span class="fn">main</span>() {
+    reader := kafka.<span class="fn">NewReader</span>(kafka.ReaderConfig{
+        Brokers: []<span class="kw">string</span>{<span class="str">"localhost:9092"</span>},
+        GroupID: <span class="str">"fraud-detector"</span>, Topic: <span class="str">"payments"</span>,
+    })
+    writer := &amp;kafka.Writer{
+        Addr: kafka.<span class="fn">TCP</span>(<span class="str">"localhost:9092"</span>), Topic: <span class="str">"fraud-alerts"</span>,
+    }
+    <span class="kw">defer</span> reader.<span class="fn">Close</span>(); <span class="kw">defer</span> writer.<span class="fn">Close</span>()
 
-KafkaStreams streams = <span class="kw">new</span> <span class="fn">KafkaStreams</span>(builder.<span class="fn">build</span>(), props);
-streams.<span class="fn">start</span>();</pre>
+    store := &amp;WindowStore{events: <span class="fn">make</span>(<span class="kw">map</span>[<span class="kw">string</span>][]time.Time)}
+    ctx := context.<span class="fn">Background</span>()
+    <span class="kw">for</span> {
+        m, err := reader.<span class="fn">FetchMessage</span>(ctx)
+        <span class="kw">if</span> err != <span class="kw">nil</span> { log.<span class="fn">Fatal</span>(err) }
+        <span class="kw">var</span> p <span class="kw">struct</span> {
+            UserID <span class="kw">string</span>  <span class="str">`json:"user_id"`</span>
+            Amount <span class="kw">float64</span> <span class="str">`json:"amount"`</span>
+        }
+        json.<span class="fn">Unmarshal</span>(m.Value, &amp;p)
+        <span class="cm">// Count large txns in 5-min window; alert if &gt; 3</span>
+        <span class="kw">if</span> p.Amount > <span class="num">10000</span> {
+            <span class="kw">if</span> count := store.<span class="fn">Add</span>(p.UserID); count > <span class="num">3</span> {
+                alert, _ := json.<span class="fn">Marshal</span>(<span class="kw">map</span>[<span class="kw">string</span>]<span class="kw">any</span>{
+                    <span class="str">"user_id"</span>: p.UserID, <span class="str">"count"</span>: count, <span class="str">"action"</span>: <span class="str">"BLOCK"</span>,
+                })
+                writer.<span class="fn">WriteMessages</span>(ctx, kafka.Message{
+                    Key: []<span class="kw">byte</span>(p.UserID), Value: alert,
+                })
+            }
+        }
+        reader.<span class="fn">CommitMessages</span>(ctx, m)
+    }
+}</pre>
         </div>
 
         <div class="cards-grid fade-in">
@@ -233,56 +286,64 @@ streams.<span class="fn">start</span>();</pre>
         <div class="code-wrap fade-in">
           <div class="code-header">
             <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
-            <span class="code-title">Python — Avro producer with Schema Registry</span>
+            <span class="code-title">Go — confluent-kafka-go: Avro producer with Schema Registry</span>
             <button class="copy-btn">COPY</button>
           </div>
-          <pre><span class="kw">from</span> confluent_kafka <span class="kw">import</span> SerializingProducer
-<span class="kw">from</span> confluent_kafka.schema_registry <span class="kw">import</span> SchemaRegistryClient
-<span class="kw">from</span> confluent_kafka.schema_registry.avro <span class="kw">import</span> AvroSerializer
+          <pre><span class="kw">package</span> main
 
-<span class="cm"># Avro schema — versioned and validated centrally</span>
-order_schema = <span class="str">"""
-{
-  "type": "record",
-  "name": "Order",
+<span class="kw">import</span> (
+    <span class="str">"github.com/confluentinc/confluent-kafka-go/v2/kafka"</span>
+    <span class="str">"github.com/confluentinc/confluent-kafka-go/v2/schemaregistry"</span>
+    <span class="str">"github.com/confluentinc/confluent-kafka-go/v2/schemaregistry/serde/avro"</span>
+)
+
+<span class="cm">// Avro schema — versioned and validated centrally</span>
+<span class="kw">const</span> orderSchema = <span class="str">`{
+  "type": "record", "name": "Order",
   "namespace": "com.example.events",
   "fields": [
     {"name": "order_id",   "type": "string"},
     {"name": "user_id",    "type": "string"},
     {"name": "amount",     "type": "double"},
     {"name": "currency",   "type": "string", "default": "USD"},
-    {"name": "created_at", "type": "long", "logicalType": "timestamp-millis"}
+    {"name": "created_at", "type": "long"}
   ]
+}`</span>
+
+<span class="kw">type</span> Order <span class="kw">struct</span> {
+    OrderID   <span class="kw">string</span>  <span class="str">`avro:"order_id"`</span>
+    UserID    <span class="kw">string</span>  <span class="str">`avro:"user_id"`</span>
+    Amount    <span class="kw">float64</span> <span class="str">`avro:"amount"`</span>
+    Currency  <span class="kw">string</span>  <span class="str">`avro:"currency"`</span>
+    CreatedAt <span class="kw">int64</span>   <span class="str">`avro:"created_at"`</span>
 }
-"""</span>
 
-schema_registry = <span class="fn">SchemaRegistryClient</span>({
-    <span class="str">'url'</span>: <span class="str">'http://schema-registry:8081'</span>
-})
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// Serializer automatically registers schema &amp; checks compatibility</span>
+    srClient, _ := schemaregistry.<span class="fn">NewClient</span>(
+        schemaregistry.<span class="fn">NewConfig</span>(<span class="str">"http://schema-registry:8081"</span>))
+    ser, _ := avro.<span class="fn">NewSpecificSerializer</span>(srClient, serde.ValueSerde,
+        avro.<span class="fn">NewSerializerConfig</span>())
 
-<span class="cm"># Serializer automatically registers schema & checks compatibility</span>
-avro_serializer = <span class="fn">AvroSerializer</span>(
-    schema_registry_client=schema_registry,
-    schema_str=order_schema,
-)
+    p, _ := kafka.<span class="fn">NewProducer</span>(&amp;kafka.ConfigMap{
+        <span class="str">"bootstrap.servers"</span>: <span class="str">"kafka:9092"</span>,
+    })
+    <span class="kw">defer</span> p.<span class="fn">Close</span>()
 
-producer = <span class="fn">SerializingProducer</span>({
-    <span class="str">'bootstrap.servers'</span>: <span class="str">'kafka:9092'</span>,
-    <span class="str">'value.serializer'</span>: avro_serializer,
-})
-
-<span class="cm"># On the wire: 5-byte magic header (schema ID) + Avro binary</span>
-producer.<span class="fn">produce</span>(
-    topic=<span class="str">'orders'</span>,
-    key=<span class="str">'ord-001'</span>,
-    value={
-        <span class="str">'order_id'</span>: <span class="str">'ord-001'</span>,
-        <span class="str">'user_id'</span>: <span class="str">'usr-999'</span>,
-        <span class="str">'amount'</span>: <span class="num">299.99</span>,
-        <span class="str">'currency'</span>: <span class="str">'USD'</span>,
-        <span class="str">'created_at'</span>: <span class="num">1709000000000</span>,
+    order := &amp;Order{
+        OrderID: <span class="str">"ord-001"</span>, UserID: <span class="str">"usr-999"</span>,
+        Amount: <span class="num">299.99</span>, Currency: <span class="str">"USD"</span>, CreatedAt: <span class="num">1709000000000</span>,
     }
-)</pre>
+    <span class="cm">// On the wire: 5-byte magic header (schema ID) + Avro binary</span>
+    val, _ := ser.<span class="fn">Serialize</span>(<span class="str">"orders"</span>, order)
+    p.<span class="fn">Produce</span>(&amp;kafka.Message{
+        TopicPartition: kafka.TopicPartition{
+            Topic: <span class="fn">strPtr</span>(<span class="str">"orders"</span>), Partition: kafka.PartitionAny,
+        },
+        Key: []<span class="kw">byte</span>(<span class="str">"ord-001"</span>), Value: val,
+    }, <span class="kw">nil</span>)
+    p.<span class="fn">Flush</span>(<span class="num">5000</span>)
+}</pre>
         </div>
 
         <div class="table-wrap fade-in">
@@ -399,4 +460,13 @@ producer.<span class="fn">produce</span>(
       <span class="footer-text">// kafka-developer-guide • Advanced Concepts</span>
       <div class="footer-links">
         <a href="architecture.html" class="footer-link">← Architecture</a>
-        <a href="usecases.html" class="footer
+        <a href="usecases.html" class="footer-link">Use Cases →</a>
+      </div>
+    </footer>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="js/search-data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

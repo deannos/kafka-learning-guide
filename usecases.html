@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kafka Use Cases — Kafka Developer Guide</title>
+<meta name="description" content="Real-world Kafka use cases — event sourcing, CDC, microservices messaging, real-time analytics, fraud detection, IoT data pipelines, and more with code examples.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>!function(){var t=localStorage.getItem('kguide-theme');t&&document.documentElement.setAttribute('data-theme',t)}();</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -120,40 +125,55 @@
           <div class="code-wrap" style="margin-top:16px">
             <div class="code-header">
               <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
-              <span class="code-title">Python — Real-time fraud scoring pipeline</span>
+              <span class="code-title">Go — kafka-go: Real-time fraud scoring pipeline</span>
               <button class="copy-btn">COPY</button>
             </div>
-            <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaConsumer, KafkaProducer
-<span class="kw">import</span> json, ml_model
+            <pre><span class="kw">package</span> main
 
-<span class="cm"># Consume payment events</span>
-consumer = <span class="fn">KafkaConsumer</span>(
-    <span class="str">'payment-events'</span>,
-    bootstrap_servers=<span class="str">'kafka:9092'</span>,
-    group_id=<span class="str">'fraud-detector'</span>,
-    value_deserializer=<span class="kw">lambda</span> m: json.loads(m.decode()),
+<span class="kw">import</span> (
+    <span class="str">"context"</span>; <span class="str">"encoding/json"</span>; <span class="str">"log"</span>
+    kafka <span class="str">"github.com/segmentio/kafka-go"</span>
 )
 
-alert_producer = <span class="fn">KafkaProducer</span>(bootstrap_servers=<span class="str">'kafka:9092'</span>)
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// Consume payment events</span>
+    reader := kafka.<span class="fn">NewReader</span>(kafka.ReaderConfig{
+        Brokers: []<span class="kw">string</span>{<span class="str">"kafka:9092"</span>},
+        GroupID: <span class="str">"fraud-detector"</span>, Topic: <span class="str">"payment-events"</span>,
+    })
+    writer := &amp;kafka.Writer{
+        Addr: kafka.<span class="fn">TCP</span>(<span class="str">"kafka:9092"</span>), Topic: <span class="str">"fraud-alerts"</span>,
+    }
+    <span class="kw">defer</span> reader.<span class="fn">Close</span>(); <span class="kw">defer</span> writer.<span class="fn">Close</span>()
 
-<span class="kw">for</span> msg <span class="kw">in</span> consumer:
-    txn = msg.value
-    
-    <span class="cm"># Score transaction using ML model</span>
-    features = <span class="fn">extract_features</span>(txn)
-    fraud_score = ml_model.<span class="fn">predict</span>(features)
-    
-    <span class="kw">if</span> fraud_score > <span class="num">0.85</span>:
-        <span class="cm"># Emit fraud alert — < 50ms end-to-end</span>
-        alert_producer.<span class="fn">send</span>(<span class="str">'fraud-alerts'</span>, 
-            key=txn[<span class="str">'account_id'</span>].encode(),
-            value=json.dumps({
-                <span class="str">'txn_id'</span>: txn[<span class="str">'id'</span>],
-                <span class="str">'score'</span>: fraud_score,
-                <span class="str">'action'</span>: <span class="str">'BLOCK'</span>,
-                <span class="str">'reason'</span>: <span class="str">'ML_ANOMALY'</span>,
-            }).encode()
-        )</pre>
+    ctx := context.<span class="fn">Background</span>()
+    <span class="kw">for</span> {
+        m, err := reader.<span class="fn">FetchMessage</span>(ctx)
+        <span class="kw">if</span> err != <span class="kw">nil</span> { log.<span class="fn">Fatal</span>(err) }
+
+        <span class="kw">var</span> txn <span class="kw">map</span>[<span class="kw">string</span>]<span class="kw">any</span>
+        json.<span class="fn">Unmarshal</span>(m.Value, &amp;txn)
+
+        <span class="cm">// Score transaction using ML model</span>
+        features := <span class="fn">extractFeatures</span>(txn)
+        fraudScore := mlModel.<span class="fn">Predict</span>(features)
+
+        <span class="kw">if</span> fraudScore > <span class="num">0.85</span> {
+            <span class="cm">// Emit fraud alert — &lt; 50ms end-to-end</span>
+            alert, _ := json.<span class="fn">Marshal</span>(<span class="kw">map</span>[<span class="kw">string</span>]<span class="kw">any</span>{
+                <span class="str">"txn_id"</span>: txn[<span class="str">"id"</span>],
+                <span class="str">"score"</span>:  fraudScore,
+                <span class="str">"action"</span>: <span class="str">"BLOCK"</span>,
+                <span class="str">"reason"</span>: <span class="str">"ML_ANOMALY"</span>,
+            })
+            writer.<span class="fn">WriteMessages</span>(ctx, kafka.Message{
+                Key:   []<span class="kw">byte</span>(txn[<span class="str">"account_id"</span>].(<span class="kw">string</span>)),
+                Value: alert,
+            })
+        }
+        reader.<span class="fn">CommitMessages</span>(ctx, m)
+    }
+}</pre>
           </div>
         </div>
 
@@ -260,6 +280,7 @@ alert_producer = <span class="fn">KafkaProducer</span>(bootstrap_servers=<span c
     </footer>
   </div>
 </div>
+<script src="js/search-data.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

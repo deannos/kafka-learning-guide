@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kafka Security — Kafka Developer Guide</title>
+<meta name="description" content="Kafka security guide — TLS encryption, SASL authentication, ACL authorization, network isolation, audit logging, and security hardening best practices.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>!function(){var t=localStorage.getItem('kguide-theme');t&&document.documentElement.setAttribute('data-theme',t)}();</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -103,7 +108,7 @@
             <div class="step-num">2</div>
             <div class="step-body">
               <div class="step-title">Configure Broker Keystores & Truststores</div>
-              <div class="step-desc">Import broker certs into Java keystores. Import CA cert into truststores. Both broker and client need these configured correctly.</div>
+              <div class="step-desc">Import broker certs into JDK keystores (keytool). Import CA cert into truststores. Both broker and clients need these configured correctly.</div>
             </div>
           </div>
           <div class="step">
@@ -186,26 +191,47 @@ ssl.client.auth=required</pre>
         <div class="code-wrap fade-in">
           <div class="code-header">
             <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
-            <span class="code-title">Python — Client TLS configuration</span>
+            <span class="code-title">Go — kafka-go: Client TLS configuration</span>
             <button class="copy-btn">COPY</button>
           </div>
-          <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaProducer
+          <pre><span class="kw">package</span> main
 
-producer = <span class="fn">KafkaProducer</span>(
-    <span class="cm"># Use the SSL listener port</span>
-    bootstrap_servers=<span class="str">'broker1.kafka.internal:9093'</span>,
-    
-    <span class="cm"># TLS configuration</span>
-    security_protocol=<span class="str">'SSL'</span>,
-    ssl_cafile=<span class="str">'/etc/kafka/certs/ca-cert.pem'</span>,
-    
-    <span class="cm"># Only needed for mTLS (client certificates)</span>
-    ssl_certfile=<span class="str">'/etc/kafka/certs/client-cert.pem'</span>,
-    ssl_keyfile=<span class="str">'/etc/kafka/certs/client-key.pem'</span>,
-    
-    <span class="cm"># Verify broker hostname in cert (always True in prod)</span>
-    ssl_check_hostname=<span class="kw">True</span>,
-)</pre>
+<span class="kw">import</span> (
+    <span class="str">"crypto/tls"</span>
+    <span class="str">"crypto/x509"</span>
+    <span class="str">"os"</span>
+    kafka <span class="str">"github.com/segmentio/kafka-go"</span>
+)
+
+<span class="kw">func</span> <span class="fn">newTLSConfig</span>() *tls.Config {
+    caCert, _ := os.<span class="fn">ReadFile</span>(<span class="str">"/etc/kafka/certs/ca-cert.pem"</span>)
+    pool := x509.<span class="fn">NewCertPool</span>()
+    pool.<span class="fn">AppendCertsFromPEM</span>(caCert)
+
+    <span class="cm">// For mTLS: load client certificate + key</span>
+    clientCert, _ := tls.<span class="fn">LoadX509KeyPair</span>(
+        <span class="str">"/etc/kafka/certs/client-cert.pem"</span>,
+        <span class="str">"/etc/kafka/certs/client-key.pem"</span>,
+    )
+    <span class="kw">return</span> &amp;tls.Config{
+        RootCAs:      pool,
+        Certificates: []tls.Certificate{clientCert},
+        <span class="cm">// Verify broker hostname in cert (always false=verify in prod)</span>
+        InsecureSkipVerify: <span class="kw">false</span>,
+    }
+}
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// Use the SSL listener port</span>
+    dialer := &amp;kafka.Dialer{TLS: <span class="fn">newTLSConfig</span>()}
+    w := kafka.<span class="fn">NewWriter</span>(kafka.WriterConfig{
+        Brokers: []<span class="kw">string</span>{<span class="str">"broker1.kafka.internal:9093"</span>},
+        Topic:   <span class="str">"events"</span>,
+        Dialer:  dialer,
+    })
+    <span class="kw">defer</span> w.<span class="fn">Close</span>()
+    <span class="cm">// ... produce messages</span>
+}</pre>
         </div>
       </div>
 
@@ -301,20 +327,40 @@ ssl.keystore.password=changeit</pre>
         <div class="code-wrap fade-in">
           <div class="code-header">
             <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
-            <span class="code-title">Python — SASL_SSL client config</span>
+            <span class="code-title">Go — kafka-go: SASL_SSL client config</span>
             <button class="copy-btn">COPY</button>
           </div>
-          <pre><span class="kw">from</span> kafka <span class="kw">import</span> KafkaProducer
+          <pre><span class="kw">package</span> main
 
-producer = <span class="fn">KafkaProducer</span>(
-    bootstrap_servers=<span class="str">'broker1:9093'</span>,
-    security_protocol=<span class="str">'SASL_SSL'</span>,
-    sasl_mechanism=<span class="str">'SCRAM-SHA-512'</span>,
-    sasl_plain_username=<span class="str">'payments-service'</span>,
-    sasl_plain_password=<span class="str">'supersecret123'</span>,
-    ssl_cafile=<span class="str">'/certs/ca-cert.pem'</span>,
-    ssl_check_hostname=<span class="kw">True</span>,
-)</pre>
+<span class="kw">import</span> (
+    <span class="str">"crypto/tls"</span>; <span class="str">"crypto/x509"</span>; <span class="str">"os"</span>
+    kafka  <span class="str">"github.com/segmentio/kafka-go"</span>
+    <span class="str">"github.com/segmentio/kafka-go/sasl/scram"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    caCert, _ := os.<span class="fn">ReadFile</span>(<span class="str">"/certs/ca-cert.pem"</span>)
+    pool := x509.<span class="fn">NewCertPool</span>()
+    pool.<span class="fn">AppendCertsFromPEM</span>(caCert)
+
+    <span class="cm">// SCRAM-SHA-512 mechanism</span>
+    mechanism, _ := scram.<span class="fn">Mechanism</span>(scram.SHA512,
+        <span class="str">"payments-service"</span>, <span class="str">"supersecret123"</span>)
+
+    dialer := &amp;kafka.Dialer{
+        SASLMechanism: mechanism,
+        TLS: &amp;tls.Config{
+            RootCAs: pool, InsecureSkipVerify: <span class="kw">false</span>,
+        },
+    }
+    w := kafka.<span class="fn">NewWriter</span>(kafka.WriterConfig{
+        Brokers: []<span class="kw">string</span>{<span class="str">"broker1:9093"</span>},
+        Topic:   <span class="str">"payments"</span>,
+        Dialer:  dialer,
+    })
+    <span class="kw">defer</span> w.<span class="fn">Close</span>()
+    <span class="cm">// ... produce messages</span>
+}</pre>
         </div>
       </div>
 
@@ -475,6 +521,7 @@ kafka-acls.sh --bootstrap-server localhost:9093 \
     </footer>
   </div>
 </div>
+<script src="js/search-data.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
