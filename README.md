@@ -224,9 +224,9 @@ To deploy elsewhere (Netlify, Vercel, Cloudflare Pages):
 
 ## Roadmap
 
-**v1.0** ✅ — Initial public release (May 2026)
+**v1.0**  — Initial public release (May 2026)
 
-**v1.1** 🚧 — UX & Accessibility pass (tracked in [GitHub Issues](https://github.com/deannos/kafka-learning-guide/issues?q=label%3aux))
+**v1.1**  — UX & Accessibility pass (tracked in [GitHub Issues](https://github.com/deannos/kafka-learning-guide/issues?q=label%3aux))
 
 | # | Issue | Priority |
 |---|---|---|
