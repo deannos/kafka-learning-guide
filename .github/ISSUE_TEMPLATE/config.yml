@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: UX Audit Issues (v1.1 backlog)
+    url: https://github.com/deannos/kafka-learning-guide/issues?q=label%3aux
+    about: Browse the full UX improvement backlog tracked for the v1.1 release.
