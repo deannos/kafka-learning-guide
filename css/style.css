@@ -200,6 +200,7 @@ body::before { content: ''; position: fixed; inset: 0; background: var(--gradien
   transition: var(--transition);
 }
 .github-btn:hover { border-color: var(--border-bright); color: var(--text-primary); background: var(--bg-card-hover); }
+.github-btn svg { flex-shrink: 0; }
 
 /* PAGE CONTENT */
 .page-content { flex: 1; padding: 52px 40px; max-width: 1080px; width: 100%; }
