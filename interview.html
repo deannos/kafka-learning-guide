@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
-<button class="sidebar-toggle">☰</button>
+<button class="sidebar-toggle" aria-label="Open menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
 <div class="site-wrapper">
   <aside class="sidebar">
     <a href="index.html" class="sidebar-logo">
@@ -151,7 +151,7 @@
             <span class="interview-q-text">1. What is Apache Kafka and what problem does it solve?</span>
             <div class="interview-q-meta">
               <span class="security-level sec-low">BEGINNER</span>
-              <span class="interview-toggle">›</span>
+              <span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span>
             </div>
           </div>
           <div class="interview-a">
@@ -164,7 +164,7 @@
         <div class="interview-block fade-in">
           <div class="interview-q">
             <span class="interview-q-text">2. Explain topics, partitions, and offsets.</span>
-            <div class="interview-q-meta"><span class="security-level sec-low">BEGINNER</span><span class="interview-toggle">›</span></div>
+            <div class="interview-q-meta"><span class="security-level sec-low">BEGINNER</span><span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span></div>
           </div>
           <div class="interview-a">
             <p>A <strong>topic</strong> is a named feed of events — analogous to a database table or a folder. Producers write to topics; consumers read from them.</p>
@@ -176,7 +176,7 @@
         <div class="interview-block fade-in">
           <div class="interview-q">
             <span class="interview-q-text">3. What is a consumer group and why is it important?</span>
-            <div class="interview-q-meta"><span class="security-level sec-low">BEGINNER</span><span class="interview-toggle">›</span></div>
+            <div class="interview-q-meta"><span class="security-level sec-low">BEGINNER</span><span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span></div>
           </div>
           <div class="interview-a">
             <p>A <strong>consumer group</strong> is a set of consumer instances that cooperate to consume a topic. Kafka ensures each partition is assigned to exactly <strong>one consumer</strong> within the group at any time — this guarantees ordered processing within a partition while distributing load across the group.</p>
@@ -188,7 +188,7 @@
         <div class="interview-block fade-in">
           <div class="interview-q">
             <span class="interview-q-text">4. What is the difference between Kafka and RabbitMQ?</span>
-            <div class="interview-q-meta"><span class="security-level sec-low">BEGINNER</span><span class="interview-toggle">›</span></div>
+            <div class="interview-q-meta"><span class="security-level sec-low">BEGINNER</span><span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span></div>
           </div>
           <div class="interview-a">
             <p>The fundamental difference is their <strong>model</strong>: RabbitMQ is a traditional message <strong>queue</strong> (work distribution), while Kafka is an event <strong>streaming log</strong>.</p>
@@ -208,7 +208,7 @@
         <div class="interview-block fade-in">
           <div class="interview-q">
             <span class="interview-q-text">5. Explain Kafka's replication mechanism and what ISR means.</span>
-            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle">›</span></div>
+            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span></div>
           </div>
           <div class="interview-a">
             <p>For each partition, Kafka designates one broker as the <strong>leader</strong> and others as <strong>followers</strong>. All client reads and writes go to the leader. Followers continuously replicate data from the leader.</p>
@@ -221,7 +221,7 @@
         <div class="interview-block fade-in">
           <div class="interview-q">
             <span class="interview-q-text">6. What are the three delivery semantics? How do you achieve exactly-once?</span>
-            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle">›</span></div>
+            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span></div>
           </div>
           <div class="interview-a">
             <p><strong>At-most-once:</strong> Commit offset before processing. Messages may be lost on crash (consumer committed but didn't finish processing), but never duplicated. Used for non-critical metrics.</p>
@@ -233,7 +233,7 @@
         <div class="interview-block fade-in">
           <div class="interview-q">
             <span class="interview-q-text">7. Why does Kafka perform so well? What makes it faster than a database?</span>
-            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle">›</span></div>
+            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span></div>
           </div>
           <div class="interview-a">
             <p>Kafka's performance comes from four key design decisions:</p>
@@ -247,7 +247,7 @@
         <div class="interview-block fade-in">
           <div class="interview-q">
             <span class="interview-q-text">8. What is log compaction? When would you use it?</span>
-            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle">›</span></div>
+            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span></div>
           </div>
           <div class="interview-a">
             <p><strong>Log compaction</strong> (<code>cleanup.policy=compact</code>) is a retention mode where instead of deleting old messages by time, Kafka retains <strong>the latest record for each key</strong> and removes older records with the same key.</p>
@@ -260,7 +260,7 @@
         <div class="interview-block fade-in">
           <div class="interview-q">
             <span class="interview-q-text">9. What causes consumer group rebalancing, and why is it a problem?</span>
-            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle">›</span></div>
+            <div class="interview-q-meta"><span class="security-level sec-medium">INTERMEDIATE</span><span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span></div>
           </div>
           <div class="interview-a">
             <p>A rebalance is triggered when: a consumer joins the group, a consumer leaves (crash, graceful close), a consumer is considered dead (heartbeat timeout or <code>max.poll.interval.ms</code> exceeded), or partition count changes.</p>
@@ -280,7 +280,7 @@
         <div class="interview-block fade-in">
           <div class="interview-q">
             <span class="interview-q-text">10. How would you design a Kafka-based order processing system that guarantees no order is lost and no order is processed twice?</span>
-            <div class="interview-q-meta"><span class="security-level sec-high">ADVANCED</span><span class="interview-toggle">›</span></div>
+            <div class="interview-q-meta"><span class="security-level sec-high">ADVANCED</span><span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span></div>
           </div>
           <div class="interview-a">
             <p><strong>Producer side:</strong> Enable <code>enable.idempotence=true</code> and use transactions (<code>transactional.id=order-service-1</code>). Use the <strong>Outbox Pattern</strong> — write the order to the database and an outbox table in a single DB transaction. Debezium captures the outbox table and publishes to Kafka. This guarantees the event is always published exactly once, even if the service crashes between writing to DB and publishing to Kafka.</p>
@@ -293,7 +293,7 @@
         <div class="interview-block fade-in">
           <div class="interview-q">
             <span class="interview-q-text">11. How do you choose the right number of partitions for a topic?</span>
-            <div class="interview-q-meta"><span class="security-level sec-high">ADVANCED</span><span class="interview-toggle">›</span></div>
+            <div class="interview-q-meta"><span class="security-level sec-high">ADVANCED</span><span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span></div>
           </div>
           <div class="interview-a">
             <p>Partition count is the most important tuning decision and is hard to change later. Consider these factors:</p>
@@ -308,7 +308,7 @@
         <div class="interview-block fade-in">
           <div class="interview-q">
             <span class="interview-q-text">12. Explain KRaft and why it replaces ZooKeeper.</span>
-            <div class="interview-q-meta"><span class="security-level sec-high">ADVANCED</span><span class="interview-toggle">›</span></div>
+            <div class="interview-q-meta"><span class="security-level sec-high">ADVANCED</span><span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span></div>
           </div>
           <div class="interview-a">
             <p>Kafka historically used <strong>Apache ZooKeeper</strong> as an external coordination service for: storing cluster metadata (topic configs, partition assignments), controller election (one broker acts as cluster controller), and authentication/ACL data.</p>
@@ -321,7 +321,7 @@
         <div class="interview-block fade-in">
           <div class="interview-q">
             <span class="interview-q-text">13. How does Kafka Streams handle state and fault tolerance?</span>
-            <div class="interview-q-meta"><span class="security-level sec-high">ADVANCED</span><span class="interview-toggle">›</span></div>
+            <div class="interview-q-meta"><span class="security-level sec-high">ADVANCED</span><span class="interview-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span></div>
           </div>
           <div class="interview-a">
             <p>Kafka Streams maintains local state in <strong>RocksDB</strong> (an embedded key-value store) on each stream processor instance. This enables O(1) lookups for joins and aggregations without network round-trips to external databases.</p>
