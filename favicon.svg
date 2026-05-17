@@ -6,5 +6,18 @@
       <stop offset="100%" stop-color="#0080ff"/>
     </linearGradient>
   </defs>
-  <polygon points="18,4 10,18 16,18 14,28 22,14 16,14" fill="url(#g)"/>
+  <!-- Central broker node -->
+  <circle cx="16" cy="16" r="4" fill="url(#g)"/>
+  <!-- Producer nodes (left) -->
+  <circle cx="7" cy="9" r="2.5" fill="url(#g)" opacity="0.75"/>
+  <circle cx="7" cy="23" r="2.5" fill="url(#g)" opacity="0.75"/>
+  <!-- Consumer nodes (right) -->
+  <circle cx="25" cy="9" r="2.5" fill="url(#g)" opacity="0.75"/>
+  <circle cx="25" cy="23" r="2.5" fill="url(#g)" opacity="0.75"/>
+  <!-- producers → broker -->
+  <line x1="9.2" y1="10.3" x2="12.5" y2="13.2" stroke="url(#g)" stroke-width="1.3" stroke-linecap="round" opacity="0.65"/>
+  <line x1="9.2" y1="21.7" x2="12.5" y2="18.8" stroke="url(#g)" stroke-width="1.3" stroke-linecap="round" opacity="0.65"/>
+  <!-- broker → consumers -->
+  <line x1="19.5" y1="13.2" x2="22.8" y2="10.3" stroke="url(#g)" stroke-width="1.3" stroke-linecap="round" opacity="0.65"/>
+  <line x1="19.5" y1="18.8" x2="22.8" y2="21.7" stroke="url(#g)" stroke-width="1.3" stroke-linecap="round" opacity="0.65"/>
 </svg>

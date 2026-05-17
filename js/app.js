@@ -1,5 +1,73 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+  // ── Sidebar collapse + icon injection ──
+  (function () {
+    const NAV_ICONS = {
+      'index.html':       '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+      'roadmap.html':     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>',
+      'architecture.html':'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+      'advanced.html':    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+      'security.html':    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+      'usecases.html':    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
+      'performance.html': '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+      'comparison.html':  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+      'operations.html':  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+      'cheatsheet.html':  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+      'interview.html':   '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    };
+
+    // Inject icons + wrap text nodes in .nav-label for collapse support
+    document.querySelectorAll('.nav-item').forEach(item => {
+      const href = (item.getAttribute('href') || '').split('/').pop() || 'index.html';
+      const iconEl = item.querySelector('.nav-icon');
+      if (iconEl && NAV_ICONS[href]) {
+        iconEl.innerHTML = NAV_ICONS[href];
+        iconEl.setAttribute('aria-hidden', 'true');
+      }
+      // Wrap plain text nodes in .nav-label spans
+      Array.from(item.childNodes).forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+          const label = document.createElement('span');
+          label.className = 'nav-label';
+          label.textContent = node.textContent.trim();
+          item.replaceChild(label, node);
+        }
+      });
+      // title attribute drives native tooltip in collapsed state
+      const labelEl = item.querySelector('.nav-label');
+      if (labelEl) item.setAttribute('title', labelEl.textContent.trim());
+    });
+
+    // Only wire up collapse toggle on desktop
+    if (window.innerWidth <= 900) return;
+
+    const siteWrapper = document.querySelector('.site-wrapper');
+    const sidebar = document.querySelector('.sidebar');
+    if (!siteWrapper || !sidebar) return;
+
+    // Build the collapse button
+    const collapseBtn = document.createElement('button');
+    collapseBtn.className = 'sidebar-collapse-btn';
+    collapseBtn.setAttribute('aria-label', 'Toggle sidebar');
+    collapseBtn.innerHTML = `
+      <svg class="icon-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <span class="collapse-btn-label">Collapse</span>`;
+
+    const sidebarFooter = sidebar.querySelector('.sidebar-footer');
+    if (sidebarFooter) sidebar.insertBefore(collapseBtn, sidebarFooter);
+    else sidebar.appendChild(collapseBtn);
+
+    // Restore saved state before first paint
+    if (localStorage.getItem('kguide-sidebar') === 'collapsed') {
+      siteWrapper.classList.add('sidebar-collapsed');
+    }
+
+    collapseBtn.addEventListener('click', () => {
+      const isNowCollapsed = siteWrapper.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('kguide-sidebar', isNowCollapsed ? 'collapsed' : 'expanded');
+    });
+  })();
+
   // ── Search modal (Cmd+K / Ctrl+K) ──
   if (window.SEARCH_INDEX) {
     // Build modal DOM first so helpers can reference overlay/input/results
@@ -245,14 +313,14 @@ document.addEventListener('DOMContentLoaded', () => {
       startOnLoad: false,
       theme: 'dark',
       themeVariables: {
-        primaryColor: '#00d4ff',
-        primaryTextColor: '#f0f0f8',
-        primaryBorderColor: 'rgba(0,212,255,0.4)',
-        lineColor: 'rgba(0,212,255,0.4)',
-        secondaryColor: '#0f0f18',
-        tertiaryColor: '#0a0a10',
-        background: '#050508',
-        fontFamily: 'DM Mono, monospace',
+        primaryColor: '#3b82f6',
+        primaryTextColor: '#e2e8f0',
+        primaryBorderColor: 'rgba(59,130,246,0.5)',
+        lineColor: 'rgba(59,130,246,0.45)',
+        secondaryColor: '#131929',
+        tertiaryColor: '#0d1220',
+        background: '#080c14',
+        fontFamily: 'Inter, sans-serif',
         fontSize: '13px',
       },
       flowchart: { curve: 'basis', padding: 20 },
