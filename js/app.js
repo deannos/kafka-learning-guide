@@ -53,18 +53,22 @@ document.addEventListener('DOMContentLoaded', () => {
       <svg class="icon-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       <span class="collapse-btn-label">Collapse</span>`;
 
-    const sidebarFooter = sidebar.querySelector('.sidebar-footer');
-    if (sidebarFooter) sidebar.insertBefore(collapseBtn, sidebarFooter);
+    const sidebarNav = sidebar.querySelector('.sidebar-nav');
+    if (sidebarNav) sidebar.insertBefore(collapseBtn, sidebarNav);
     else sidebar.appendChild(collapseBtn);
+
+    const collapseBtnLabel = collapseBtn.querySelector('.collapse-btn-label');
 
     // Restore saved state before first paint
     if (localStorage.getItem('kguide-sidebar') === 'collapsed') {
       siteWrapper.classList.add('sidebar-collapsed');
+      if (collapseBtnLabel) collapseBtnLabel.textContent = 'Expand';
     }
 
     collapseBtn.addEventListener('click', () => {
       const isNowCollapsed = siteWrapper.classList.toggle('sidebar-collapsed');
       localStorage.setItem('kguide-sidebar', isNowCollapsed ? 'collapsed' : 'expanded');
+      if (collapseBtnLabel) collapseBtnLabel.textContent = isNowCollapsed ? 'Expand' : 'Collapse';
     });
   })();
 
@@ -218,15 +222,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (icon) icon.setAttribute('aria-hidden', 'true');
   });
 
+  const ICON_COPY = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const ICON_CHECK = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+
   // ── Copy code ──
   document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.innerHTML = ICON_COPY + 'Copy';
     btn.addEventListener('click', () => {
       const pre = btn.closest('.code-wrap')?.querySelector('pre');
       if (!pre) return;
       navigator.clipboard.writeText(pre.innerText).then(() => {
-        btn.textContent = '✓ COPIED';
+        btn.innerHTML = ICON_CHECK + 'Copied!';
         btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000);
+        setTimeout(() => { btn.innerHTML = ICON_COPY + 'Copy'; btn.classList.remove('copied'); }, 2000);
       });
     });
   });
@@ -385,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const backToTop = document.createElement('button');
   backToTop.className = 'back-to-top';
   backToTop.setAttribute('aria-label', 'Back to top');
-  backToTop.innerHTML = '↑';
+  backToTop.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>';
   document.body.appendChild(backToTop);
 
   const mainScroll = document.querySelector('.main-content') || window;
