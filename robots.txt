@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://deannos.github.io/kafka-learning-guide/sitemap.xml

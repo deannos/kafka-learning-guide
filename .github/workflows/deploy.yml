@@ -35,3 +35,11 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Ping Google sitemap
+        run: |
+          curl -s "https://www.google.com/ping?sitemap=https://deannos.github.io/kafka-learning-guide/sitemap.xml" || true
+
+      - name: Ping Bing sitemap
+        run: |
+          curl -s "https://www.bing.com/ping?sitemap=https://deannos.github.io/kafka-learning-guide/sitemap.xml" || true

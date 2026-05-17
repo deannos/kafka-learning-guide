@@ -1,0 +1,18 @@
+{
+  "name": "KafkaGuide — Apache Kafka Developer Portal",
+  "short_name": "KafkaGuide",
+  "description": "Learn Apache Kafka from first principles to production — architecture, security, performance, operations, and interview prep.",
+  "start_url": "/kafka-learning-guide/",
+  "display": "standalone",
+  "background_color": "#080c14",
+  "theme_color": "#3b82f6",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
