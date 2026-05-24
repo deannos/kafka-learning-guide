@@ -123,7 +123,7 @@ graph LR
             T1P2["Topic-A P2 ★"]
             T2P2["Topic-B P2"]
         end
-        ZK["🔧 Controller\n(KRaft/ZK)"]
+        ZK["Controller\n(KRaft/ZK)"]
     end
 
     subgraph CONSUMERS[" CONSUMERS"]
@@ -163,7 +163,7 @@ graph LR
             <p>Each broker handles hundreds of thousands of reads and writes per second across thousands of partitions while using only a few percent of CPU. Brokers use the OS page cache aggressively, meaning recently-written data is served from RAM without any application-level cache management.</p>
           </div>
           <div class="info-box cyan" style="margin-top:16px">
-            <div class="info-label">💡 Broker Configuration</div>
+            <div class="info-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-2px;margin-right:5px"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>Broker Configuration</div>
             <div class="info-text">Key broker settings: <code>log.dirs</code> (partition storage), <code>num.network.threads</code> (I/O threads), <code>log.retention.hours</code> (data TTL), <code>log.segment.bytes</code> (segment rollover size).</div>
           </div>
         </div>
@@ -351,7 +351,7 @@ graph TB
             <p>The <strong>ISR (In-Sync Replicas)</strong> is the set of replicas that are caught up with the leader within <code>replica.lag.time.max.ms</code>. A message is considered <strong>committed</strong> only when all ISR members have acknowledged it (with <code>acks=all</code>).</p>
           </div>
           <div class="info-box green" style="margin-top:16px">
-            <div class="info-label">✅ Production Durability Formula</div>
+            <div class="info-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-2px;margin-right:5px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Production Durability Formula</div>
             <div class="info-text"><strong>replication.factor=3 + min.insync.replicas=2 + acks=all</strong> = Zero data loss guarantee. Can tolerate 1 broker failure for writes, 2 broker failures for reads.</div>
           </div>
           <div class="diagram-block" style="margin-top:16px">
@@ -400,7 +400,7 @@ graph LR
                 <tr><td>Controller failover</td><td>30–60 seconds</td><td class="yes">Milliseconds</td></tr>
                 <tr><td>Metadata propagation</td><td>Seconds</td><td class="yes">Milliseconds</td></tr>
                 <tr><td>Operational complexity</td><td>Two systems to manage</td><td class="yes">Single system</td></tr>
-                <tr><td>Recommended for new clusters</td><td class="no">❌ Deprecated</td><td class="yes">✅ Yes (3.3+)</td></tr>
+                <tr><td>Recommended for new clusters</td><td class="no">Deprecated</td><td class="yes">Yes (3.3+)</td></tr>
               </tbody>
             </table>
           </div>
@@ -435,17 +435,17 @@ graph LR
 
         <div class="cards-grid fade-in">
           <div class="card">
-            <div class="card-icon cyan">🔄</div>
+            <div class="card-icon cyan"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
             <div class="card-title">Zero-Copy Transfers</div>
             <div class="card-desc">Kafka uses the Linux <code>sendfile()</code> syscall to transfer data directly from disk to network without copying through user space. This eliminates 2 context switches and 2 data copies per message batch.</div>
           </div>
           <div class="card">
-            <div class="card-icon green">💾</div>
+            <div class="card-icon green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 17.76 4H6.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg></div>
             <div class="card-title">OS Page Cache</div>
             <div class="card-desc">Kafka doesn't manage its own memory cache. It relies on the OS page cache. Recently written data is automatically served from RAM. Kafka can consume disk at RAM speed for recent data.</div>
           </div>
           <div class="card">
-            <div class="card-icon orange">📦</div>
+            <div class="card-icon orange"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
             <div class="card-title">Compression</div>
             <div class="card-desc">Batches are compressed end-to-end: stored compressed on broker, transferred compressed to consumer. Snappy/LZ4/ZSTD can reduce payload 5–10x on JSON data.</div>
           </div>

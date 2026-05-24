@@ -199,19 +199,19 @@ log.flush.interval.ms=<span class="num">9223372036854775807</span></pre>
 
         <div class="cards-grid fade-in">
           <div class="card">
-            <div class="card-icon cyan">⚡</div>
+            <div class="card-icon cyan"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
             <div class="card-title">High Throughput Config</div>
             <div class="card-desc">Maximize messages per second. Accept slightly higher latency in exchange for massive batching efficiency.</div>
             <div class="card-tags"><span class="tag cyan">Throughput</span></div>
           </div>
           <div class="card">
-            <div class="card-icon green">⏱️</div>
+            <div class="card-icon green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
             <div class="card-title">Low Latency Config</div>
             <div class="card-desc">Minimize end-to-end latency. Accept lower throughput. Use for interactive applications and real-time alerts.</div>
             <div class="card-tags"><span class="tag green">Latency</span></div>
           </div>
           <div class="card">
-            <div class="card-icon orange">🛡️</div>
+            <div class="card-icon orange"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
             <div class="card-title">High Durability Config</div>
             <div class="card-desc">Zero data loss guarantee. Accept throughput trade-off. Use for financial data, audit logs, critical events.</div>
             <div class="card-tags"><span class="tag orange">Durability</span></div>
@@ -353,17 +353,17 @@ log.flush.interval.ms=<span class="num">9223372036854775807</span></pre>
 
         <div class="cards-grid fade-in">
           <div class="card">
-            <div class="card-icon cyan">📡</div>
+            <div class="card-icon cyan"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
             <div class="card-title">Monitor Lag</div>
             <div class="card-desc">Use <code>kafka-consumer-groups.sh --describe</code>, Kafka's JMX metrics (<code>records-lag-max</code>), or tools like Burrow, Lag Exporter for Prometheus/Grafana.</div>
           </div>
           <div class="card">
-            <div class="card-icon orange">⚠️</div>
+            <div class="card-icon orange"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
             <div class="card-title">Causes of Lag</div>
             <div class="card-desc">Slow consumer processing, insufficient consumer instances, rebalancing storms, network bottlenecks, consumer crashes, or underpowered consumer machines.</div>
           </div>
           <div class="card">
-            <div class="card-icon green">✅</div>
+            <div class="card-icon green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
             <div class="card-title">Fix Lag</div>
             <div class="card-desc">Add consumers (up to partition count), increase <code>max.poll.records</code>, optimize processing logic, increase partitions (with caution), or use parallel processing within consumers.</div>
           </div>

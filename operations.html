@@ -217,7 +217,7 @@
 
         <div class="concept-block fade-in">
           <div class="concept-header">
-            <div class="concept-num">🔴</div>
+            <div class="concept-num"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
             <div class="concept-title-wrap">
               <div class="concept-title">Consumer Lag is Growing</div>
               <div class="concept-subtitle">Consumers cannot keep up with message production rate</div>
@@ -238,7 +238,7 @@
 
         <div class="concept-block fade-in">
           <div class="concept-header">
-            <div class="concept-num">🔴</div>
+            <div class="concept-num"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
             <div class="concept-title-wrap">
               <div class="concept-title">UnderReplicatedPartitions &gt; 0</div>
               <div class="concept-subtitle">Partition replicas falling behind or broker down</div>
@@ -258,7 +258,7 @@
 
         <div class="concept-block fade-in">
           <div class="concept-header">
-            <div class="concept-num">🔴</div>
+            <div class="concept-num"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
             <div class="concept-title-wrap">
               <div class="concept-title">Producer Getting NotEnoughReplicas</div>
               <div class="concept-subtitle">Can't meet min.insync.replicas requirement</div>
@@ -269,7 +269,7 @@
             <p><strong>Immediate fix:</strong> Bring brokers back online. Kafka will catch up replicas automatically.</p>
             <p><strong>Temporary workaround (data loss risk):</strong> Reduce <code>min.insync.replicas</code> temporarily to 1 — use only as last resort, never in financial systems.</p>
             <div class="info-box orange" style="margin-top:12px">
-              <div class="info-label">⚠ Never do this permanently</div>
+              <div class="info-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-2px;margin-right:5px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Never do this permanently</div>
               <div class="info-text">Setting <code>min.insync.replicas=1</code> means you can lose data if the single in-sync broker dies before replication catches up. It's a temporary disaster recovery step only.</div>
             </div>
           </div>
@@ -277,7 +277,7 @@
 
         <div class="concept-block fade-in">
           <div class="concept-header">
-            <div class="concept-num">🔴</div>
+            <div class="concept-num"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
             <div class="concept-title-wrap">
               <div class="concept-title">Constant Consumer Group Rebalancing</div>
               <div class="concept-subtitle">Consumers keep joining and leaving the group</div>
@@ -325,7 +325,7 @@
             <h3>Adding Partitions</h3>
             <p>You can increase partition count but <strong>never decrease it</strong>. Adding partitions to an existing topic changes key-to-partition routing for new messages — existing data in old partitions is not redistributed.</p>
             <div class="info-box orange" style="margin:12px 0">
-              <div class="info-label">⚠ Warning</div>
+              <div class="info-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-2px;margin-right:5px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Warning</div>
               <div class="info-text">Adding partitions breaks key ordering for messages already in the topic. For ordering-sensitive topics, create a new topic with more partitions and migrate.</div>
             </div>
           </div>
