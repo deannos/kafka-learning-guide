@@ -45,10 +45,11 @@ html { scroll-behavior: smooth; }
 body { font-family: var(--font-display); background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; overflow-x: hidden; min-height: 100vh; animation: pageFadeIn 0.3s ease; }
 body::before { content: ''; position: fixed; inset: 0; background: var(--gradient-hero); pointer-events: none; z-index: 0; }
 
-::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar { width: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+pre::-webkit-scrollbar { width: 7px; height: 7px; }
 
 .site-wrapper { display: flex; min-height: 100vh; position: relative; z-index: 1; }
 
@@ -310,7 +311,7 @@ body::before { content: ''; position: fixed; inset: 0; background: var(--gradien
 
 /* CARDS */
 .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 52px; }
-.cards-grid-2 { grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); }
+.cards-grid-2 { grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr)); }
 .cards-grid-3 { grid-template-columns: repeat(3, 1fr); }
 .card {
   background: var(--bg-card);
@@ -805,16 +806,16 @@ a:hover { color: #60a5fa; }
 .interview-block.open .interview-q { border-bottom-color: var(--border); }
 .interview-q-text { font-size: 14px; font-weight: 600; color: var(--text-primary); flex: 1; letter-spacing: -0.1px; }
 .interview-q-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.interview-toggle { display: flex; align-items: center; color: var(--text-muted); transition: var(--transition); flex-shrink: 0; }
+.interview-toggle { display: flex; align-items: center; color: var(--text-muted); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease; flex-shrink: 0; }
 .interview-block.open .interview-toggle { transform: rotate(90deg); color: var(--accent-cyan); }
 .interview-a {
   max-height: 0;
   overflow: hidden;
   padding: 0 20px;
   background: rgba(0,0,0,0.15);
-  transition: max-height 0.3s ease, padding 0.3s ease;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
 }
-.interview-block.open .interview-a { max-height: 2000px; padding: 20px; }
+.interview-block.open .interview-a { padding: 20px; }
 .interview-a p { font-size: 13.5px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 10px; }
 .interview-a p:last-child { margin-bottom: 0; }
 .interview-a strong { color: var(--text-primary); }
@@ -840,7 +841,7 @@ a:hover { color: #60a5fa; }
   --accent-red:    #dc2626;
   --text-primary:  #0f172a;
   --text-secondary:#475569;
-  --text-muted:    #94a3b8;
+  --text-muted:    #64748b;
   --text-code:     #2563eb;
   --gradient-hero: radial-gradient(ellipse 100% 55% at 50% -5%, rgba(37,99,235,0.06) 0%, transparent 65%);
   --gradient-card: linear-gradient(145deg, rgba(255,255,255,1) 0%, rgba(248,250,252,1) 100%);
@@ -923,8 +924,8 @@ pre { max-height: 480px; overflow-y: auto; }
   position: fixed;
   bottom: 28px;
   right: 28px;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-sm);
   background: var(--bg-secondary);
   border: 1px solid var(--border-bright);
@@ -1219,3 +1220,107 @@ pre { max-height: 480px; overflow-y: auto; }
   .site-wrapper.sidebar-collapsed .sidebar { width: var(--sidebar-width); }
   .site-wrapper.sidebar-collapsed .main-content { margin-left: 0; }
 }
+
+/* ══════════════════════════════════════════
+   ISSUE FIXES #1–#24
+   ══════════════════════════════════════════ */
+
+/* #1 — Skip-to-content link for keyboard navigation */
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  z-index: 9999;
+  background: var(--accent-cyan);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 0 0 var(--radius) var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.15s ease;
+  white-space: nowrap;
+}
+.skip-to-content:focus { top: 0; outline: none; }
+
+/* #4 — Sidebar nav :focus-visible ring */
+.nav-item:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 1px;
+  border-radius: var(--radius-sm);
+}
+
+/* #7 — Sidebar collapse label stagger: fade out first, then shrink */
+.nav-label,
+.collapse-btn-label {
+  transition: opacity 0.12s ease, max-width 0.22s cubic-bezier(0.4, 0, 0.2, 1) 0.06s;
+}
+.site-wrapper.sidebar-collapsed .nav-label,
+.site-wrapper.sidebar-collapsed .collapse-btn-label {
+  transition: opacity 0.08s ease, max-width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* #9 — TOC sticky positioning */
+.toc {
+  float: right;
+  clear: right;
+  position: sticky;
+  top: calc(var(--header-height) + 16px);
+  margin: 0 0 24px 24px;
+}
+@media (max-width: 900px) {
+  .toc { float: none; position: static; margin: 0 0 32px; max-width: 100%; }
+}
+
+/* #13 — Section divider margin on mobile */
+@media (max-width: 600px) {
+  .section-divider { margin: 32px 0; }
+}
+
+/* #14 — Quiz option disabled visual state */
+.quiz-opt:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* #15 — Config/cheatsheet tables mobile readability */
+@media (max-width: 600px) {
+  .config-table th, .config-table td { padding: 8px; font-size: 11.5px; }
+  .table-wrap th, .table-wrap td { padding: 9px 10px; font-size: 12.5px; }
+}
+
+/* #16 — Hero stat labels responsive font size */
+.stat-label { font-size: clamp(10px, 1.8vw, 12px); }
+
+/* #17 — Mobile sidebar backdrop cursor */
+.sidebar-backdrop { cursor: pointer; }
+
+/* #18 — Sticky header compress on scroll */
+.header { transition: height 0.25s ease, padding 0.25s ease; }
+.header.compact { height: 48px; }
+
+/* #20 — Tall code blocks scroll indicator gradient */
+.code-wrap { position: relative; }
+.code-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 28px;
+  background: linear-gradient(to bottom, transparent, rgba(13,17,23,0.9));
+  pointer-events: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  transition: opacity 0.2s ease;
+}
+[data-theme="light"] .code-wrap::after { background: linear-gradient(to bottom, transparent, rgba(30,30,46,0.92)); }
+
+/* #21 — prefers-reduced-motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  html { scroll-behavior: auto; }
+  .fade-in { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
+
+/* #22 — Interview question minimum tap target 56px */
+.interview-q { min-height: 56px; }

@@ -1,5 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+  // #1 — Skip-to-content link for keyboard navigation
+  const skipLink = document.createElement('a');
+  skipLink.className = 'skip-to-content';
+  skipLink.href = '#main-content';
+  skipLink.textContent = 'Skip to content';
+  document.body.insertBefore(skipLink, document.body.firstChild);
+  const mainContent = document.querySelector('.page-content') || document.querySelector('.hero');
+  if (mainContent && !mainContent.id) mainContent.id = 'main-content';
+
   // ── Sidebar collapse + icon injection ──
   (function () {
     const NAV_ICONS = {
@@ -72,9 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
-  // ── Search modal (Cmd+K / Ctrl+K) ──
-  if (window.SEARCH_INDEX) {
-    // Build modal DOM first so helpers can reference overlay/input/results
+  // ── Search modal (Cmd+K / Ctrl+K) — always rendered, falls back gracefully (#3) ──
+  {
+    const hasIndex = Array.isArray(window.SEARCH_INDEX) && window.SEARCH_INDEX.length > 0;
+
     const overlay = document.createElement('div');
     overlay.className = 'search-overlay';
     overlay.setAttribute('aria-modal', 'true');
@@ -84,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="search-box">
         <div class="search-input-wrap">
           <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="search-input" type="text" placeholder="Search topics, commands, concepts…" autocomplete="off" spellcheck="false">
+          <input class="search-input" type="text" placeholder="Search topics, commands, concepts…" autocomplete="off" spellcheck="false" ${hasIndex ? '' : 'disabled'}>
           <kbd class="search-esc-hint">ESC</kbd>
         </div>
         <ul class="search-results" role="listbox"></ul>
@@ -100,12 +110,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const results = overlay.querySelector('.search-results');
     let activeIdx = -1;
 
-    // Define helpers before any event listeners reference them
     const openSearch = () => {
       overlay.classList.add('active');
       input.value = '';
-      results.innerHTML = '';
       activeIdx = -1;
+      if (!hasIndex) {
+        results.innerHTML = '<li class="search-empty">Search index not available — try refreshing the page.</li>';
+      } else {
+        results.innerHTML = '';
+      }
       setTimeout(() => input.focus(), 50);
     };
     const closeSearch = () => overlay.classList.remove('active');
@@ -119,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
     const renderResults = (query) => {
+      if (!hasIndex) return;
       const q = query.trim().toLowerCase();
       results.innerHTML = '';
       activeIdx = -1;
@@ -143,13 +157,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     };
 
-    // Now safe to attach listeners — all helpers are defined above
     input.addEventListener('input', () => renderResults(input.value));
     input.addEventListener('keydown', (e) => {
       const items = results.querySelectorAll('.search-item');
       if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIdx + 1, items.length - 1)); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIdx - 1, 0)); }
-      else if (e.key === 'Enter' && activeIdx >= 0) {
+      else if (e.key === 'Enter' && activeIdx >= 0 && hasIndex) {
         const href = window.SEARCH_INDEX.filter(item =>
           (item.section + ' ' + item.excerpt + ' ' + item.pageTitle).toLowerCase().includes(input.value.trim().toLowerCase())
         )[activeIdx]?.page;
@@ -163,7 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'Escape' && overlay.classList.contains('active')) closeSearch();
     });
 
-    // Inject search trigger into header — after helpers are defined
     const headerRight = document.querySelector('.header-right');
     if (headerRight) {
       const hint = document.createElement('button');
@@ -217,24 +229,49 @@ document.addEventListener('DOMContentLoaded', () => {
       item.classList.add('active');
       item.setAttribute('aria-current', 'page');
     }
-    // Hide emoji from screen readers
     const icon = item.querySelector('.nav-icon');
     if (icon) icon.setAttribute('aria-hidden', 'true');
   });
 
+  // #12 — Breadcrumb aria-current="page"
+  const breadcrumbCurrent = document.querySelector('.header-breadcrumb .current');
+  if (breadcrumbCurrent) breadcrumbCurrent.setAttribute('aria-current', 'page');
+
+  // #18 — Header compresses on scroll
+  const header = document.querySelector('.header');
+  const scrollHost = document.querySelector('.main-content') || window;
+  if (header) {
+    scrollHost.addEventListener('scroll', () => {
+      const scrollTop = scrollHost === window ? window.scrollY : scrollHost.scrollTop;
+      header.classList.toggle('compact', scrollTop > 60);
+    }, { passive: true });
+  }
+
   const ICON_COPY = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
   const ICON_CHECK = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
 
-  // ── Copy code ──
+  // ── Copy code — #11 timeout 1400ms, #24 in-flight feedback ──
   document.querySelectorAll('.copy-btn').forEach(btn => {
     btn.innerHTML = ICON_COPY + 'Copy';
     btn.addEventListener('click', () => {
       const pre = btn.closest('.code-wrap')?.querySelector('pre');
-      if (!pre) return;
+      if (!pre || btn.dataset.copying) return;
+      btn.dataset.copying = '1';
+      btn.innerHTML = ICON_COPY + 'Copying…';
+      btn.style.opacity = '0.7';
       navigator.clipboard.writeText(pre.innerText).then(() => {
         btn.innerHTML = ICON_CHECK + 'Copied!';
         btn.classList.add('copied');
-        setTimeout(() => { btn.innerHTML = ICON_COPY + 'Copy'; btn.classList.remove('copied'); }, 2000);
+        btn.style.opacity = '';
+        setTimeout(() => {
+          btn.innerHTML = ICON_COPY + 'Copy';
+          btn.classList.remove('copied');
+          delete btn.dataset.copying;
+        }, 1400);
+      }).catch(() => {
+        btn.innerHTML = ICON_COPY + 'Copy';
+        btn.style.opacity = '';
+        delete btn.dataset.copying;
       });
     });
   });
@@ -291,28 +328,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ── Interview accordion — keyboard accessible ──
+  // ── Interview accordion — #5 chevron transition, #6 actual height animation ──
+  function collapseAnswer(block) {
+    const a = block.querySelector('.interview-a');
+    if (a) a.style.maxHeight = '0';
+    block.classList.remove('open');
+    block.querySelector('.interview-q')?.setAttribute('aria-expanded', 'false');
+  }
+  function expandAnswer(block) {
+    const a = block.querySelector('.interview-a');
+    block.classList.add('open');
+    block.querySelector('.interview-q')?.setAttribute('aria-expanded', 'true');
+    if (a) {
+      // Measure actual scrollHeight (includes padding from .open state in CSS)
+      requestAnimationFrame(() => {
+        a.style.maxHeight = a.scrollHeight + 'px';
+      });
+    }
+  }
+
   document.querySelectorAll('.interview-q').forEach(q => {
     q.setAttribute('tabindex', '0');
     q.setAttribute('role', 'button');
+    q.setAttribute('aria-expanded', 'false');
     q.addEventListener('click', () => {
       const block = q.closest('.interview-block');
       const isOpen = block.classList.contains('open');
-      document.querySelectorAll('.interview-block.open').forEach(b => {
-        b.classList.remove('open');
-        b.querySelector('.interview-q')?.setAttribute('aria-expanded', 'false');
-      });
-      if (!isOpen) {
-        block.classList.add('open');
-        q.setAttribute('aria-expanded', 'true');
-      } else {
-        q.setAttribute('aria-expanded', 'false');
-      }
+      document.querySelectorAll('.interview-block.open').forEach(b => collapseAnswer(b));
+      if (!isOpen) expandAnswer(block);
     });
     q.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); q.click(); }
     });
-    q.setAttribute('aria-expanded', 'false');
   });
 
   // ── Mermaid — apply theme before rendering ──
@@ -397,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (active) active.classList.add('active');
         }
       });
-    }, { rootMargin: '-10% 0px -80% 0px' });
+    }, { rootMargin: '-10% 0px -50% 0px' });
     headings.forEach(h => secObs.observe(h));
   }
 
