@@ -1260,16 +1260,35 @@ pre { max-height: 480px; overflow-y: auto; }
   transition: opacity 0.08s ease, max-width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* #9 — TOC sticky positioning */
-.toc {
-  float: right;
-  clear: right;
+/* #9 — TOC two-column layout (flex wrapper; no float+sticky overlap) */
+.toc-layout {
+  display: flex;
+  gap: 40px;
+  align-items: start;
+}
+.toc-main-col {
+  flex: 1;
+  min-width: 0;
+}
+.toc-sidebar {
+  width: 220px;
+  flex-shrink: 0;
   position: sticky;
   top: calc(var(--header-height) + 16px);
-  margin: 0 0 24px 24px;
+}
+.toc {
+  float: none;
+  display: block;
+  margin: 0;
+  max-width: none;
+}
+@media (max-width: 1024px) {
+  .toc-sidebar { width: 190px; }
 }
 @media (max-width: 900px) {
-  .toc { float: none; position: static; margin: 0 0 32px; max-width: 100%; }
+  .toc-layout { flex-direction: column; }
+  .toc-sidebar { position: static; width: 100%; }
+  .toc { max-width: 100%; margin: 0 0 24px; }
 }
 
 /* #13 — Section divider margin on mobile */

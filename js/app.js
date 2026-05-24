@@ -408,15 +408,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ── Auto Table of Contents ──
-  // Inject a TOC for any inner page with 3+ h2 headings
+  // ── Auto Table of Contents — two-column flex layout (no float+sticky overlap) ──
   const pageContent = document.querySelector('.page-content');
   const headings = pageContent ? Array.from(pageContent.querySelectorAll('h2')) : [];
   if (headings.length >= 2) {
-    // Assign IDs to headings that lack them
-    headings.forEach((h, i) => {
-      if (!h.id) h.id = 'section-' + i;
-    });
+    headings.forEach((h, i) => { if (!h.id) h.id = 'section-' + i; });
 
     const toc = document.createElement('nav');
     toc.className = 'toc';
@@ -426,12 +422,30 @@ document.addEventListener('DOMContentLoaded', () => {
       headings.map(h => `<li><a class="toc-link" href="#${h.id}">${h.textContent.trim()}</a></li>`).join('') +
       '</ul>';
 
-    // Insert TOC after the page-title-block (or at start of page-content)
+    // Build a flex wrapper: [content column] [toc sidebar]
+    const layout = document.createElement('div');
+    layout.className = 'toc-layout';
+
+    const mainCol = document.createElement('div');
+    mainCol.className = 'toc-main-col';
+
+    const tocSidebar = document.createElement('aside');
+    tocSidebar.className = 'toc-sidebar';
+    tocSidebar.setAttribute('aria-label', 'On this page');
+    tocSidebar.appendChild(toc);
+
+    // Move all page content that follows the title block into the main column
     const titleBlock = pageContent.querySelector('.page-title-block');
+    const siblings = Array.from(pageContent.children).filter(el => el !== titleBlock);
+    siblings.forEach(el => mainCol.appendChild(el)); // moves nodes out of pageContent
+
+    layout.appendChild(mainCol);
+    layout.appendChild(tocSidebar);
+
     if (titleBlock) {
-      titleBlock.insertAdjacentElement('afterend', toc);
+      titleBlock.insertAdjacentElement('afterend', layout);
     } else {
-      pageContent.prepend(toc);
+      pageContent.appendChild(layout);
     }
 
     // Highlight active section on scroll
