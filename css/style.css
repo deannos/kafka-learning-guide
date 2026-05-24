@@ -558,13 +558,13 @@ td .partial { color: var(--accent-yellow); }
 /* MISC */
 .section-divider { height: 1px; background: var(--border); margin: 52px 0; }
 .content-section { margin-bottom: 64px; }
-h2 { font-size: clamp(20px, 2.8vw, 28px); font-weight: 700; letter-spacing: -0.7px; margin-bottom: 14px; }
+h2 { font-size: clamp(22px, 3.2vw, 34px); font-weight: 700; letter-spacing: -0.7px; margin-bottom: 14px; }
 h3 { font-size: 18px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.3px; }
 h4 { font-size: 11px; font-weight: 700; margin-bottom: 8px; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
-p { font-size: 14.5px; line-height: 1.75; color: var(--text-secondary); margin-bottom: 14px; font-weight: 400; }
+p { font-size: 15.5px; line-height: 1.75; color: var(--text-secondary); margin-bottom: 14px; font-weight: 400; }
 p strong { color: var(--text-primary); font-weight: 600; }
 ul, ol { padding-left: 18px; margin-bottom: 14px; }
-li { font-size: 13.5px; line-height: 1.75; color: var(--text-secondary); margin-bottom: 6px; }
+li { font-size: 14.5px; line-height: 1.75; color: var(--text-secondary); margin-bottom: 6px; }
 li strong { color: var(--text-primary); }
 a { color: var(--accent-cyan); text-decoration: none; transition: var(--transition); }
 a:hover { color: #60a5fa; }
@@ -1572,3 +1572,82 @@ body.page-exit { opacity: 0 !important; transition: opacity 0.15s ease !importan
 
 /* UX26 — Hero secondary button visual pull */
 .hero .btn-secondary { border-color: var(--border-bright); }
+
+/* ══════════════════════════════════════════
+   LAYOUT IMPROVEMENTS
+   ══════════════════════════════════════════ */
+
+/* Dark mode card hover shadow */
+.card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.3); }
+[data-theme="light"] .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1), 0 0 0 1px rgba(37,99,235,0.2); }
+
+/* Sticky table headers removed — position:sticky breaks inside overflow-x:auto wrappers */
+
+/* Tablet breakpoint: cards-grid-3 shows 2 cols between 601–900px */
+@media (max-width: 900px) and (min-width: 601px) {
+  .cards-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Alternating section backgrounds for visual rhythm */
+.content-section:nth-child(even) {
+  background: rgba(255,255,255,0.015);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  margin-left: -24px;
+  margin-right: -24px;
+}
+[data-theme="light"] .content-section:nth-child(even) {
+  background: rgba(0,0,0,0.018);
+}
+
+/* .yes / .no / .partial with icon spacing */
+td.yes, td.no, td.partial {
+  display: table-cell;
+  white-space: nowrap;
+}
+td.yes svg, td.no svg, td.partial svg {
+  display: inline-block;
+  vertical-align: -3px;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+/* Code block expand/collapse */
+.code-collapsible pre { max-height: 220px; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
+.code-collapsible.expanded pre { max-height: 2000px; }
+.code-expand-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 7px 16px;
+  background: rgba(59,130,246,0.04);
+  border: none;
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.code-expand-btn:hover { color: var(--accent-cyan); background: rgba(59,130,246,0.08); }
+.code-expand-btn svg { transition: transform 0.3s ease; }
+.code-collapsible.expanded .code-expand-btn svg { transform: rotate(180deg); }
+[data-theme="light"] .code-expand-btn { background: rgba(0,0,0,0.03); }
+[data-theme="light"] .code-expand-btn:hover { background: rgba(37,99,235,0.06); color: var(--accent-cyan); }
+
+/* Language badge colored indicator dot */
+.lang-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: 1px;
+  flex-shrink: 0;
+}
+.lang-dot-go     { background: #00acd7; }
+.lang-dot-python { background: #f7ca18; }
