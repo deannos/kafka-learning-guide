@@ -150,8 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const li = document.createElement('li');
         li.className = 'search-item';
         li.setAttribute('role', 'option');
+        const anchor = uxSlugify(item.section);
+        li.dataset.href = item.page + (anchor ? '#' + anchor : '');
         li.innerHTML = `<span class="search-item-page">${item.pageTitle}</span><span class="search-item-section">${item.section}</span><span class="search-item-excerpt">${item.excerpt}</span>`;
-        li.addEventListener('click', () => { window.location.href = item.page; });
+        li.addEventListener('click', () => { window.location.href = li.dataset.href; });
         li.addEventListener('mouseenter', () => setActive(i));
         results.appendChild(li);
       });
@@ -163,10 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIdx + 1, items.length - 1)); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIdx - 1, 0)); }
       else if (e.key === 'Enter' && activeIdx >= 0 && hasIndex) {
-        const href = window.SEARCH_INDEX.filter(item =>
-          (item.section + ' ' + item.excerpt + ' ' + item.pageTitle).toLowerCase().includes(input.value.trim().toLowerCase())
-        )[activeIdx]?.page;
-        if (href) window.location.href = href;
+        const activeItem = results.querySelectorAll('.search-item')[activeIdx];
+        if (activeItem?.dataset.href) window.location.href = activeItem.dataset.href;
       }
       else if (e.key === 'Escape') closeSearch();
     });
@@ -412,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const pageContent = document.querySelector('.page-content');
   const headings = pageContent ? Array.from(pageContent.querySelectorAll('h2')) : [];
   if (headings.length >= 2) {
-    headings.forEach((h, i) => { if (!h.id) h.id = 'section-' + i; });
+    headings.forEach((h, i) => { if (!h.id) h.id = uxSlugify(h.textContent.trim()) || ('section-' + i); });
 
     const toc = document.createElement('nav');
     toc.className = 'toc';
@@ -466,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const backToTop = document.createElement('button');
   backToTop.className = 'back-to-top';
   backToTop.setAttribute('aria-label', 'Back to top');
+  backToTop.setAttribute('data-tip', 'Back to top');
   backToTop.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>';
   document.body.appendChild(backToTop);
 
@@ -480,4 +481,522 @@ document.addEventListener('DOMContentLoaded', () => {
     mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
+  // ══════════════════════════════════════════════════════════════
+  //  UX ENHANCEMENTS — 28-point audit implementation
+  // ══════════════════════════════════════════════════════════════
+
+  // Shared helper: convert text to a URL-safe slug
+  function uxSlugify(text) {
+    return text.toLowerCase().trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+  }
+
+  // Shared page order (mirrors sidebar)
+  const PAGE_ORDER = [
+    { href: 'index.html',        label: 'Home',               section: 'Getting Started' },
+    { href: 'roadmap.html',      label: 'Learning Roadmap',   section: 'Getting Started' },
+    { href: 'architecture.html', label: 'Architecture',       section: 'Core Knowledge' },
+    { href: 'advanced.html',     label: 'Advanced Concepts',  section: 'Core Knowledge' },
+    { href: 'security.html',     label: 'Security',           section: 'Core Knowledge' },
+    { href: 'usecases.html',     label: 'Use Cases',          section: 'Applied Kafka' },
+    { href: 'performance.html',  label: 'Performance Tuning', section: 'Applied Kafka' },
+    { href: 'comparison.html',   label: 'Kafka vs Others',    section: 'Applied Kafka' },
+    { href: 'operations.html',   label: 'Operations',         section: 'Applied Kafka' },
+    { href: 'cheatsheet.html',   label: 'Cheatsheet',         section: 'Reference' },
+    { href: 'interview.html',    label: 'Interview Prep',     section: 'Reference' },
+  ];
+  const curPage = window.location.pathname.split('/').pop() || 'index.html';
+  const curIdx  = PAGE_ORDER.findIndex(p => p.href === curPage);
+
+  // UX28 — Scroll restoration
+  if ('scrollRestoration' in history) history.scrollRestoration = 'auto';
+
+  // UX1 — Reading progress bar
+  (function () {
+    const bar = document.createElement('div');
+    bar.className = 'reading-progress';
+    document.body.appendChild(bar);
+    const host = document.querySelector('.main-content') || window;
+    const el   = host === window ? document.documentElement : host;
+    host.addEventListener('scroll', () => {
+      const pct = el.scrollTop / (el.scrollHeight - el.clientHeight) * 100;
+      bar.style.width = Math.min(pct, 100) + '%';
+    }, { passive: true });
+  })();
+
+  // UX16 — Page exit transition (intercept internal links)
+  document.querySelectorAll('a[href$=".html"]:not([target])').forEach(a => {
+    a.addEventListener('click', e => {
+      const url = a.href;
+      if (!url || url.startsWith('#')) return;
+      e.preventDefault();
+      document.body.classList.add('page-exit');
+      setTimeout(() => { window.location.href = url; }, 140);
+    });
+  });
+
+  // UX15 — Theme transition: force the transition AFTER first paint so it doesn't flash on load
+  requestAnimationFrame(() => document.documentElement.style.transition = '');
+
+  // UX7 — Estimated reading time
+  (function () {
+    const content = document.querySelector('.page-content') || document.querySelector('.hero');
+    const titleBlock = document.querySelector('.page-title-block');
+    if (!content || !titleBlock) return;
+    const words = content.innerText.trim().split(/\s+/).length;
+    const mins  = Math.max(1, Math.round(words / 220));
+    const rt = document.createElement('div');
+    rt.className = 'reading-time';
+    rt.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${mins} min read`;
+    const sub = titleBlock.querySelector('.page-subtitle');
+    if (sub) sub.insertAdjacentElement('afterend', rt);
+    else titleBlock.appendChild(rt);
+  })();
+
+  // UX10 — Replace native title tooltips with data-tip on collapsed nav items
+  document.querySelectorAll('.nav-item[title]').forEach(item => {
+    item.setAttribute('data-tip', item.getAttribute('title'));
+    item.removeAttribute('title');
+  });
+
+  // UX13 — Inject group dividers between nav sections (visible only when collapsed)
+  (function () {
+    const nav = document.querySelector('.sidebar-nav');
+    if (!nav) return;
+    const labels = nav.querySelectorAll('.nav-section-label');
+    labels.forEach((label, i) => {
+      if (i === 0) return; // skip first
+      const div = document.createElement('div');
+      div.className = 'nav-group-divider';
+      label.insertAdjacentElement('beforebegin', div);
+    });
+  })();
+
+  // UX5 — Visited page tracking
+  (function () {
+    const VISITED_KEY = 'kguide-visited';
+    const visited = new Set(JSON.parse(localStorage.getItem(VISITED_KEY) || '[]'));
+    if (curPage && !visited.has(curPage)) {
+      visited.add(curPage);
+      localStorage.setItem(VISITED_KEY, JSON.stringify([...visited]));
+    }
+    document.querySelectorAll('.nav-item').forEach(item => {
+      const page = (item.getAttribute('href') || '').split('/').pop() || 'index.html';
+      if (visited.has(page) && page !== curPage) {
+        const dot = document.createElement('span');
+        dot.className = 'visited-dot';
+        dot.setAttribute('aria-hidden', 'true');
+        item.appendChild(dot);
+      }
+    });
+  })();
+
+  // UX10 (breadcrumb hierarchy) — enrich breadcrumb with section
+  (function () {
+    const bc = document.querySelector('.header-breadcrumb');
+    if (!bc || curIdx < 0) return;
+    const page = PAGE_ORDER[curIdx];
+    const sep = document.createElement('span');
+    sep.style.color = 'var(--text-muted)';
+    sep.textContent = '/';
+    const sectionSpan = document.createElement('span');
+    sectionSpan.textContent = page.section;
+    // Insert section between "kafka-guide" and the current page span
+    const currentSpan = bc.querySelector('.current');
+    if (currentSpan) {
+      bc.insertBefore(sep, currentSpan);
+      bc.insertBefore(sectionSpan, currentSpan);
+      const sep2 = document.createElement('span');
+      sep2.style.color = 'var(--text-muted)';
+      sep2.textContent = '/';
+      bc.insertBefore(sep2, currentSpan);
+    }
+  })();
+
+  // UX22 — Onboarding welcome banner (first visit only, on home page)
+  (function () {
+    if (curPage !== 'index.html' && curPage !== '') return;
+    if (localStorage.getItem('kguide-welcomed')) return;
+    const hero = document.querySelector('.hero');
+    if (!hero) return;
+    const banner = document.createElement('div');
+    banner.className = 'welcome-banner fade-in';
+    banner.innerHTML = `
+      <div class="welcome-banner-body">
+        <div class="welcome-banner-text"><strong>Welcome to KafkaGuide!</strong> — A structured path from zero to production Kafka. Start with the <a href="roadmap.html" class="welcome-banner-cta">Learning Roadmap →</a></div>
+      </div>
+      <button class="welcome-banner-dismiss" aria-label="Dismiss welcome banner">×</button>`;
+    hero.insertAdjacentElement('beforebegin', banner);
+    banner.querySelector('.welcome-banner-dismiss').addEventListener('click', () => {
+      banner.style.opacity = '0';
+      banner.style.transition = 'opacity 0.2s ease';
+      setTimeout(() => banner.remove(), 200);
+      localStorage.setItem('kguide-welcomed', '1');
+    });
+  })();
+
+  // UX2 — Prev/Next page navigation
+  (function () {
+    const content = document.querySelector('.toc-main-col') || document.querySelector('.page-content');
+    if (!content || curIdx < 0) return;
+    const prev = PAGE_ORDER[curIdx - 1];
+    const next = PAGE_ORDER[curIdx + 1];
+    if (!prev && !next) return;
+    const nav = document.createElement('nav');
+    nav.className = 'page-nav';
+    nav.setAttribute('aria-label', 'Page navigation');
+    if (prev) {
+      nav.innerHTML += `<a href="${prev.href}" class="page-nav-btn prev"><span class="page-nav-dir">← Previous</span><span class="page-nav-label">${prev.label}</span><span class="page-nav-section">${prev.section}</span></a>`;
+    }
+    if (next) {
+      nav.innerHTML += `<a href="${next.href}" class="page-nav-btn next"><span class="page-nav-dir">Next →</span><span class="page-nav-label">${next.label}</span><span class="page-nav-section">${next.section}</span></a>`;
+    }
+    content.appendChild(nav);
+  })();
+
+  // UX4 — "Share this section" anchor links on all h2/h3
+  (function () {
+    const pc = document.querySelector('.page-content');
+    if (!pc) return;
+    pc.querySelectorAll('h2, h3').forEach(h => {
+      if (!h.id) h.id = uxSlugify(h.textContent.trim());
+      if (!h.id) return;
+      const a = document.createElement('a');
+      a.className = 'heading-anchor';
+      a.href = '#' + h.id;
+      a.setAttribute('aria-label', 'Link to section');
+      a.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+      h.appendChild(a);
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const url = location.origin + location.pathname + '#' + h.id;
+        navigator.clipboard?.writeText(url).then(() => {
+          a.classList.add('flash');
+          setTimeout(() => a.classList.remove('flash'), 1200);
+        });
+        history.pushState(null, '', '#' + h.id);
+      });
+    });
+  })();
+
+  // UX3 — Keyboard shortcuts modal
+  (function () {
+    const overlay = document.createElement('div');
+    overlay.className = 'shortcuts-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Keyboard shortcuts');
+    overlay.innerHTML = `
+      <div class="shortcuts-box">
+        <div class="shortcuts-title">Keyboard Shortcuts <button class="shortcuts-close">ESC</button></div>
+        <div class="shortcuts-group">
+          <div class="shortcuts-group-label">Navigation</div>
+          <div class="shortcut-row"><span class="shortcut-desc">Open search</span><span class="shortcut-keys"><kbd>⌘</kbd><kbd>K</kbd></span></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Close modal / sidebar</span><span class="shortcut-keys"><kbd>Esc</kbd></span></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Navigate search results</span><span class="shortcut-keys"><kbd>↑</kbd><kbd>↓</kbd></span></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Open search result</span><span class="shortcut-keys"><kbd>↵</kbd></span></div>
+        </div>
+        <div class="shortcuts-group">
+          <div class="shortcuts-group-label">Page</div>
+          <div class="shortcut-row"><span class="shortcut-desc">Show keyboard shortcuts</span><span class="shortcut-keys"><kbd>?</kbd></span></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Copy section link</span><span class="shortcut-keys"><kbd>Click #</kbd></span></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Toggle theme</span><span class="shortcut-keys"><kbd>Click ☀</kbd></span></div>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const openShortcuts  = () => overlay.classList.add('active');
+    const closeShortcuts = () => overlay.classList.remove('active');
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeShortcuts(); });
+    overlay.querySelector('.shortcuts-close').addEventListener('click', closeShortcuts);
+    document.addEventListener('keydown', e => {
+      if (e.key === '?' && !e.metaKey && !e.ctrlKey && document.activeElement?.tagName !== 'INPUT') {
+        e.preventDefault();
+        overlay.classList.contains('active') ? closeShortcuts() : openShortcuts();
+      }
+      if (e.key === 'Escape' && overlay.classList.contains('active')) closeShortcuts();
+    });
+    // Inject ? trigger button in header
+    const headerRight = document.querySelector('.header-right');
+    if (headerRight) {
+      const btn = document.createElement('button');
+      btn.className = 'shortcuts-trigger';
+      btn.setAttribute('aria-label', 'Show keyboard shortcuts');
+      btn.setAttribute('data-tip', 'Keyboard shortcuts (?)');
+      btn.textContent = '?';
+      headerRight.appendChild(btn);
+      btn.addEventListener('click', openShortcuts);
+    }
+  })();
+
+  // UX17 — Search popular + recent searches panel
+  (function () {
+    const overlay = document.querySelector('.search-overlay');
+    if (!overlay) return;
+    const searchBox    = overlay.querySelector('.search-box');
+    const searchInput  = overlay.querySelector('.search-input');
+    const searchResults = overlay.querySelector('.search-results');
+    if (!searchBox || !searchInput || !searchResults) return;
+
+    const RECENT_KEY  = 'kguide-recent-searches';
+    const POPULAR     = ['partitions', 'replication', 'consumer groups', 'exactly-once', 'KRaft', 'SASL', 'linger.ms', 'compaction'];
+
+    const panel = document.createElement('div');
+    panel.className = 'search-popular';
+
+    const renderPanel = () => {
+      const recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]').slice(0, 5);
+      let html = '';
+      if (recent.length) {
+        html += `<div class="search-popular-label">Recent <button class="search-recent-clear" aria-label="Clear recent searches">Clear</button></div>`;
+        html += `<div class="search-chips">` + recent.map(r => `<button class="search-chip" data-query="${r}">${r}</button>`).join('') + `</div>`;
+      }
+      html += `<div class="search-popular-label">Popular</div>`;
+      html += `<div class="search-chips">` + POPULAR.map(p => `<button class="search-chip" data-query="${p}">${p}</button>`).join('') + `</div>`;
+      panel.innerHTML = html;
+      panel.querySelectorAll('.search-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          searchInput.value = chip.dataset.query;
+          searchInput.dispatchEvent(new Event('input'));
+          panel.style.display = 'none';
+        });
+      });
+      const clearBtn = panel.querySelector('.search-recent-clear');
+      if (clearBtn) clearBtn.addEventListener('click', () => {
+        localStorage.removeItem(RECENT_KEY);
+        renderPanel();
+      });
+    };
+
+    renderPanel();
+    searchBox.insertBefore(panel, searchResults);
+
+    // Show/hide panel based on input
+    searchInput.addEventListener('input', () => {
+      panel.style.display = searchInput.value ? 'none' : '';
+    });
+
+    // Save query to recent on navigation
+    searchResults.addEventListener('click', e => {
+      const item = e.target.closest('.search-item');
+      if (!item) return;
+      const section = item.querySelector('.search-item-section')?.textContent;
+      if (!section) return;
+      const recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+      const updated = [section, ...recent.filter(r => r !== section)].slice(0, 8);
+      localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
+    });
+
+    // Show panel when modal opens (watch class change)
+    new MutationObserver(() => {
+      if (overlay.classList.contains('active')) {
+        panel.style.display = '';
+        renderPanel();
+      }
+    }).observe(overlay, { attributes: true, attributeFilter: ['class'] });
+  })();
+
+  // UX8 — Code language badges
+  (function () {
+    const LANG_MAP = {
+      'docker-compose': ['docker', 'Docker Compose'], 'docker': ['docker', 'Docker'],
+      'bash': ['bash', 'Bash'], 'shell': ['bash', 'Shell'],
+      'properties': ['props', 'Properties'], 'config': ['props', 'Config'],
+      'yaml': ['yaml', 'YAML'], 'json': ['json', 'JSON'],
+      'java': ['java', 'Java'], 'sql': ['sql', 'SQL'], 'xml': ['xml', 'XML'],
+    };
+    document.querySelectorAll('.code-wrap').forEach(wrap => {
+      const title = wrap.querySelector('.code-title');
+      if (!title) return;
+      const text = title.textContent.toLowerCase();
+      for (const [key, [cls, label]] of Object.entries(LANG_MAP)) {
+        if (text.includes(key)) {
+          const badge = document.createElement('span');
+          badge.className = `code-lang lang-${cls}`;
+          badge.textContent = label;
+          title.insertAdjacentElement('afterend', badge);
+          break;
+        }
+      }
+    });
+  })();
+
+  // UX9 — Table Copy-All for config tables
+  (function () {
+    document.querySelectorAll('.config-table-wrap').forEach(wrap => {
+      const rows = wrap.querySelectorAll('tbody tr');
+      if (!rows.length) return;
+      const wrapDiv = document.createElement('div');
+      wrapDiv.className = 'table-copy-wrap';
+      const lbl = document.createElement('span');
+      lbl.className = 'table-copy-label';
+      lbl.textContent = wrap.previousElementSibling?.textContent?.trim() || '';
+      const btn = document.createElement('button');
+      btn.className = 'table-copy-all';
+      btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy All';
+      btn.addEventListener('click', () => {
+        const lines = Array.from(rows).map(r => {
+          const cells = r.querySelectorAll('td');
+          return cells[0]?.textContent.trim() + '=' + (cells[1]?.textContent.trim() || '');
+        }).join('\n');
+        navigator.clipboard?.writeText(lines).then(() => {
+          btn.textContent = '✓ Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy All'; btn.classList.remove('copied'); }, 1400);
+        });
+      });
+      wrapDiv.appendChild(lbl);
+      wrapDiv.appendChild(btn);
+      wrap.insertAdjacentElement('beforebegin', wrapDiv);
+    });
+  })();
+
+  // UX18 — Performance bar Re-run button
+  (function () {
+    const perfGrid = document.querySelector('.perf-grid');
+    if (!perfGrid) return;
+    const fills = perfGrid.querySelectorAll('.perf-fill');
+    if (!fills.length) return;
+    const btn = document.createElement('button');
+    btn.className = 'perf-rerun';
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.14"/></svg> Re-run benchmarks`;
+    btn.addEventListener('click', () => {
+      btn.classList.add('running');
+      fills.forEach(f => { f.style.width = '0%'; });
+      setTimeout(() => {
+        fills.forEach(f => { f.style.width = (f.dataset.width || 0) + '%'; });
+        btn.classList.remove('running');
+      }, 200);
+    });
+    perfGrid.insertAdjacentElement('afterend', btn);
+  })();
+
+  // UX19 — Mermaid diagram accessibility
+  document.querySelectorAll('.diagram-block').forEach(block => {
+    const label = block.querySelector('.diagram-label');
+    if (label) {
+      block.setAttribute('role', 'img');
+      block.setAttribute('aria-label', label.textContent.trim());
+    }
+  });
+
+  // UX6 — Interview "Mark as Reviewed"
+  (function () {
+    const REVIEWED_KEY = 'kguide-reviewed';
+    const reviewed = new Set(JSON.parse(localStorage.getItem(REVIEWED_KEY) || '[]'));
+    let reviewedCount = 0;
+
+    document.querySelectorAll('.interview-block').forEach((block, i) => {
+      const qEl = block.querySelector('.interview-q-text');
+      const id  = 'iq-' + i;
+      block.dataset.iqId = id;
+
+      const actions = document.createElement('div');
+      actions.className = 'interview-actions';
+
+      const btn = document.createElement('button');
+      btn.className = 'mark-reviewed-btn' + (reviewed.has(id) ? ' reviewed' : '');
+      const ICON_CHECK_SM = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+      btn.innerHTML = reviewed.has(id) ? ICON_CHECK_SM + ' Reviewed' : ICON_CHECK_SM + ' Mark reviewed';
+
+      if (reviewed.has(id)) { block.classList.add('reviewed-block'); reviewedCount++; }
+
+      btn.addEventListener('click', () => {
+        const isReviewed = reviewed.has(id);
+        if (isReviewed) {
+          reviewed.delete(id);
+          block.classList.remove('reviewed-block');
+          btn.innerHTML = ICON_CHECK_SM + ' Mark reviewed';
+          btn.classList.remove('reviewed');
+          reviewedCount--;
+        } else {
+          reviewed.add(id);
+          block.classList.add('reviewed-block');
+          btn.innerHTML = ICON_CHECK_SM + ' Reviewed';
+          btn.classList.add('reviewed');
+          reviewedCount++;
+        }
+        localStorage.setItem(REVIEWED_KEY, JSON.stringify([...reviewed]));
+        updateReviewedCount();
+      });
+
+      const countSpan = document.createElement('span');
+      countSpan.className = 'reviewed-count';
+      actions.appendChild(btn);
+      actions.appendChild(countSpan);
+      block.appendChild(actions);
+    });
+
+    function updateReviewedCount() {
+      const total = document.querySelectorAll('.interview-block').length;
+      document.querySelectorAll('.reviewed-count').forEach(el => {
+        el.textContent = `${reviewedCount} / ${total} reviewed`;
+      });
+    }
+    updateReviewedCount();
+  })();
+
+  // UX9 (quiz) — Quiz answer persistence via sessionStorage
+  (function () {
+    const QUIZ_KEY = 'kguide-quiz-' + curPage;
+    let saved = {};
+    try { saved = JSON.parse(sessionStorage.getItem(QUIZ_KEY) || '{}'); } catch (e) {}
+
+    document.querySelectorAll('.quiz-block').forEach((block, bi) => {
+      const opts = block.querySelectorAll('.quiz-opt');
+      const result = block.querySelector('.quiz-result');
+      const savedAnswer = saved[bi];
+
+      if (savedAnswer !== undefined) {
+        opts.forEach((opt, oi) => {
+          opt.disabled = true;
+          if (oi === savedAnswer) opt.classList.add(opt.dataset.correct === 'true' ? 'persisted-correct' : 'persisted-wrong');
+          else if (opt.dataset.correct === 'true') opt.classList.add('persisted-correct');
+        });
+        if (result) {
+          const wasCorrect = opts[savedAnswer]?.dataset.correct === 'true';
+          result.textContent = wasCorrect ? '✓ Correct!' : '✗ Not quite — see highlighted answer.';
+          result.className = 'quiz-result ' + (wasCorrect ? 'ok' : 'fail');
+        }
+      }
+
+      opts.forEach((opt, oi) => {
+        opt.addEventListener('click', () => {
+          saved[bi] = oi;
+          try { sessionStorage.setItem(QUIZ_KEY, JSON.stringify(saved)); } catch (e) {}
+        });
+      });
+    });
+  })();
+
+  // UX11 — Hero stats as links
+  (function () {
+    const STAT_LINKS = [
+      { keyword: 'page', href: 'index.html' },
+      { keyword: 'interview', href: 'interview.html' },
+      { keyword: 'section', href: 'architecture.html' },
+      { keyword: 'week', href: 'roadmap.html' },
+    ];
+    document.querySelectorAll('.stat-item').forEach(item => {
+      const label = item.querySelector('.stat-label')?.textContent?.toLowerCase() || '';
+      const match = STAT_LINKS.find(s => label.includes(s.keyword));
+      if (!match) return;
+      item.style.cursor = 'pointer';
+      item.addEventListener('click', () => { window.location.href = match.href; });
+    });
+  })();
+
+  // UX24 — NEW badge expiry (remove if past date)
+  (function () {
+    const EXPIRY = { 'operations.html': '2026-08-17', 'interview.html': '2026-08-17' };
+    const now = new Date();
+    document.querySelectorAll('.nav-badge').forEach(badge => {
+      const page = badge.closest('.nav-item')?.getAttribute('href') || '';
+      const expiry = EXPIRY[page];
+      if (expiry && now > new Date(expiry)) badge.remove();
+    });
+  })();
+
 });
+

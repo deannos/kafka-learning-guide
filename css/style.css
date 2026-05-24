@@ -1343,3 +1343,232 @@ pre { max-height: 480px; overflow-y: auto; }
 
 /* #22 — Interview question minimum tap target 56px */
 .interview-q { min-height: 56px; }
+
+/* ══════════════════════════════════════════════════════════════
+   UX ENHANCEMENTS — 28-point audit implementation
+   ══════════════════════════════════════════════════════════════ */
+
+/* UX1 — Reading progress bar */
+.reading-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0%;
+  background: var(--gradient-cyan);
+  z-index: 9999;
+  transition: width 0.1s linear;
+  pointer-events: none;
+}
+[data-theme="light"] .reading-progress { background: linear-gradient(90deg, #2563eb, #1d4ed8); }
+
+/* UX2 — Prev/Next page navigation */
+.page-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 64px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.page-nav-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: var(--transition);
+  min-width: 180px;
+  max-width: 48%;
+}
+.page-nav-btn:hover { border-color: var(--border-accent); background: var(--bg-card-hover); transform: translateY(-1px); }
+.page-nav-btn.next { align-items: flex-end; margin-left: auto; text-align: right; }
+.page-nav-dir { font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+.page-nav-label { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+.page-nav-section { font-size: 10px; font-family: var(--font-mono); color: var(--accent-cyan); }
+@media (max-width: 600px) {
+  .page-nav-btn { min-width: 0; max-width: 100%; width: 100%; }
+  .page-nav-btn.next { align-items: flex-start; text-align: left; }
+}
+
+/* UX3 — Keyboard shortcuts trigger + modal */
+.shortcuts-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+.shortcuts-trigger:hover { border-color: var(--border-bright); color: var(--text-primary); background: var(--bg-card-hover); }
+.shortcuts-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.shortcuts-overlay.active { display: flex; }
+.shortcuts-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  max-width: 460px; width: 100%;
+  margin: 16px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  animation: searchSlideIn 0.15s ease;
+}
+[data-theme="light"] .shortcuts-box { background: #fff; }
+.shortcuts-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+.shortcuts-close { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-muted); cursor: pointer; padding: 3px 9px; font-size: 11px; font-family: var(--font-mono); transition: var(--transition); }
+.shortcuts-close:hover { color: var(--text-primary); border-color: var(--border-bright); }
+.shortcuts-group { margin-bottom: 18px; }
+.shortcuts-group-label { font-size: 10px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
+.shortcut-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.shortcut-row:last-child { border-bottom: none; }
+[data-theme="light"] .shortcut-row { border-bottom-color: rgba(0,0,0,0.05); }
+.shortcut-desc { font-size: 13px; color: var(--text-secondary); }
+.shortcut-keys { display: flex; gap: 4px; }
+.shortcut-keys kbd { font-family: var(--font-mono); font-size: 11px; padding: 2px 7px; background: var(--bg-tertiary); border: 1px solid var(--border-bright); border-radius: 4px; color: var(--text-secondary); }
+
+/* UX4 — Heading anchor share links */
+.heading-anchor { display: inline-flex; align-items: center; margin-left: 8px; color: var(--text-muted); font-size: 0.7em; opacity: 0; transition: opacity 0.15s ease, color 0.15s ease; text-decoration: none; vertical-align: middle; }
+h2:hover .heading-anchor, h3:hover .heading-anchor, .heading-anchor:focus { opacity: 1; }
+.heading-anchor:hover { color: var(--accent-cyan); }
+.heading-anchor.flash { color: var(--accent-green) !important; opacity: 1 !important; }
+
+/* UX5 — Visited page dot in sidebar */
+.nav-item .nav-icon { position: relative; }
+.visited-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent-green); flex-shrink: 0; margin-left: auto; opacity: 0.75; }
+.site-wrapper.sidebar-collapsed .visited-dot { display: none; }
+
+/* UX6 — Interview "Mark as Reviewed" */
+.interview-actions { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: rgba(0,0,0,0.08); border-top: 1px solid var(--border); }
+.mark-reviewed-btn {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; font-family: var(--font-mono); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 4px 11px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-muted); cursor: pointer;
+  transition: var(--transition);
+}
+.mark-reviewed-btn:hover { border-color: rgba(34,197,94,0.4); color: var(--accent-green); background: rgba(34,197,94,0.06); }
+.mark-reviewed-btn.reviewed { border-color: rgba(34,197,94,0.45); color: var(--accent-green); background: rgba(34,197,94,0.08); }
+.interview-block.reviewed-block { border-color: rgba(34,197,94,0.22); }
+.interview-block.reviewed-block .interview-q { background: rgba(34,197,94,0.025); }
+.reviewed-count { font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); margin-left: auto; }
+
+/* UX7 — Estimated reading time */
+.reading-time { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); margin-top: 8px; }
+
+/* UX8 — Code language badge */
+.code-lang { font-size: 9px; font-family: var(--font-mono); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 1px 7px; border-radius: 3px; border: 1px solid; margin-left: 8px; }
+.code-lang.lang-bash  { color: #50fa7b; border-color: rgba(80,250,123,0.3);  background: rgba(80,250,123,0.06); }
+.code-lang.lang-yaml  { color: #bd93f9; border-color: rgba(189,147,249,0.3); background: rgba(189,147,249,0.06); }
+.code-lang.lang-java  { color: #ff79c6; border-color: rgba(255,121,198,0.3); background: rgba(255,121,198,0.06); }
+.code-lang.lang-props { color: #ffb86c; border-color: rgba(255,184,108,0.3); background: rgba(255,184,108,0.06); }
+.code-lang.lang-json  { color: #f1fa8c; border-color: rgba(241,250,140,0.3); background: rgba(241,250,140,0.06); }
+.code-lang.lang-sql   { color: #8be9fd; border-color: rgba(139,233,253,0.3); background: rgba(139,233,253,0.06); }
+.code-lang.lang-xml   { color: #ffb86c; border-color: rgba(255,184,108,0.3); background: rgba(255,184,108,0.06); }
+.code-lang.lang-docker { color: #60a5fa; border-color: rgba(96,165,250,0.3); background: rgba(96,165,250,0.06); }
+
+/* UX9 — Table Copy-All button */
+.table-copy-wrap { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.table-copy-label { font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); font-weight: 600; letter-spacing: 0.05em; }
+.table-copy-all { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-family: var(--font-mono); padding: 3px 10px; background: transparent; border: 1px solid var(--border); border-radius: 5px; color: var(--text-muted); cursor: pointer; transition: var(--transition); letter-spacing: 0.05em; font-weight: 600; }
+.table-copy-all:hover { color: var(--accent-cyan); border-color: rgba(59,130,246,0.35); }
+.table-copy-all.copied { color: var(--accent-green); border-color: rgba(34,197,94,0.35); }
+
+/* UX10 — Custom tooltip (replaces native title) */
+[data-tip] { position: relative; }
+[data-tip]::after { content: attr(data-tip); position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); background: var(--bg-tertiary); border: 1px solid var(--border-bright); color: var(--text-primary); font-size: 12px; font-family: var(--font-display); white-space: nowrap; padding: 5px 10px; border-radius: var(--radius-sm); pointer-events: none; opacity: 0; transition: opacity 0.15s ease; z-index: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+[data-tip]:hover::after { opacity: 1; }
+.back-to-top[data-tip]::after { left: auto; right: calc(100% + 10px); }
+@media (max-width: 900px) { [data-tip]::after { display: none; } }
+
+/* UX11 — Hero primary CTA pulse + size */
+@keyframes heroPulse { 0%,100% { box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 0 0 0 rgba(59,130,246,0.45); } 60% { box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 0 0 10px rgba(59,130,246,0); } }
+.hero .btn-primary { animation: heroPulse 2.8s ease-in-out infinite; font-size: 15px; padding: 13px 28px; }
+.hero .btn-primary:hover { animation: none; }
+@media (prefers-reduced-motion: reduce) { .hero .btn-primary { animation: none !important; } }
+
+/* UX12 — Light mode code wrap border */
+[data-theme="light"] .code-wrap { border-color: rgba(0,0,0,0.16); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+[data-theme="light"] .code-header { border-bottom-color: rgba(0,0,0,0.10); }
+
+/* UX13 — Sidebar collapsed group dividers */
+.nav-group-divider { display: none; height: 1px; background: var(--border); margin: 6px 8px; }
+.site-wrapper.sidebar-collapsed .nav-group-divider { display: block; }
+
+/* UX14 — Back-to-top tooltip already handled by UX10 */
+
+/* UX15 — Theme transition on html background */
+html { transition: background-color 0.25s ease, color 0.25s ease; }
+
+/* UX16 — Page exit transition */
+body.page-exit { opacity: 0 !important; transition: opacity 0.15s ease !important; }
+
+/* UX17 — Search popular / recent chips */
+.search-popular { padding: 14px 16px 8px; border-bottom: 1px solid var(--border); }
+.search-popular-label { font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+.search-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.search-chip { font-size: 11px; font-family: var(--font-mono); padding: 4px 10px; border: 1px solid var(--border); border-radius: 20px; color: var(--text-secondary); background: var(--bg-card); cursor: pointer; transition: var(--transition); }
+.search-chip:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(59,130,246,0.06); }
+.search-recent-clear { font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 0; transition: var(--transition); }
+.search-recent-clear:hover { color: var(--accent-red); }
+
+/* UX18 — Performance bar Re-run button */
+.perf-rerun { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-family: var(--font-mono); padding: 6px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text-muted); cursor: pointer; transition: var(--transition); margin: 16px 0 0; }
+.perf-rerun:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(59,130,246,0.06); }
+.perf-rerun.running svg { animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .perf-rerun.running svg { animation: none; } }
+
+/* UX19 — Quiz persisted state */
+.quiz-opt.persisted-correct { border-color: rgba(34,197,94,0.35) !important; opacity: 0.65; cursor: not-allowed; }
+.quiz-opt.persisted-wrong   { border-color: rgba(239,68,68,0.25) !important;  opacity: 0.55; cursor: not-allowed; }
+
+/* UX20 — Copy button always slightly visible */
+.copy-btn { opacity: 0.55; }
+.copy-btn:hover, .copy-btn:focus-visible { opacity: 1; }
+.copy-btn.copied { opacity: 1; }
+
+/* UX21 — Mobile copy button min-width */
+.copy-btn { min-width: 70px; justify-content: center; }
+
+/* UX22 — Onboarding welcome banner */
+.welcome-banner { display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: rgba(59,130,246,0.07); border: 1px solid rgba(59,130,246,0.2); border-radius: var(--radius); margin-bottom: 28px; position: relative; flex-wrap: wrap; gap: 10px; }
+.welcome-banner-body { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+.welcome-banner-text { font-size: 13.5px; color: var(--text-secondary); line-height: 1.6; }
+.welcome-banner-text strong { color: var(--text-primary); }
+.welcome-banner-cta { font-size: 12px; font-weight: 600; color: var(--accent-cyan); text-decoration: none; white-space: nowrap; padding: 5px 12px; border: 1px solid rgba(59,130,246,0.3); border-radius: var(--radius-sm); transition: var(--transition); flex-shrink: 0; }
+.welcome-banner-cta:hover { background: rgba(59,130,246,0.1); color: var(--accent-cyan); }
+.welcome-banner-dismiss { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px 6px; font-size: 14px; line-height: 1; transition: var(--transition); flex-shrink: 0; }
+.welcome-banner-dismiss:hover { color: var(--text-primary); }
+[data-theme="light"] .welcome-banner { background: rgba(37,99,235,0.05); border-color: rgba(37,99,235,0.18); }
+
+/* UX23 — Hero stats clickable hover */
+.stat-item { cursor: pointer; transition: var(--transition); }
+.stat-item:hover { opacity: 0.8; }
+.stat-item a { color: inherit; text-decoration: none; }
+
+/* UX25 — Sidebar collapsed: no native title tooltip (handled by data-tip) */
+
+/* UX26 — Hero secondary button visual pull */
+.hero .btn-secondary { border-color: var(--border-bright); }
