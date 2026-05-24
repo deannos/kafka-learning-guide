@@ -998,5 +998,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
+  // Code block expand/collapse
+  (function () {
+    const COLLAPSED_H = 220;
+    const EXPAND_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
+
+    document.querySelectorAll('.code-wrap').forEach(wrap => {
+      const pre = wrap.querySelector('pre');
+      if (!pre) return;
+
+      // Measure natural height before capping
+      pre.style.maxHeight = 'none';
+      const fullH = pre.scrollHeight;
+      pre.style.maxHeight = '';
+
+      if (fullH <= COLLAPSED_H + 40) return; // not tall enough to bother
+
+      wrap.classList.add('code-collapsible');
+
+      const btn = document.createElement('button');
+      btn.className = 'code-expand-btn';
+      btn.innerHTML = `${EXPAND_SVG}<span>Show more</span>`;
+      wrap.appendChild(btn);
+
+      btn.addEventListener('click', () => {
+        const expanded = wrap.classList.toggle('expanded');
+        btn.querySelector('span').textContent = expanded ? 'Show less' : 'Show more';
+        if (!expanded) {
+          // Scroll back to top of code block on collapse
+          wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+  })();
+
 });
 
