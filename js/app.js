@@ -1040,13 +1040,137 @@ document.addEventListener('DOMContentLoaded', () => {
       pdfBtn.className = 'pdf-download-btn';
       pdfBtn.title = 'Download page as PDF';
       pdfBtn.setAttribute('aria-label', 'Download page as PDF');
-      pdfBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>PDF</span>`;
+      pdfBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="pdf-btn-label">PDF</span>`;
 
       const githubBtn = headerRight.querySelector('.github-btn');
       if (githubBtn) headerRight.insertBefore(pdfBtn, githubBtn);
       else headerRight.appendChild(pdfBtn);
 
-      pdfBtn.addEventListener('click', () => window.print());
+      // #1 — Derive a clean filename from the breadcrumb or URL segment
+      function getPageSlug() {
+        const crumb = document.querySelector('.header-breadcrumb .current');
+        if (crumb) return crumb.textContent.trim();
+        const seg = window.location.pathname.split('/').pop().replace('.html', '') || 'home';
+        return seg.charAt(0).toUpperCase() + seg.slice(1);
+      }
+      function getPdfFilename() {
+        return 'kafka-guide-' + getPageSlug().toLowerCase().replace(/\s+/g, '-') + '.pdf';
+      }
+
+      // #6 — Load html2pdf.js on first click (CDN, cached after)
+      let libPromise = null;
+      function loadLib() {
+        if (!libPromise) {
+          libPromise = new Promise((resolve, reject) => {
+            if (window.html2pdf) { resolve(); return; }
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+            s.onload = resolve;
+            s.onerror = () => { libPromise = null; reject(new Error('Failed to load pdf library')); };
+            document.head.appendChild(s);
+          });
+        }
+        return libPromise;
+      }
+
+      // Build a light-themed clone of the page content for rendering
+      function buildPrintEl() {
+        const source = document.querySelector('.page-content') || document.querySelector('.main-content');
+        if (!source) return null;
+        const clone = source.cloneNode(true);
+
+        // Strip interactive chrome that doesn't belong in a PDF
+        clone.querySelectorAll('.code-copy-btn, .code-expand-btn, .nav-badge, .hero-actions, .back-to-top').forEach(el => el.remove());
+
+        // #3 — Expand collapsed code blocks so nothing is cut off
+        clone.querySelectorAll('.code-collapsible').forEach(el => {
+          el.style.cssText += ';max-height:none!important;overflow:visible!important';
+        });
+
+        // #6 wrapper: white, fixed A4 width so html2pdf measures correctly
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'background:#fff;color:#111;font-family:Inter,sans-serif;font-size:10.5pt;line-height:1.65;padding:0;margin:0;width:170mm;box-sizing:border-box';
+
+        // #4 — Apply inline light-theme styles so the dark CSS vars don't bleed through
+        const rules = [
+          ['h1,h2,h3,h4,h5,h6',            'color:#111;-webkit-text-fill-color:#111;background:none;background-image:none'],
+          ['p,li,span,label',               'color:#333'],
+          ['strong,b',                      'color:#111'],
+          ['a',                             'color:#1d4ed8'],
+          // #4 — Code: GitHub-style light syntax theme
+          ['pre',                           'background:#f6f8fa;color:#24292e;border:1px solid #d0d7de;border-radius:6px;padding:12px 14px;font-size:9pt;line-height:1.5;white-space:pre-wrap;word-break:break-word'],
+          ['code:not(pre code)',            'background:#f0f0f0;color:#d63384;border:1px solid #ddd;border-radius:3px;padding:1px 4px;font-size:9pt'],
+          // #3 — All card / callout / content block variants
+          ['.card,.cheat-card,.perf-card,.info-box,.concept-block,.diagram-block,.interview-block,.quiz-block,.shortcuts-box,.reviewed-block',
+                                            'background:#f9fafb;border:1px solid #e5e7eb;color:#111;box-shadow:none'],
+          ['.card-title,.concept-title,.info-label,.section-title,.section-eyebrow,.page-title-block',
+                                            'color:#111;-webkit-text-fill-color:#111;background:none'],
+          ['.card-desc,.concept-body,.info-text',  'color:#444'],
+          ['table',                         'border-collapse:collapse;width:100%'],
+          ['th',                            'background:#f0f4f8;color:#111;border:1px solid #c8cdd3;padding:7px 10px;font-weight:600'],
+          ['td',                            'color:#222;border:1px solid #d0d7de;padding:6px 10px'],
+          ['.hero-title,.hero-title span,.stat-value',
+                                            'color:#111;-webkit-text-fill-color:#111;background:none;background-image:none'],
+          ['.hero-desc',                    'color:#444'],
+          ['.hero-eyebrow,.section-eyebrow','color:#1d4ed8'],
+        ];
+        rules.forEach(([sel, css]) => {
+          try { clone.querySelectorAll(sel).forEach(el => { el.style.cssText += ';' + css; }); } catch (_) {}
+        });
+
+        wrap.appendChild(clone);
+
+        // Off-screen host so html2pdf can measure without flickering the page
+        const host = document.createElement('div');
+        host.style.cssText = 'position:absolute;left:-9999px;top:0;z-index:-1';
+        host.appendChild(wrap);
+        document.body.appendChild(host);
+        return { el: wrap, host };
+      }
+
+      pdfBtn.addEventListener('click', async () => {
+        const label = pdfBtn.querySelector('.pdf-btn-label');
+        pdfBtn.disabled = true;
+        label.textContent = 'Preparing…';
+        let host = null;
+
+        try {
+          await loadLib();
+          label.textContent = 'Generating…';
+
+          const result = buildPrintEl();
+          if (!result) throw new Error('No content element found');
+          host = result.host;
+
+          await window.html2pdf()
+            .set({
+              margin: [14, 12, 18, 12],       // top, right, bottom, left — mm
+              filename: getPdfFilename(),      // #1 clean filename
+              image: { type: 'jpeg', quality: 0.97 },
+              html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
+              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+              pagebreak: {                     // #3 avoid mid-element breaks
+                mode: ['css', 'legacy'],
+                avoid: ['.card', '.cheat-card', '.perf-card', '.info-box',
+                        '.concept-block', '.diagram-block', '.interview-block', 'tr', 'pre'],
+              },
+            })
+            .from(result.el)
+            .save();
+
+        } catch (err) {
+          // #6 — Fallback: browser print dialog with custom title for filename hint
+          console.warn('html2pdf failed, falling back to print dialog:', err);
+          const orig = document.title;
+          document.title = 'KafkaGuide — ' + getPageSlug();
+          window.print();
+          setTimeout(() => { document.title = orig; }, 2000);
+        } finally {
+          if (host && host.parentNode) host.parentNode.removeChild(host);
+          pdfBtn.disabled = false;
+          label.textContent = 'PDF';
+        }
+      });
     }
   }
 
