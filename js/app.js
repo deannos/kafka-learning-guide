@@ -1032,5 +1032,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
+  // ── PDF Download button ──
+  {
+    const headerRight = document.querySelector('.header-right');
+    if (headerRight) {
+      const pdfBtn = document.createElement('button');
+      pdfBtn.className = 'pdf-download-btn';
+      pdfBtn.title = 'Download page as PDF';
+      pdfBtn.setAttribute('aria-label', 'Download page as PDF');
+      pdfBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>PDF</span>`;
+
+      const githubBtn = headerRight.querySelector('.github-btn');
+      if (githubBtn) headerRight.insertBefore(pdfBtn, githubBtn);
+      else headerRight.appendChild(pdfBtn);
+
+      pdfBtn.addEventListener('click', () => window.print());
+    }
+  }
+
 });
 
